@@ -5,7 +5,7 @@
 > **ZEISS Beyond Code 2026 · Mid-progress prototype**  
 > **Chosen theme:** No-Device Vision Intelligence & Accessible Clinical UX  
 > **College:** National Institute of Technology Rourkela  
-> **Group:** [Add your official group name]
+> **Group:** 
 
 SightSteps is a lightweight web app/PWA concept that helps a person organise self-reported vision experiences, everyday habits and eye-care background before speaking with an optician or eye-care professional. It is designed for a smartphone-based, low-friction interaction and does not require a dedicated vision-testing device.
 
