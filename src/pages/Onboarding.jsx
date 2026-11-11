@@ -6,72 +6,126 @@ import './Onboarding.css';
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { setLanguage, giveConsent, startSession, language } = useApp();
-  const [step, setStep] = useState(language ? 'consent' : 'language');
+  const { setLanguage, startSession, language } = useApp();
 
-  const handleLanguageSelect = (lang) => {
-    setLanguage(lang);
+  const [step, setStep] = useState(
+    language ? 'consent' : 'language',
+  );
+
+  const lang = language || 'en';
+
+  const handleLanguageSelect = (selectedLanguage) => {
+    setLanguage(selectedLanguage);
     setStep('consent');
   };
 
   const handleConsent = () => {
-    giveConsent();
+    // A new session is created once, after language selection and consent.
     startSession();
     navigate('/intake');
   };
 
-  const lang = language || 'en';
-
   if (step === 'language') {
     return (
-      <div className="onboarding animate-fade-in">
-        <div className="onboarding__content">
-          <div className="onboarding__icon-wrap">
-            <span className="material-symbols-outlined">translate</span>
+      <main className="onboarding animate-fade-in">
+        <section
+          className="onboarding__content"
+          aria-labelledby="onboarding-language-title"
+        >
+          <div className="onboarding__icon-wrap" aria-hidden="true">
+            <span className="material-symbols-outlined">
+              translate
+            </span>
           </div>
-          <h2 className="onboarding__title">
+
+          <h1
+            id="onboarding-language-title"
+            className="onboarding__title"
+          >
             {t('onboarding.chooseLanguage', 'en')}
-          </h2>
+          </h1>
+
           <p className="onboarding__subtitle text-hindi">
             अपनी भाषा चुनें
           </p>
 
-          <div className="onboarding__language-grid">
+          <div
+            className="onboarding__language-grid"
+            role="group"
+            aria-label="Choose language"
+          >
             <button
               className="onboarding__language-btn"
+              type="button"
               onClick={() => handleLanguageSelect('en')}
             >
-              <div className="onboarding__lang-icon-wrap">
-                <span className="material-symbols-outlined">language</span>
-              </div>
-              <span className="onboarding__language-name">English</span>
-              <span className="onboarding__language-sub">EN</span>
+              <span
+                className="onboarding__lang-icon-wrap"
+                aria-hidden="true"
+              >
+                <span className="material-symbols-outlined">
+                  language
+                </span>
+              </span>
+
+              <span className="onboarding__language-name">
+                English
+              </span>
+
+              <span className="onboarding__language-sub">
+                EN
+              </span>
             </button>
+
             <button
               className="onboarding__language-btn"
+              type="button"
               onClick={() => handleLanguageSelect('hi')}
             >
-              <div className="onboarding__lang-icon-wrap onboarding__lang-icon-wrap--hi">
-                <span className="text-hindi" style={{ fontSize: '1.5rem', fontWeight: 700 }}>अ</span>
-              </div>
-              <span className="onboarding__language-name text-hindi">हिन्दी</span>
-              <span className="onboarding__language-sub">HI</span>
+              <span
+                className="onboarding__lang-icon-wrap onboarding__lang-icon-wrap--hi"
+                aria-hidden="true"
+              >
+                <span className="text-hindi onboarding__devanagari">
+                  अ
+                </span>
+              </span>
+
+              <span className="onboarding__language-name text-hindi">
+                हिन्दी
+              </span>
+
+              <span className="onboarding__language-sub">
+                HI
+              </span>
             </button>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     );
   }
 
   return (
-    <div className="onboarding animate-fade-in">
-      <div className="onboarding__content">
-        <div className="onboarding__icon-wrap onboarding__icon-wrap--shield">
-          <span className="material-symbols-outlined">shield</span>
+    <main className="onboarding animate-fade-in">
+      <section
+        className="onboarding__content"
+        aria-labelledby="onboarding-consent-title"
+      >
+        <div
+          className="onboarding__icon-wrap onboarding__icon-wrap--shield"
+          aria-hidden="true"
+        >
+          <span className="material-symbols-outlined">
+            shield
+          </span>
         </div>
-        <h2 className="onboarding__title">
+
+        <h1
+          id="onboarding-consent-title"
+          className="onboarding__title"
+        >
           {t('onboarding.consent.title', lang)}
-        </h2>
+        </h1>
 
         <div className="onboarding__consent-box">
           <p>{t('onboarding.consent.text', lang)}</p>
@@ -79,24 +133,59 @@ export default function Onboarding() {
 
         <ul className="onboarding__checklist">
           <li>
-            <span className="onboarding__check-icon material-symbols-outlined">check_circle</span>
-            <span>{lang === 'hi' ? 'कोई डेटा क्लाउड पर नहीं जाता' : 'No data leaves this device'}</span>
+            <span
+              className="onboarding__check-icon material-symbols-outlined"
+              aria-hidden="true"
+            >
+              check_circle
+            </span>
+            <span>
+              {lang === 'hi'
+                ? 'सेशन डेटा इसी डिवाइस पर सेव होता है'
+                : 'Session data is saved on this device'}
+            </span>
           </li>
+
           <li>
-            <span className="onboarding__check-icon material-symbols-outlined">check_circle</span>
-            <span>{lang === 'hi' ? 'चिकित्सा निदान नहीं' : 'Not a medical diagnosis'}</span>
+            <span
+              className="onboarding__check-icon material-symbols-outlined"
+              aria-hidden="true"
+            >
+              check_circle
+            </span>
+            <span>
+              {lang === 'hi'
+                ? 'यह चिकित्सा निदान नहीं है'
+                : 'This is not a medical diagnosis'}
+            </span>
           </li>
+
           <li>
-            <span className="onboarding__check-icon material-symbols-outlined">check_circle</span>
-            <span>{lang === 'hi' ? 'केवल लेंस सुविधा सुझाव' : 'Lens feature suggestions only'}</span>
+            <span
+              className="onboarding__check-icon material-symbols-outlined"
+              aria-hidden="true"
+            >
+              check_circle
+            </span>
+            <span>
+              {lang === 'hi'
+                ? 'यह पेशेवर आँखों की जाँच का विकल्प नहीं है'
+                : 'It does not replace a professional eye examination'}
+            </span>
           </li>
         </ul>
 
-        <button className="btn btn--primary btn--full btn--lg" onClick={handleConsent}>
-          <span className="material-symbols-outlined">arrow_forward</span>
+        <button
+          className="btn btn--primary btn--full btn--lg"
+          type="button"
+          onClick={handleConsent}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            arrow_forward
+          </span>
           {t('onboarding.consent.agree', lang)}
         </button>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

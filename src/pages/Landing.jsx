@@ -2,119 +2,217 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
-import { initVoices, unlockAudio, speakWhenReady } from '../utils/tts.js';
-import questions from '../data/questions.js';
+import { getNextQuestion } from '../data/questions.js';
 import rameshPersona from '../data/demoPersona.js';
+import { initVoices } from '../utils/tts.js';
 import './Landing.css';
+
+function getResumePath(session) {
+  if (session.visionResults) return '/report';
+  if (getNextQuestion(session.answers || {})) return '/intake';
+  if (session.isDemo && session.demoPersona?.skipVision) return '/intake';
+  return '/vision';
+}
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { startSession, startDemo, reset } = useApp();
 
-  // Always reset state when landing page mounts (fixes Hindi sticking after demo back)
+  const {
+    isHydrated,
+    sessionId,
+    consentGiven,
+    answers,
+    visionResults,
+    isDemo,
+    demoPersona,
+    startDemo,
+    reset,
+  } = useApp();
+
+  const hasSavedSession = Boolean(
+    isHydrated && sessionId && consentGiven,
+  );
+
   useEffect(() => {
-    reset();
-    initVoices();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Language is always 'en' on landing after reset
-  const lang = 'en';
+    void initVoices();
+  }, []);
 
   const handleStart = () => {
-    startSession();
+    reset();
     navigate('/onboarding');
   };
 
+  const handleResume = () => {
+    navigate(getResumePath({
+      answers,
+      visionResults,
+      isDemo,
+      demoPersona,
+    }));
+  };
+
   const handleDemo = () => {
-    unlockAudio();
-    // Speak Q1 in Hindi directly from this click (user gesture context)
-    const q1Text = questions[0].text.hi;
-    speakWhenReady(q1Text, 'hi', { rate: 0.85, pitch: 0.95 });
     startDemo(rameshPersona);
     navigate('/intake');
   };
 
-  return (
-    <div className="landing">
-      {/* Gradient top section */}
-      <div className="landing__gradient-bg" />
+  const lang = 'en';
 
-      {/* Hero */}
-      <div className="landing__hero">
-        <div className="landing__logo-ring">
-          <svg viewBox="0 0 100 100" width="80" height="80">
+  return (
+    <main className="landing">
+      <div className="landing__gradient-bg" aria-hidden="true" />
+
+      <section
+        className="landing__hero"
+        aria-labelledby="landing-title"
+      >
+        <div className="landing__logo-ring" aria-hidden="true">
+          <svg
+            viewBox="0 0 100 100"
+            width="80"
+            height="80"
+            focusable="false"
+          >
             <defs>
-              <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#0066CC' }} />
-                <stop offset="100%" style={{ stopColor: '#004e9f' }} />
+              <linearGradient
+                id="logo-grad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#0066CC" />
+                <stop offset="100%" stopColor="#004e9f" />
               </linearGradient>
             </defs>
+
             <circle cx="50" cy="50" r="45" fill="url(#logo-grad)" />
-            <circle cx="50" cy="50" r="25" fill="white" />
+            <circle cx="50" cy="50" r="25" fill="#fff" />
             <circle cx="50" cy="50" r="12" fill="#0066CC" />
             <circle cx="50" cy="50" r="5" fill="#1A1D23" />
           </svg>
         </div>
-        <h1 className="landing__title">SightSteps</h1>
-        <p className="landing__tagline">{t('landing.tagline', lang)}</p>
-      </div>
 
-      {/* Feature pills */}
-      <div className="landing__pills">
-        <div className="landing__pill">
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>wifi_off</span>
+        <h1 id="landing-title" className="landing__title">
+          SightSteps
+        </h1>
+
+        <p className="landing__tagline">
+          {t('landing.tagline', lang)}
+        </p>
+      </section>
+
+      <div className="landing__pills" aria-label="App features">
+        <span className="landing__pill">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            wifi_off
+          </span>
           {t('landing.features.offline', lang)}
-        </div>
-        <div className="landing__pill">
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>lock</span>
+        </span>
+
+        <span className="landing__pill">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            lock
+          </span>
           {t('landing.features.private', lang)}
-        </div>
-        <div className="landing__pill">
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>timer</span>
+        </span>
+
+        <span className="landing__pill">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            timer
+          </span>
           {t('landing.features.minutes', lang)}
-        </div>
+        </span>
       </div>
 
-      {/* Description */}
-      <p className="landing__desc">{t('landing.description', lang)}</p>
+      <p className="landing__desc">
+        {t('landing.description', lang)}
+      </p>
 
-      {/* Actions */}
       <div className="landing__actions">
-        <button className="btn btn--primary btn--full btn--lg landing__cta" onClick={handleStart}>
-          <span className="material-symbols-outlined">visibility</span>
-          {t('landing.start', lang)}
+        {hasSavedSession && (
+          <button
+            className="btn btn--secondary btn--full btn--lg landing__resume"
+            type="button"
+            onClick={handleResume}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              play_circle
+            </span>
+            Continue saved session
+          </button>
+        )}
+
+        <button
+          className="btn btn--primary btn--full btn--lg landing__cta"
+          type="button"
+          onClick={handleStart}
+          disabled={!isHydrated}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            visibility
+          </span>
+          {hasSavedSession
+            ? 'Start a new assessment'
+            : t('landing.start', lang)}
         </button>
 
-        <div className="landing__demo-card" onClick={handleDemo}>
-          <div className="landing__demo-avatar">
-            <span>र</span>
-          </div>
-          <div className="landing__demo-info">
-            <span className="landing__demo-label">{t('landing.tryDemo', lang)}</span>
-            <span className="landing__demo-sub">6 questions · ~45 sec · Hindi voice</span>
-          </div>
-          <span className="material-symbols-outlined landing__demo-arrow">arrow_forward</span>
-        </div>
+        <button
+          className="landing__demo-card"
+          type="button"
+          onClick={handleDemo}
+          disabled={!isHydrated}
+        >
+          <span className="landing__demo-avatar" aria-hidden="true">
+            र
+          </span>
+
+          <span className="landing__demo-info">
+            <span className="landing__demo-label">
+              {t('landing.tryDemo', lang)}
+            </span>
+
+            <span className="landing__demo-sub">
+              6 questions · ~45 sec · optional Hindi voice
+            </span>
+          </span>
+
+          <span
+            className="material-symbols-outlined landing__demo-arrow"
+            aria-hidden="true"
+          >
+            arrow_forward
+          </span>
+        </button>
       </div>
 
-      {/* Trust section */}
       <div className="landing__trust">
         <div className="landing__trust-item">
-          <span className="material-symbols-outlined">verified_user</span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            verified_user
+          </span>
           <span>ZEISS Beyond Code 2026</span>
         </div>
-        <div className="landing__trust-divider" />
+
+        <span
+          className="landing__trust-divider"
+          aria-hidden="true"
+        />
+
         <div className="landing__trust-item">
-          <span className="material-symbols-outlined">smartphone</span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            smartphone
+          </span>
           <span>PWA · Works Offline</span>
         </div>
       </div>
 
-      {/* Disclaimer */}
       <p className="landing__disclaimer">
-        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>info</span>
+        <span className="material-symbols-outlined" aria-hidden="true">
+          info
+        </span>
         {t('landing.notMedical', lang)}
       </p>
-    </div>
+    </main>
   );
 }

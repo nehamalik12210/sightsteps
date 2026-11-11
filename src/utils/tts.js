@@ -1,145 +1,191 @@
-/**
- * TTS Service
- */
+/** Browser speech helper for the optional bilingual demo voice. */
 
 let hindiVoice = null;
 let englishVoice = null;
-let voicesReady = false;
 let voicesPromise = null;
+let voicesListenerAttached = false;
+let activeSpeakRequest = 0;
 
 const PREFERRED_VENDORS = ['google', 'microsoft', 'apple'];
 
+function getSpeechSynthesis() {
+  if (typeof window === 'undefined') return null;
+  return window.speechSynthesis || null;
+}
+
 function scoreVoice(voice) {
-  const name = voice.name.toLowerCase();
+  const name = String(voice?.name || '').toLowerCase();
   let score = 0;
-  for (let i = 0; i < PREFERRED_VENDORS.length; i++) {
-    if (name.includes(PREFERRED_VENDORS[i])) score += (PREFERRED_VENDORS.length - i) * 10;
+
+  PREFERRED_VENDORS.forEach((vendor, index) => {
+    if (name.includes(vendor)) {
+      score += (PREFERRED_VENDORS.length - index) * 10;
+    }
+  });
+
+  if (
+    name.includes('female') ||
+    name.includes('lekha') ||
+    name.includes('swara')
+  ) {
+    score += 5;
   }
-  if (name.includes('female') || name.includes('lekha') || name.includes('swara')) score += 5;
-  if (!name.includes('compact') && !name.includes('reduced')) score += 3;
+
+  if (!name.includes('compact') && !name.includes('reduced')) {
+    score += 2;
+  }
+
   return score;
 }
 
-function pickBestVoice(voices, langPrefix) {
-  const candidates = voices.filter((v) => v.lang.startsWith(langPrefix));
-  if (candidates.length === 0) return null;
-  candidates.sort((a, b) => scoreVoice(b) - scoreVoice(a));
-  return candidates[0];
+function chooseVoice(voices, prefix) {
+  return voices
+    .filter((voice) => String(voice.lang || '').toLowerCase().startsWith(prefix))
+    .sort((a, b) => scoreVoice(b) - scoreVoice(a))[0] || null;
 }
 
-/**
- * Must be called from a click handler to unlock Chrome audio.
- */
-export function unlockAudio() {
-  if (!window.speechSynthesis) return;
-  // Speak a tiny silent word to unlock the audio pipeline
-  const u = new SpeechSynthesisUtterance('.');
-  u.volume = 0.01;
-  u.rate = 10;
-  window.speechSynthesis.speak(u);
-  // Cancel it immediately so user hears nothing
-  setTimeout(() => window.speechSynthesis.cancel(), 50);
-  console.log('[TTS] Audio unlocked');
+function updateVoices() {
+  const synthesis = getSpeechSynthesis();
+  if (!synthesis) return;
+
+  const voices = synthesis.getVoices();
+  if (!voices.length) return;
+
+  hindiVoice = chooseVoice(voices, 'hi');
+  englishVoice = chooseVoice(voices, 'en');
 }
 
+/** Resolve even when the browser has no installed speech voices. */
 export function initVoices() {
   if (voicesPromise) return voicesPromise;
 
   voicesPromise = new Promise((resolve) => {
-    if (!window.speechSynthesis) {
-      voicesReady = true;
+    const synthesis = getSpeechSynthesis();
+
+    if (!synthesis) {
       resolve({ hindiVoice: null, englishVoice: null });
       return;
     }
 
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) return;
+    updateVoices();
 
-      hindiVoice = pickBestVoice(voices, 'hi');
-      englishVoice = pickBestVoice(voices, 'en');
-      voicesReady = true;
-
-      console.log('[TTS] Hindi voice:', hindiVoice?.name || 'NONE');
-      console.log('[TTS] English voice:', englishVoice?.name || 'NONE');
+    if (synthesis.getVoices().length) {
       resolve({ hindiVoice, englishVoice });
+      return;
+    }
+
+    const onVoicesChanged = () => {
+      updateVoices();
+
+      if (synthesis.getVoices().length) {
+        resolve({ hindiVoice, englishVoice });
+      }
     };
 
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      loadVoices();
-    } else {
-      window.speechSynthesis.addEventListener('voiceschanged', loadVoices, { once: true });
-      const poll = setInterval(() => {
-        if (window.speechSynthesis.getVoices().length > 0) {
-          clearInterval(poll);
-          if (!voicesReady) loadVoices();
-        }
-      }, 250);
-      setTimeout(() => {
-        clearInterval(poll);
-        if (!voicesReady) { loadVoices(); resolve({ hindiVoice, englishVoice }); }
-      }, 5000);
+    if (!voicesListenerAttached) {
+      synthesis.addEventListener?.('voiceschanged', onVoicesChanged);
+      voicesListenerAttached = true;
     }
+
+    // Some browsers return an empty list indefinitely; do not block the app.
+    window.setTimeout(() => {
+      updateVoices();
+      resolve({ hindiVoice, englishVoice });
+    }, 1800);
   });
 
   return voicesPromise;
 }
 
+/** Call from a user gesture when a browser requires speech activation. */
+export function unlockAudio() {
+  const synthesis = getSpeechSynthesis();
+  if (!synthesis) return false;
+
+  try {
+    synthesis.cancel();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function speakWhenReady(text, lang = 'en', options = {}) {
+  const synthesis = getSpeechSynthesis();
+
+  if (!synthesis || !String(text || '').trim()) {
+    options.onError?.();
+    return false;
+  }
+
+  const requestId = ++activeSpeakRequest;
+
   await initVoices();
 
-  if (!window.speechSynthesis || !text) {
-    options.onError?.();
-    return;
+  if (requestId !== activeSpeakRequest) return false;
+
+  try {
+    synthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(String(text));
+
+    if (lang === 'hi') {
+      utterance.lang = 'hi-IN';
+      if (hindiVoice) utterance.voice = hindiVoice;
+    } else {
+      utterance.lang = 'en-US';
+      if (englishVoice) utterance.voice = englishVoice;
+    }
+
+    utterance.rate = options.rate ?? (lang === 'hi' ? 0.88 : 1);
+    utterance.pitch = options.pitch ?? 1;
+    utterance.volume = Math.min(1, Math.max(0, options.volume ?? 1));
+
+    utterance.onstart = () => options.onStart?.();
+    utterance.onend = () => options.onEnd?.();
+    utterance.onerror = (event) => options.onError?.(event);
+
+    synthesis.speak(utterance);
+    return true;
+  } catch (error) {
+    options.onError?.(error);
+    return false;
   }
-
-  // Cancel anything playing, wait for Chrome to settle
-  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-    window.speechSynthesis.cancel();
-    await new Promise((r) => setTimeout(r, 150));
-  }
-
-  const utterance = new SpeechSynthesisUtterance(text);
-
-  if (lang === 'hi' && hindiVoice) {
-    utterance.voice = hindiVoice;
-    utterance.lang = 'hi-IN';
-  } else if (lang === 'hi') {
-    utterance.lang = 'hi-IN';
-  } else if (englishVoice) {
-    utterance.voice = englishVoice;
-    utterance.lang = 'en-US';
-  }
-
-  utterance.rate = options.rate ?? (lang === 'hi' ? 0.85 : 1.0);
-  utterance.pitch = options.pitch ?? (lang === 'hi' ? 0.95 : 1.0);
-  utterance.volume = options.volume ?? 1.0;
-
-  utterance.onend = () => { console.log('[TTS] Done'); options.onEnd?.(); };
-  utterance.onerror = (e) => { console.error('[TTS] Error:', e.error); options.onError?.(); };
-
-  console.log(`[TTS] Speaking (${lang}): "${text.substring(0, 50)}" voice=${utterance.voice?.name || 'default'}`);
-  window.speechSynthesis.speak(utterance);
 }
 
 export function speak(text, lang = 'en', options = {}) {
-  speakWhenReady(text, lang, options);
+  return speakWhenReady(text, lang, options);
 }
 
 export function stopSpeaking() {
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  activeSpeakRequest += 1;
+
+  const synthesis = getSpeechSynthesis();
+  if (!synthesis) return;
+
+  try {
+    synthesis.cancel();
+  } catch {
+    // Speech cancellation is best-effort only.
+  }
 }
 
 export function isHindiTTSAvailable() {
-  return hindiVoice !== null;
+  return Boolean(hindiVoice);
 }
 
-export function playAudio(src) {
+export function playAudio(source) {
   return new Promise((resolve) => {
-    const audio = new Audio(src);
-    audio.addEventListener('ended', resolve);
-    audio.addEventListener('error', () => resolve());
-    audio.play().catch(() => resolve());
+    if (!source || typeof Audio === 'undefined') {
+      resolve(false);
+      return;
+    }
+
+    const audio = new Audio(source);
+
+    audio.addEventListener('ended', () => resolve(true), { once: true });
+    audio.addEventListener('error', () => resolve(false), { once: true });
+
+    audio.play().catch(() => resolve(false));
   });
 }

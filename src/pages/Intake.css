@@ -5,135 +5,124 @@
   background: var(--color-bg);
 }
 
+.intake--loading {
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
 .intake__progress {
   padding: var(--space-3) var(--space-4) 0;
 }
 
 .intake__progress-pct {
-  font-weight: var(--fw-semibold);
   color: var(--color-primary);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ─── Question Area ─── */
 .intake__question {
-  flex: 1;
-  padding: var(--space-5) var(--space-4) var(--space-4);
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+  max-width: 620px;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  margin: 0 auto;
 }
 
 .intake__question--in {
-  animation: questionIn 300ms ease forwards;
+  animation: intakeQuestionIn 240ms ease both;
 }
 
 .intake__question--out {
-  animation: questionOut 200ms ease forwards;
+  animation: intakeQuestionOut 160ms ease both;
   pointer-events: none;
 }
 
-@keyframes questionIn {
-  from { opacity: 0; transform: translateX(30px); }
-  to   { opacity: 1; transform: translateX(0); }
+@keyframes intakeQuestionIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-@keyframes questionOut {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(-30px); }
+@keyframes intakeQuestionOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
 }
 
-/* ─── Category badge ─── */
 .intake__category-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 5px;
+  width: fit-content;
+  padding: 5px 11px;
   border-radius: var(--radius-full);
   background: var(--color-primary-bg);
   color: var(--color-primary);
   font-size: 11px;
   font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  width: fit-content;
+  letter-spacing: 0.02em;
 }
 
-/* ─── Play TTS button ─── */
+.intake__category-badge .material-symbols-outlined {
+  font-size: 16px;
+}
+
 .intake__play-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: var(--color-primary-bg);
+  width: fit-content;
+  min-height: 40px;
+  padding: 7px 14px;
   border: 1.5px solid var(--color-primary);
   border-radius: var(--radius-full);
+  background: var(--color-primary-bg);
   color: var(--color-primary);
-  font-size: 13px;
-  font-weight: var(--fw-semibold);
   cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.intake__play-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.intake__play-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.intake__speaking {
   width: fit-content;
-  transition: all var(--transition-fast);
-}
-
-.intake__play-btn:hover {
-  background: var(--color-primary);
-  color: white;
-}
-
-.intake__play-btn:active {
-  transform: scale(0.96);
+  padding: 6px 11px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
 }
 
 .intake__question-text {
+  color: var(--color-text);
   font-size: var(--headline-md-size);
   font-weight: var(--headline-md-weight);
   line-height: var(--headline-md-line);
-  color: var(--color-text);
 }
 
-/* ─── Speaking indicator ─── */
-.intake__speaking {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--color-primary-bg);
-  border-radius: var(--radius-full);
-  width: fit-content;
-}
-
-.intake__speaking-bars {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  height: 16px;
-}
-
-.intake__speaking-bar {
-  width: 3px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--color-primary);
-  animation: barPulse 1s ease-in-out infinite;
-}
-
-.intake__speaking-bar:nth-child(1) { animation-delay: 0ms; height: 6px; }
-.intake__speaking-bar:nth-child(2) { animation-delay: 150ms; height: 12px; }
-.intake__speaking-bar:nth-child(3) { animation-delay: 300ms; height: 8px; }
-.intake__speaking-bar:nth-child(4) { animation-delay: 450ms; height: 14px; }
-
-@keyframes barPulse {
-  0%, 100% { transform: scaleY(0.5); opacity: 0.4; }
-  50% { transform: scaleY(1.3); opacity: 1; }
-}
-
-.intake__speaking-label {
-  font-size: 11px;
-  color: var(--color-primary);
-  font-weight: var(--fw-semibold);
-}
-
-/* ─── Option buttons ─── */
 .intake__options {
   display: flex;
   flex-direction: column;
@@ -141,106 +130,110 @@
 }
 
 .intake__option {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  min-height: 56px;
   padding: var(--space-3) var(--space-4);
-  background: white;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-xl);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.025);
+  color: var(--color-text);
+  cursor: pointer;
   font-size: var(--fs-base);
   font-weight: var(--fw-medium);
   text-align: left;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  min-height: 52px;
-  animation: optionFadeIn 300ms ease both;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
-@keyframes optionFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.intake__option:hover {
+.intake__option:hover:not(:disabled) {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
-  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.08);
 }
 
-.intake__option:active {
-  transform: scale(0.98);
+.intake__option:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .intake__option-icon {
+  flex: 0 0 32px;
+  width: 32px;
   font-size: var(--fs-xl);
   line-height: 1;
-  flex-shrink: 0;
-  width: 32px;
   text-align: center;
 }
 
 .intake__option-label {
   flex: 1;
+  min-width: 0;
 }
 
-/* ─── Demo highlighted option ─── */
 .intake__option--demo {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
-  position: relative;
-}
-
-.intake__option--demo::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border: 2px solid var(--color-primary);
-  border-radius: calc(var(--radius-xl) + 2px);
-  animation: demoPulse 2s ease infinite;
-  pointer-events: none;
-}
-
-@keyframes demoPulse {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.6; }
 }
 
 .intake__option-demo-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px 8px;
+  gap: 3px;
+  flex: 0 0 auto;
+  padding: 3px 7px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
-  color: white;
+  color: #fff;
   font-size: 10px;
   font-weight: var(--fw-bold);
-  flex-shrink: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
 }
 
-/* ─── Demo control bar ─── */
+.intake__option-demo-badge .material-symbols-outlined {
+  font-size: 13px;
+}
+
 .intake__demo-control {
-  padding: var(--space-4);
-  padding-bottom: calc(var(--space-5) + var(--bottom-padding));
-  border-top: 1px solid var(--color-border);
-  background: white;
   position: sticky;
   bottom: 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.intake__demo-control .btn {
-  gap: var(--space-2);
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + var(--bottom-padding));
+  border-top: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .intake__demo-hint {
-  text-align: center;
-  font-size: 11px;
-  color: var(--color-text-muted);
   margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.intake button:focus-visible {
+  outline: 3px solid #163f70;
+  outline-offset: 3px;
+}
+
+@media (min-width: 700px) {
+  .intake__question {
+    padding-top: var(--space-8);
+  }
+
+  .intake__question-text {
+    font-size: 1.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intake *,
+  .intake *::before,
+  .intake *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

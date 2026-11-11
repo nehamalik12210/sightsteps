@@ -1,11 +1,7 @@
 /**
- * SightSteps — IndexedDB Session Storage
- *
- * Persists answers and session state locally so the user doesn't lose
- * progress if the app is closed or refreshed.
- *
- * Uses a single object store 'sessions' keyed by sessionId.
- * Also stores the latest session ID in a 'meta' store for quick resume.
+ * SightSteps local session storage.
+ * Session records remain in this browser/device only; no network request is made.
+ * If IndexedDB is unavailable, the app continues without persistence.
  */
 
 const DB_NAME = 'SightSteps';
@@ -13,19 +9,14 @@ const DB_VERSION = 1;
 const STORE_SESSIONS = 'sessions';
 const STORE_META = 'meta';
 
-let dbPromise = null;
+let dbPromise;
 
-/**
- * Open (or create) the database. Returns a promise that resolves to the db.
- * Safe to call multiple times — returns the same promise.
- */
 function openDB() {
   if (dbPromise) return dbPromise;
 
   dbPromise = new Promise((resolve, reject) => {
-    if (!window.indexedDB) {
-      console.warn('[Storage] IndexedDB not available');
-      reject(new Error('IndexedDB not available'));
+    if (typeof indexedDB === 'undefined') {
+      reject(new Error('IndexedDB is not available in this browser.'));
       return;
     }
 
@@ -35,8 +26,10 @@ function openDB() {
       const db = event.target.result;
 
       if (!db.objectStoreNames.contains(STORE_SESSIONS)) {
-        const store = db.createObjectStore(STORE_SESSIONS, { keyPath: 'sessionId' });
-        store.createIndex('timestamp', 'startedAt', { unique: false });
+        const sessions = db.createObjectStore(STORE_SESSIONS, {
+          keyPath: 'sessionId',
+        });
+        sessions.createIndex('startedAt', 'startedAt', { unique: false });
       }
 
       if (!db.objectStoreNames.contains(STORE_META)) {
@@ -44,120 +37,167 @@ function openDB() {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => {
-      console.error('[Storage] Failed to open DB:', request.error);
-      reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => db.close();
+      resolve(db);
     };
+
+    request.onerror = () => reject(
+      request.error || new Error('Could not open local storage.'),
+    );
+
+    request.onblocked = () => reject(
+      new Error('Local storage upgrade is blocked by another tab.'),
+    );
+  });
+
+  // Permit a later retry after a transient browser/storage error.
+  dbPromise.catch(() => {
+    dbPromise = null;
   });
 
   return dbPromise;
 }
 
-/**
- * Save the current session state to IndexedDB.
- */
+function transactionDone(transaction) {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(
+      transaction.error || new Error('Storage transaction failed.'),
+    );
+    transaction.onabort = () => reject(
+      transaction.error || new Error('Storage transaction was aborted.'),
+    );
+  });
+}
+
 export async function saveSession(state) {
+  if (!state?.sessionId) return false;
+
   try {
     const db = await openDB();
-
-    if (!state.sessionId) return;
+    const transaction = db.transaction(
+      [STORE_SESSIONS, STORE_META],
+      'readwrite',
+    );
 
     const record = {
       sessionId: state.sessionId,
-      startedAt: state.startedAt,
-      language: state.language,
-      isDemo: state.isDemo,
-      answers: state.answers,
-      visionResults: state.visionResults,
-      report: state.report,
+      startedAt: state.startedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      language: state.language || 'en',
+      consentGiven: Boolean(state.consentGiven),
+      isDemo: Boolean(state.isDemo),
+      demoPersona: state.demoPersona || null,
+      demoStepIndex: Number(state.demoStepIndex || 0),
+      answers: state.answers || {},
+      visionResults: state.visionResults || null,
+      report: state.report || null,
     };
 
-    const tx = db.transaction([STORE_SESSIONS, STORE_META], 'readwrite');
-
-    // Save session
-    tx.objectStore(STORE_SESSIONS).put(record);
-
-    // Update meta with latest session ID
-    tx.objectStore(STORE_META).put({ key: 'latestSessionId', value: state.sessionId });
-
-    await new Promise((resolve, reject) => {
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
+    transaction.objectStore(STORE_SESSIONS).put(record);
+    transaction.objectStore(STORE_META).put({
+      key: 'latestSessionId',
+      value: state.sessionId,
     });
-  } catch (err) {
-    console.warn('[Storage] Save failed:', err.message);
+
+    await transactionDone(transaction);
+    return true;
+  } catch (error) {
+    console.warn(
+      '[SightSteps] Local save unavailable:',
+      error?.message || error,
+    );
+    return false;
   }
 }
 
-/**
- * Load the latest session from IndexedDB.
- * Returns the session record or null if none exists.
- */
 export async function loadLatestSession() {
   try {
     const db = await openDB();
+    const metaTransaction = db.transaction(STORE_META, 'readonly');
+    const metaRequest = metaTransaction
+      .objectStore(STORE_META)
+      .get('latestSessionId');
 
-    // Get the latest session ID
-    const metaTx = db.transaction(STORE_META, 'readonly');
-    const metaReq = metaTx.objectStore(STORE_META).get('latestSessionId');
-
-    const meta = await new Promise((resolve, reject) => {
-      metaReq.onsuccess = () => resolve(metaReq.result);
-      metaReq.onerror = () => reject(metaReq.error);
+    const latestId = await new Promise((resolve, reject) => {
+      metaRequest.onsuccess = () => resolve(metaRequest.result?.value || null);
+      metaRequest.onerror = () => reject(
+        metaRequest.error || new Error('Could not read session pointer.'),
+      );
     });
 
-    if (!meta?.value) return null;
+    if (!latestId) return null;
 
-    // Get the session
-    const sessionTx = db.transaction(STORE_SESSIONS, 'readonly');
-    const sessionReq = sessionTx.objectStore(STORE_SESSIONS).get(meta.value);
+    const sessionTransaction = db.transaction(STORE_SESSIONS, 'readonly');
+    const sessionRequest = sessionTransaction
+      .objectStore(STORE_SESSIONS)
+      .get(latestId);
 
-    const session = await new Promise((resolve, reject) => {
-      sessionReq.onsuccess = () => resolve(sessionReq.result);
-      sessionReq.onerror = () => reject(sessionReq.error);
+    return await new Promise((resolve, reject) => {
+      sessionRequest.onsuccess = () => resolve(sessionRequest.result || null);
+      sessionRequest.onerror = () => reject(
+        sessionRequest.error || new Error('Could not read saved session.'),
+      );
     });
-
-    return session || null;
-  } catch (err) {
-    console.warn('[Storage] Load failed:', err.message);
+  } catch (error) {
+    console.warn(
+      '[SightSteps] Local restore unavailable:',
+      error?.message || error,
+    );
     return null;
   }
 }
 
-/**
- * Clear the latest session pointer (on reset).
- * The session data itself is kept for potential history feature.
- */
-export async function clearLatestSession() {
+/** Remove the current session and its latest-session pointer on an explicit reset. */
+export async function clearLatestSession(sessionId = null) {
   try {
     const db = await openDB();
-    const tx = db.transaction(STORE_META, 'readwrite');
-    tx.objectStore(STORE_META).delete('latestSessionId');
-    await new Promise((resolve, reject) => {
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-  } catch (err) {
-    console.warn('[Storage] Clear failed:', err.message);
+    const transaction = db.transaction(
+      [STORE_META, STORE_SESSIONS],
+      'readwrite',
+    );
+
+    const metaStore = transaction.objectStore(STORE_META);
+    const sessionStore = transaction.objectStore(STORE_SESSIONS);
+
+    const pointerRequest = metaStore.get('latestSessionId');
+
+    pointerRequest.onsuccess = () => {
+      const latestId = pointerRequest.result?.value || null;
+
+      if (!sessionId || latestId === sessionId) {
+        metaStore.delete('latestSessionId');
+        const idToDelete = sessionId || latestId;
+        if (idToDelete) sessionStore.delete(idToDelete);
+      } else if (sessionId) {
+        sessionStore.delete(sessionId);
+      }
+    };
+
+    await transactionDone(transaction);
+    return true;
+  } catch (error) {
+    console.warn(
+      '[SightSteps] Could not clear local session:',
+      error?.message || error,
+    );
+    return false;
   }
 }
 
-/**
- * Get count of all sessions (for potential history feature).
- */
 export async function getSessionCount() {
   try {
     const db = await openDB();
-    const tx = db.transaction(STORE_SESSIONS, 'readonly');
-    const req = tx.objectStore(STORE_SESSIONS).count();
-    return new Promise((resolve) => {
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(0);
+    const transaction = db.transaction(STORE_SESSIONS, 'readonly');
+    const request = transaction.objectStore(STORE_SESSIONS).count();
+
+    return await new Promise((resolve) => {
+      request.onsuccess = () => resolve(request.result || 0);
+      request.onerror = () => resolve(0);
     });
   } catch {
     return 0;
   }
 }
-

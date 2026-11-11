@@ -1,343 +1,629 @@
+
 /**
- * SightSteps Rule Engine
+ * SightSteps — Transparent Insights Engine
  *
- * 12-signal weighted scoring system with explainability.
- * Each rule maps answer patterns → signal scores.
- * Scores are categorized into: refractive, lifestyle, awareness.
+ * Converts questionnaire responses into:
+ * 1. Answer-based observations.
+ * 2. Groups of user-reported information.
+ * 3. Optional topics to discuss with an optician.
+ * 4. Notes that may be shared with an eye-care professional.
  *
- * Heatmap denominator = max possible score for questions ACTUALLY ASKED
- * (not all questions — respects branching).
+ * SAFETY AND SCOPE:
+ * - No clinical risk score is calculated.
+ * - No diagnosis is generated.
+ * - No examination urgency or timeframe is assigned.
+ * - No lens prescription is generated.
+ * - Lens features are discussion topics, not recommendations
+ *   that replace professional assessment.
  */
 
-// --- Signal Rules ---
-const rules = [
-  // REFRACTIVE signals
+const GROUPS = [
   {
-    id: 'blur_present',
-    category: 'refractive',
-    maxPoints: 3,
-    evaluate: (a) => {
-      if (a.blurred_vision?.value === 'yes') return { score: 3, reason: { en: 'Reports blurred vision', hi: 'धुंधला दिखाई देता है' } };
-      if (a.blurred_vision?.value === 'sometimes') return { score: 1, reason: { en: 'Occasional blurred vision', hi: 'कभी-कभी धुंधला दिखता है' } };
-      return { score: 0, reason: { en: 'No blurred vision reported', hi: 'धुंधलापन नहीं' } };
+    id: 'experiences',
+    title: {
+      en: 'Vision Experiences',
+      hi: 'दृष्टि संबंधी अनुभव',
     },
+    description: {
+      en: 'What you shared about your day-to-day vision experiences.',
+      hi: 'आपने अपनी रोज़मर्रा की दृष्टि के बारे में जो बताया।',
+    },
+    icon: 'visibility',
   },
   {
-    id: 'blur_type',
-    category: 'refractive',
-    maxPoints: 2,
-    appliesIf: (a) => a.blur_distance, // only scored if question was shown
-    evaluate: (a) => {
-      if (a.blur_distance?.value === 'both') return { score: 2, reason: { en: 'Blur at both near and far distances', hi: 'पास और दूर दोनों में धुंधलापन' } };
-      if (a.blur_distance?.value === 'near') return { score: 1, reason: { en: 'Near vision blur', hi: 'पास की दृष्टि में धुंधलापन' } };
-      if (a.blur_distance?.value === 'far') return { score: 1, reason: { en: 'Distance vision blur', hi: 'दूर की दृष्टि में धुंधलापन' } };
-      return { score: 0, reason: { en: 'No specific blur pattern', hi: 'कोई विशेष धुंधलापन नहीं' } };
+    id: 'dailyHabits',
+    title: {
+      en: 'Daily Habits',
+      hi: 'दैनिक आदतें',
     },
+    description: {
+      en: 'Your reported screen use, outdoor time and daily activities.',
+      hi: 'आपका स्क्रीन उपयोग, बाहर बिताया गया समय और दैनिक गतिविधियाँ।',
+    },
+    icon: 'self_improvement',
   },
   {
-    id: 'headache_signal',
-    category: 'refractive',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.headaches?.value === 'often') return { score: 2, reason: { en: 'Frequent headaches with visual tasks', hi: 'पढ़ने/स्क्रीन के बाद अक्सर सिरदर्द' } };
-      if (a.headaches?.value === 'sometimes') return { score: 1, reason: { en: 'Occasional headaches with visual tasks', hi: 'कभी-कभी सिरदर्द' } };
-      return { score: 0, reason: { en: 'No vision-related headaches', hi: 'दृष्टि संबंधी सिरदर्द नहीं' } };
+    id: 'eyeCare',
+    title: {
+      en: 'Eye-care Background',
+      hi: 'नेत्र देखभाल का इतिहास',
     },
-  },
-  {
-    id: 'squint_signal',
-    category: 'refractive',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.squinting?.value === 'yes') return { score: 2, reason: { en: 'Frequently squints to see clearly', hi: 'साफ देखने के लिए अक्सर आँखें सिकोड़ते हैं' } };
-      if (a.squinting?.value === 'sometimes') return { score: 1, reason: { en: 'Sometimes squints', hi: 'कभी-कभी आँखें सिकोड़ते हैं' } };
-      return { score: 0, reason: { en: 'Does not squint', hi: 'आँखें नहीं सिकोड़ते' } };
+    description: {
+      en: 'Your reported use of vision correction and examination history.',
+      hi: 'चश्मे या कॉन्टैक्ट लेंस के उपयोग और जाँच का आपका बताया हुआ इतिहास।',
     },
-  },
-  {
-    id: 'night_difficulty',
-    category: 'refractive',
-    maxPoints: 1,
-    evaluate: (a) => {
-      if (a.night_vision?.value === 'yes') return { score: 1, reason: { en: 'Difficulty seeing at night', hi: 'रात में देखने में दिक्कत' } };
-      return { score: 0, reason: { en: 'No night vision issues', hi: 'रात की दृष्टि ठीक' } };
-    },
-  },
-
-  // LIFESTYLE signals
-  {
-    id: 'screen_exposure',
-    category: 'lifestyle',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.screen_hours?.value === 'high') return { score: 2, reason: { en: 'Heavy screen usage (6+ hours)', hi: '6+ घंटे स्क्रीन पर' } };
-      if (a.screen_hours?.value === 'moderate') return { score: 1, reason: { en: 'Moderate screen usage (2–6 hours)', hi: '2–6 घंटे स्क्रीन पर' } };
-      return { score: 0, reason: { en: 'Low screen usage', hi: 'कम स्क्रीन उपयोग' } };
-    },
-  },
-  {
-    id: 'outdoor_exposure',
-    category: 'lifestyle',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.outdoor_time?.value === 'high') return { score: 2, reason: { en: 'High outdoor/sunlight exposure', hi: 'धूप में ज़्यादा समय' } };
-      if (a.outdoor_time?.value === 'moderate') return { score: 1, reason: { en: 'Moderate outdoor exposure', hi: 'कुछ समय बाहर' } };
-      return { score: 0, reason: { en: 'Minimal outdoor exposure', hi: 'बहुत कम बाहर' } };
-    },
-  },
-  {
-    id: 'close_work_strain',
-    category: 'lifestyle',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.close_work?.value === 'daily') return { score: 2, reason: { en: 'Daily close-up work for hours', hi: 'रोज़ घंटों पास का काम' } };
-      if (a.close_work?.value === 'sometimes') return { score: 1, reason: { en: 'Occasional close-up work', hi: 'कभी-कभी पास का काम' } };
-      return { score: 0, reason: { en: 'Minimal close-up work', hi: 'पास का काम बहुत कम' } };
-    },
-  },
-
-  // AWARENESS signals
-  {
-    id: 'correction_status',
-    category: 'awareness',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.existing_glasses?.value === 'no') return { score: 2, reason: { en: 'No current vision correction', hi: 'अभी कोई चश्मा नहीं' } };
-      return { score: 0, reason: { en: 'Currently uses vision correction', hi: 'चश्मा/लेंस पहनते हैं' } };
-    },
-  },
-  {
-    id: 'prescription_age',
-    category: 'awareness',
-    maxPoints: 2,
-    appliesIf: (a) => a.glasses_age, // conditional question
-    evaluate: (a) => {
-      if (a.glasses_age?.value === 'very_old') return { score: 2, reason: { en: 'Prescription over 2 years old', hi: 'चश्मा 2 साल से पुराना' } };
-      if (a.glasses_age?.value === 'old') return { score: 1, reason: { en: 'Prescription 1–2 years old', hi: 'चश्मा 1–2 साल पुराना' } };
-      return { score: 0, reason: { en: 'Recent prescription', hi: 'नया चश्मा' } };
-    },
-  },
-  {
-    id: 'exam_recency',
-    category: 'awareness',
-    maxPoints: 3,
-    evaluate: (a) => {
-      if (a.eye_exam?.value === 'never') return { score: 3, reason: { en: 'Never had a professional eye exam', hi: 'कभी आँखों की जाँच नहीं हुई' } };
-      if (a.eye_exam?.value === 'very_old') return { score: 2, reason: { en: 'Last eye exam over 3 years ago', hi: 'आखिरी जाँच 3+ साल पहले' } };
-      if (a.eye_exam?.value === 'old') return { score: 1, reason: { en: 'Last eye exam 1–3 years ago', hi: 'आखिरी जाँच 1–3 साल पहले' } };
-      return { score: 0, reason: { en: 'Recent eye exam', hi: 'हाल की जाँच' } };
-    },
-  },
-  {
-    id: 'age_risk',
-    category: 'awareness',
-    maxPoints: 2,
-    evaluate: (a) => {
-      if (a.age_group?.value === 'senior') return { score: 2, reason: { en: 'Age 55+ — higher risk for presbyopia and cataracts', hi: '55+ उम्र — प्रेस्बायोपिया और मोतियाबिंद का जोखिम' } };
-      if (a.age_group?.value === 'middle') return { score: 1, reason: { en: 'Age 40–55 — presbyopia likely developing', hi: '40–55 उम्र — प्रेस्बायोपिया संभव' } };
-      return { score: 0, reason: { en: 'Lower age-related risk', hi: 'उम्र संबंधी जोखिम कम' } };
-    },
+    icon: 'health_and_safety',
   },
 ];
 
 /**
- * Run the rule engine on a set of answers.
- * Returns category scores, individual signals, recommendations, and urgency.
+ * Every observation maps directly to a question ID and
+ * one of that question's actual answer values.
+ *
+ * Unknown values are handled through the original answer label.
  */
-export function evaluateAnswers(answers) {
-  const signals = [];
-  const categories = {
-    refractive: { score: 0, max: 0, signals: [] },
-    lifestyle: { score: 0, max: 0, signals: [] },
-    awareness: { score: 0, max: 0, signals: [] },
-  };
 
-  for (const rule of rules) {
-    // Skip rules for conditional questions that weren't shown
-    if (rule.appliesIf && !rule.appliesIf(answers)) continue;
-
-    const result = rule.evaluate(answers);
-    const signal = {
-      id: rule.id,
-      category: rule.category,
-      score: result.score,
-      maxPoints: rule.maxPoints,
-      reason: result.reason,
-    };
-
-    signals.push(signal);
-    categories[rule.category].score += result.score;
-    categories[rule.category].max += rule.maxPoints;
-    categories[rule.category].signals.push(signal);
-  }
-
-  const totalScore = Object.values(categories).reduce((s, c) => s + c.score, 0);
-  const totalMax = Object.values(categories).reduce((s, c) => s + c.max, 0);
-
-  const recommendations = generateRecommendations(answers, categories, signals);
-  const urgency = determineUrgency(answers, categories, totalScore, totalMax);
-
-  return {
-    categories,
-    signals,
-    totalScore,
-    totalMax,
-    recommendations,
-    urgency,
-  };
-}
-
-/**
- * Generate lens recommendations based on signals.
- */
-function generateRecommendations(answers, categories, signals) {
-  const recs = [];
-
-  // Blue light filtering
-  if (answers.screen_hours?.value === 'high' || answers.screen_hours?.value === 'moderate') {
-    recs.push({
-      id: 'blue_light',
-      title: { en: 'Blue Light Filter Lenses', hi: 'ब्लू लाइट फ़िल्टर लेंस' },
-      icon: 'filter_b_and_w',
-      reason: {
-        en: `Based on ${answers.screen_hours?.value === 'high' ? 'heavy' : 'moderate'} screen usage`,
-        hi: `${answers.screen_hours?.value === 'high' ? 'ज़्यादा' : 'मध्यम'} स्क्रीन उपयोग के आधार पर`,
-      },
-      why: {
-        en: 'Blue light from screens can cause digital eye strain, disrupted sleep, and long-term retinal stress.',
-        hi: 'स्क्रीन की नीली रोशनी से डिजिटल आई स्ट्रेन, नींद में बाधा, और रेटिना पर तनाव हो सकता है।',
-      },
-      priority: answers.screen_hours?.value === 'high' ? 'high' : 'medium',
-    });
-  }
-
-  // Photochromic / UV protection
-  if (answers.outdoor_time?.value === 'high' || answers.outdoor_time?.value === 'moderate') {
-    recs.push({
-      id: 'photochromic',
-      title: { en: 'Photochromic Lenses', hi: 'फ़ोटोक्रोमिक लेंस' },
-      icon: 'contrast',
-      reason: {
-        en: `Based on ${answers.outdoor_time?.value === 'high' ? 'significant' : 'moderate'} outdoor time`,
-        hi: `${answers.outdoor_time?.value === 'high' ? 'ज़्यादा' : 'कुछ'} बाहरी समय के आधार पर`,
-      },
-      why: {
-        en: 'Photochromic lenses darken in sunlight, protecting against UV damage and reducing glare without needing separate sunglasses.',
-        hi: 'फ़ोटोक्रोमिक लेंस धूप में काले हो जाते हैं, UV से बचाते हैं, और अलग सनग्लास की ज़रूरत नहीं।',
-      },
-      priority: answers.outdoor_time?.value === 'high' ? 'high' : 'medium',
-    });
-  }
-
-  // Anti-fatigue / reading lenses
-  if (answers.close_work?.value === 'daily' || (answers.age_group?.value === 'middle' || answers.age_group?.value === 'senior')) {
-    recs.push({
-      id: 'anti_fatigue',
-      title: { en: 'Anti-Fatigue / Reading Lenses', hi: 'एंटी-फ़ैटीग / पढ़ने के लेंस' },
-      icon: 'menu_book',
-      reason: {
-        en: answers.close_work?.value === 'daily'
-          ? 'Based on daily close-up work and near blur'
-          : 'Based on age group — presbyopia support',
-        hi: answers.close_work?.value === 'daily'
-          ? 'रोज़ पास के काम और पास के धुंधलेपन के आधार पर'
-          : 'उम्र के आधार पर — प्रेस्बायोपिया सहायता',
-      },
-      why: {
-        en: 'Anti-fatigue lenses have a slight power gradient that eases focus strain during prolonged near-work.',
-        hi: 'एंटी-फ़ैटीग लेंस में हल्का पावर ग्रेडिएंट होता है जो लंबे समय तक पास के काम में आँखों पर ज़ोर कम करता है।',
-      },
-      priority: 'high',
-    });
-  }
-
-  // Anti-glare
-  if (answers.night_vision?.value === 'yes' || answers.headaches?.value === 'often') {
-    recs.push({
-      id: 'anti_glare',
-      title: { en: 'Anti-Glare Coating', hi: 'एंटी-ग्लेयर कोटिंग' },
-      icon: 'auto_awesome',
-      reason: {
-        en: 'Based on night vision difficulty and/or frequent headaches',
-        hi: 'रात की दृष्टि की दिक्कत और/या बार-बार सिरदर्द के आधार पर',
-      },
-      why: {
-        en: 'Anti-glare coating reduces reflections from artificial light, easing eye strain and improving clarity at night.',
-        hi: 'एंटी-ग्लेयर कोटिंग कृत्रिम रोशनी के रिफ्लेक्शन कम करता है, रात में स्पष्टता बढ़ाता है।',
-      },
-      priority: 'medium',
-    });
-  }
-
-  // Scratch resistance (always a safe recommendation)
-  if (answers.close_work?.value === 'daily' || answers.outdoor_time?.value === 'high') {
-    recs.push({
-      id: 'scratch_resistant',
-      title: { en: 'Scratch-Resistant Coating', hi: 'स्क्रैच-रेसिस्टेंट कोटिंग' },
-      icon: 'shield',
-      reason: {
-        en: 'Based on active work environment',
-        hi: 'सक्रिय कार्य वातावरण के आधार पर',
-      },
-      why: {
-        en: 'Scratch-resistant coating extends lens life, especially for active lifestyles or dusty environments.',
-        hi: 'स्क्रैच-रेसिस्टेंट कोटिंग लेंस की उम्र बढ़ाता है, खासकर सक्रिय या धूल भरे वातावरण में।',
-      },
-      priority: 'low',
-    });
-  }
-
-  return recs.sort((a, b) => {
-    const p = { high: 3, medium: 2, low: 1 };
-    return (p[b.priority] || 0) - (p[a.priority] || 0);
-  });
-}
-
-/**
- * Determine urgency of professional eye exam.
- */
-function determineUrgency(answers, categories, totalScore, totalMax) {
-  const percentage = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
-
-  // High urgency triggers
-  if (
-    answers.eye_exam?.value === 'never' ||
-    answers.blurred_vision?.value === 'yes' && answers.existing_glasses?.value === 'no' ||
-    percentage >= 60
-  ) {
-    return {
-      level: 'high',
-      reason: {
-        en: answers.eye_exam?.value === 'never'
-          ? 'No prior eye exam on record — a professional examination is strongly recommended'
-          : 'Multiple vision signals suggest a professional examination is needed soon',
-        hi: answers.eye_exam?.value === 'never'
-          ? 'कभी आँखों की जाँच नहीं हुई — पेशेवर जाँच की सिफ़ारिश है'
-          : 'कई दृष्टि संकेत बताते हैं कि जल्द पेशेवर जाँच ज़रूरी है',
-      },
-    };
-  }
-
-  // Medium urgency
-  if (percentage >= 35) {
-    return {
-      level: 'medium',
-      reason: {
-        en: 'Some vision concerns were identified — consider an eye exam within 6 months',
-        hi: 'कुछ दृष्टि चिंताएं पाई गईं — 6 महीने में आँखों की जाँच करवाएं',
-      },
-    };
-  }
-
-  // Low urgency
-  return {
-    level: 'low',
-    reason: {
-      en: 'No significant concerns — maintain regular check-up schedule',
-      hi: 'कोई बड़ी चिंता नहीं — नियमित जाँच जारी रखें',
+const OBSERVATION_DEFINITIONS = {
+  blurred_vision: {
+    group: 'experiences',
+    question: {
+      en: 'Blurred or unclear vision',
+      hi: 'धुंधला या अस्पष्ट दिखाई देना',
     },
+    notes: {
+      yes: {
+        en: 'You reported experiencing blurred or unclear vision.',
+        hi: 'आपने धुंधला या अस्पष्ट दिखाई देने की बात बताई।',
+      },
+      sometimes: {
+        en: 'You reported occasional blurred or unclear vision.',
+        hi: 'आपने कभी-कभी धुंधला या अस्पष्ट दिखाई देने की बात बताई।',
+      },
+      no: {
+        en: 'You did not report blurred or unclear vision.',
+        hi: 'आपने धुंधला या अस्पष्ट दिखाई देने की शिकायत नहीं बताई।',
+      },
+    },
+  },
+
+  blur_distance: {
+    group: 'experiences',
+    question: {
+      en: 'Distance at which blur occurs',
+      hi: 'किस दूरी पर धुंधलापन होता है',
+    },
+    notes: {
+      near: {
+        en: 'You reported more difficulty with near objects.',
+        hi: 'आपने पास की वस्तुओं को देखने में अधिक कठिनाई बताई।',
+      },
+      far: {
+        en: 'You reported more difficulty with distant objects.',
+        hi: 'आपने दूर की वस्तुओं को देखने में अधिक कठिनाई बताई।',
+      },
+      both: {
+        en: 'You reported difficulty with both near and distant objects.',
+        hi: 'आपने पास और दूर दोनों की वस्तुओं को देखने में कठिनाई बताई।',
+      },
+    },
+  },
+
+  headaches: {
+    group: 'experiences',
+    question: {
+      en: 'Headaches during visual activities',
+      hi: 'दृष्टि से जुड़ी गतिविधियों के दौरान सिरदर्द',
+    },
+    notes: {
+      often: {
+        en: 'You reported frequent headaches, particularly around reading or screen use.',
+        hi: 'आपने पढ़ने या स्क्रीन देखने के दौरान अक्सर सिरदर्द होने की बात बताई।',
+      },
+      sometimes: {
+        en: 'You reported occasional headaches around reading or screen use.',
+        hi: 'आपने पढ़ने या स्क्रीन देखने के दौरान कभी-कभी सिरदर्द होने की बात बताई।',
+      },
+      rarely: {
+        en: 'You reported rarely or never experiencing these headaches.',
+        hi: 'आपने ऐसा सिरदर्द बहुत कम या कभी नहीं होने की बात बताई।',
+      },
+    },
+  },
+
+  squinting: {
+    group: 'experiences',
+    question: {
+      en: 'Squinting to see clearly',
+      hi: 'स्पष्ट देखने के लिए आँखें सिकोड़ना',
+    },
+    notes: {
+      yes: {
+        en: 'You reported frequently squinting to see things clearly.',
+        hi: 'आपने स्पष्ट देखने के लिए अक्सर आँखें सिकोड़ने की बात बताई।',
+      },
+      sometimes: {
+        en: 'You reported occasionally squinting to see things clearly.',
+        hi: 'आपने कभी-कभी स्पष्ट देखने के लिए आँखें सिकोड़ने की बात बताई।',
+      },
+      no: {
+        en: 'You did not report squinting to see clearly.',
+        hi: 'आपने स्पष्ट देखने के लिए आँखें सिकोड़ने की शिकायत नहीं बताई।',
+      },
+    },
+  },
+
+  night_vision: {
+    group: 'experiences',
+    question: {
+      en: 'Vision in low light',
+      hi: 'कम रोशनी में देखने का अनुभव',
+    },
+    notes: {
+      yes: {
+        en: 'You reported difficulty seeing at night or in low-light conditions.',
+        hi: 'आपने रात में या कम रोशनी में देखने में कठिनाई बताई।',
+      },
+      sometimes: {
+        en: 'You reported occasional difficulty seeing at night or in low light.',
+        hi: 'आपने रात में या कम रोशनी में कभी-कभी कठिनाई बताई।',
+      },
+      no: {
+        en: 'You did not report difficulty seeing at night or in low light.',
+        hi: 'आपने रात में या कम रोशनी में देखने में कठिनाई नहीं बताई।',
+      },
+    },
+  },
+
+  screen_hours: {
+    group: 'dailyHabits',
+    question: {
+      en: 'Daily screen use',
+      hi: 'दैनिक स्क्रीन उपयोग',
+    },
+    notes: {
+      low: {
+        en: 'You reported spending less than two hours per day on screens.',
+        hi: 'आपने प्रतिदिन दो घंटे से कम स्क्रीन उपयोग बताया।',
+      },
+      moderate: {
+        en: 'You reported spending two to six hours per day on screens.',
+        hi: 'आपने प्रतिदिन दो से छह घंटे स्क्रीन उपयोग बताया।',
+      },
+      high: {
+        en: 'You reported spending more than six hours per day on screens.',
+        hi: 'आपने प्रतिदिन छह घंटे से अधिक स्क्रीन उपयोग बताया।',
+      },
+    },
+  },
+
+  outdoor_time: {
+    group: 'dailyHabits',
+    question: {
+      en: 'Time spent outdoors',
+      hi: 'बाहर बिताया गया समय',
+    },
+    notes: {
+      high: {
+        en: 'You reported spending most of the day outdoors.',
+        hi: 'आपने दिन का अधिकांश समय बाहर बिताने की बात बताई।',
+      },
+      moderate: {
+        en: 'You reported spending a few hours outdoors.',
+        hi: 'आपने कुछ घंटे बाहर बिताने की बात बताई।',
+      },
+      low: {
+        en: 'You reported spending very little time outdoors.',
+        hi: 'आपने बाहर बहुत कम समय बिताने की बात बताई।',
+      },
+    },
+  },
+
+  close_work: {
+    group: 'dailyHabits',
+    question: {
+      en: 'Close-up activities',
+      hi: 'पास से किए जाने वाले काम',
+    },
+    notes: {
+      daily: {
+        en: 'You reported doing close-up work such as reading, sewing or crafts for several hours daily.',
+        hi: 'आपने पढ़ने, सिलाई या हस्तकला जैसे पास के काम रोज़ कई घंटे करने की बात बताई।',
+      },
+      sometimes: {
+        en: 'You reported doing close-up work occasionally.',
+        hi: 'आपने कभी-कभी पास से किए जाने वाले काम करने की बात बताई।',
+      },
+      rarely: {
+        en: 'You reported rarely doing close-up work.',
+        hi: 'आपने पास से किए जाने वाले काम बहुत कम करने की बात बताई।',
+      },
+    },
+  },
+
+  existing_glasses: {
+    group: 'eyeCare',
+    question: {
+      en: 'Current vision correction',
+      hi: 'वर्तमान दृष्टि सुधार',
+    },
+    notes: {
+      glasses: {
+        en: 'You reported currently wearing glasses.',
+        hi: 'आपने वर्तमान में चश्मा पहनने की बात बताई।',
+      },
+      contacts: {
+        en: 'You reported currently using contact lenses.',
+        hi: 'आपने वर्तमान में कॉन्टैक्ट लेंस उपयोग करने की बात बताई।',
+      },
+      both: {
+        en: 'You reported using both glasses and contact lenses.',
+        hi: 'आपने चश्मे और कॉन्टैक्ट लेंस दोनों का उपयोग बताया।',
+      },
+      no: {
+        en: 'You reported not currently using glasses or contact lenses.',
+        hi: 'आपने वर्तमान में चश्मा या कॉन्टैक्ट लेंस उपयोग नहीं करने की बात बताई।',
+      },
+    },
+  },
+
+  glasses_age: {
+    group: 'eyeCare',
+    question: {
+      en: 'Age of current prescription',
+      hi: 'वर्तमान चश्मे के प्रिस्क्रिप्शन की अवधि',
+    },
+    notes: {
+      recent: {
+        en: 'You reported that your current prescription is less than one year old.',
+        hi: 'आपने बताया कि आपका वर्तमान प्रिस्क्रिप्शन एक वर्ष से कम पुराना है।',
+      },
+      old: {
+        en: 'You reported that your current prescription is one to two years old.',
+        hi: 'आपने बताया कि आपका वर्तमान प्रिस्क्रिप्शन एक से दो वर्ष पुराना है।',
+      },
+      very_old: {
+        en: 'You reported that your current prescription is more than two years old.',
+        hi: 'आपने बताया कि आपका वर्तमान प्रिस्क्रिप्शन दो वर्ष से अधिक पुराना है।',
+      },
+      unknown: {
+        en: 'You were unsure how old your current prescription is.',
+        hi: 'आपको अपने वर्तमान प्रिस्क्रिप्शन की अवधि के बारे में निश्चित जानकारी नहीं थी।',
+      },
+    },
+  },
+
+  eye_exam: {
+    group: 'eyeCare',
+    question: {
+      en: 'Previous professional eye examination',
+      hi: 'पिछली पेशेवर आँखों की जाँच',
+    },
+    notes: {
+      recent: {
+        en: 'You reported having an eye examination within the last year.',
+        hi: 'आपने पिछले एक वर्ष के भीतर आँखों की जाँच करवाने की बात बताई।',
+      },
+      old: {
+        en: 'You reported that your last eye examination was one to three years ago.',
+        hi: 'आपने बताया कि आपकी पिछली आँखों की जाँच एक से तीन वर्ष पहले हुई थी।',
+      },
+      very_old: {
+        en: 'You reported that your last eye examination was more than three years ago.',
+        hi: 'आपने बताया कि आपकी पिछली आँखों की जाँच तीन वर्ष से अधिक पहले हुई थी।',
+      },
+      never: {
+        en: 'You reported that you have never had a professional eye examination.',
+        hi: 'आपने बताया कि आपने कभी पेशेवर आँखों की जाँच नहीं करवाई।',
+      },
+    },
+  },
+
+  age_group: {
+    group: 'eyeCare',
+    question: {
+      en: 'Age group',
+      hi: 'आयु वर्ग',
+    },
+    notes: {},
+  },
+};
+
+/**
+ * Safely resolve bilingual strings or answer labels.
+ */
+function getLocalizedText(value, language, fallback = '') {
+  if (value && typeof value === 'object') {
+    return value[language] || value.en || fallback;
+  }
+
+  return typeof value === 'string' ? value : fallback;
+}
+
+function hasAnswer(value) {
+  return value !== null && value !== undefined && value !== '';
+}
+
+/**
+ * Build one observation from an actual stored answer.
+ */
+function buildObservation(questionId, answer, definition) {
+  const value = answer.value;
+
+  const answerEnglish = getLocalizedText(
+    answer.label,
+    'en',
+    String(value)
+  );
+
+  const answerHindi = getLocalizedText(
+    answer.label,
+    'hi',
+    String(value)
+  );
+
+  const detail = definition.notes[value] || {
+    en: `You selected: ${answerEnglish}.`,
+    hi: `आपने यह विकल्प चुना: ${answerHindi}।`,
+  };
+
+  return {
+    id: questionId,
+    question: definition.question,
+    answer: {
+      en: answerEnglish,
+      hi: answerHindi,
+    },
+    detail,
   };
 }
 
-export default rules;
+/**
+ * Build optional optician discussion topics.
+ *
+ * These are generated only from relevant questionnaire answers.
+ * They do not determine a prescription or diagnose a condition.
+ */
+function buildDiscussionPoints(answers) {
+  const points = [];
 
+  const screenUse = answers.screen_hours?.value;
+
+  if (screenUse === 'moderate' || screenUse === 'high') {
+    points.push({
+      id: 'screen_comfort',
+
+      title: {
+        en: 'Comfort during screen use',
+        hi: 'स्क्रीन उपयोग के दौरान आराम',
+      },
+
+      context: {
+        en: screenUse === 'high'
+          ? 'You reported more than six hours of daily screen use.'
+          : 'You reported two to six hours of daily screen use.',
+
+        hi: screenUse === 'high'
+          ? 'आपने प्रतिदिन छह घंटे से अधिक स्क्रीन उपयोग बताया।'
+          : 'आपने प्रतिदिन दो से छह घंटे स्क्रीन उपयोग बताया।',
+      },
+
+      prompt: {
+        en: 'Ask the optician about available lens options for your screen-related tasks and whether changes to your viewing setup may be useful. Screen time alone does not determine a lens prescription.',
+
+        hi: 'अपने स्क्रीन से जुड़े काम के लिए उपलब्ध लेंस विकल्पों और देखने की व्यवस्था में उपयोगी बदलावों के बारे में ऑप्टिशियन से पूछें। केवल स्क्रीन उपयोग से लेंस का प्रिस्क्रिप्शन निर्धारित नहीं होता।',
+      },
+
+      icon: 'devices',
+    });
+  }
+
+  const outdoorTime = answers.outdoor_time?.value;
+
+  if (outdoorTime === 'moderate' || outdoorTime === 'high') {
+    points.push({
+      id: 'outdoor_protection',
+
+      title: {
+        en: 'Outdoor eyewear options',
+        hi: 'बाहर उपयोग के लिए चश्मे के विकल्प',
+      },
+
+      context: {
+        en: outdoorTime === 'high'
+          ? 'You reported spending most of your day outdoors.'
+          : 'You reported spending a few hours outdoors.',
+
+        hi: outdoorTime === 'high'
+          ? 'आपने दिन का अधिकांश समय बाहर बिताने की बात बताई।'
+          : 'आपने कुछ घंटे बाहर बिताने की बात बताई।',
+      },
+
+      prompt: {
+        en: 'Ask about suitable UV-protective eyewear and whether photochromic lenses would fit your everyday activities. Check product specifications and intended uses with the optician.',
+
+        hi: 'उपयुक्त UV-सुरक्षा वाले चश्मे और फोटोक्रोमिक लेंस आपकी दैनिक गतिविधियों के लिए सही हैं या नहीं, इस बारे में पूछें। ऑप्टिशियन से उत्पाद की विशेषताओं और उपयोग की जानकारी लें।',
+      },
+
+      icon: 'wb_sunny',
+    });
+  }
+
+  if (answers.close_work?.value === 'daily') {
+    points.push({
+      id: 'near_work',
+
+      title: {
+        en: 'Comfort during close-up work',
+        hi: 'पास से काम करते समय आराम',
+      },
+
+      context: {
+        en: 'You reported doing close-up activities for several hours daily.',
+        hi: 'आपने प्रतिदिन कई घंटे पास से किए जाने वाले काम करने की बात बताई।',
+      },
+
+      prompt: {
+        en: 'Explain the types of close-up tasks you do and their typical working distance. Ask the eye-care professional whether any lens options are relevant after an appropriate examination.',
+
+        hi: 'अपने पास के काम और काम करते समय सामान्य दूरी के बारे में बताएं। उचित जाँच के बाद कौन से लेंस विकल्प उपयुक्त हो सकते हैं, इस बारे में नेत्र देखभाल पेशेवर से पूछें।',
+      },
+
+      icon: 'menu_book',
+    });
+  }
+
+  const prescriptionNeedsReview = [
+    'old',
+    'very_old',
+    'unknown',
+  ].includes(answers.glasses_age?.value);
+
+  if (prescriptionNeedsReview) {
+    points.push({
+      id: 'prescription_review',
+
+      title: {
+        en: 'Review of current prescription',
+        hi: 'वर्तमान प्रिस्क्रिप्शन की समीक्षा',
+      },
+
+      context: {
+        en: 'You reported that your current prescription is not recent or that its age is unknown.',
+
+        hi: 'आपने बताया कि आपका वर्तमान प्रिस्क्रिप्शन नया नहीं है या उसकी अवधि ज्ञात नहीं है।',
+      },
+
+      prompt: {
+        en: 'Discuss your current prescription and ask whether a professional eye examination or prescription review is appropriate.',
+
+        hi: 'अपने वर्तमान प्रिस्क्रिप्शन के बारे में चर्चा करें और पूछें कि पेशेवर आँखों की जाँच या प्रिस्क्रिप्शन की समीक्षा उचित होगी या नहीं।',
+      },
+
+      icon: 'description',
+    });
+  }
+
+  return points;
+}
+
+/**
+ * Build neutral follow-up notes from reported experiences.
+ */
+function buildFollowUpNotes(answers) {
+  const notes = [];
+
+  const reportedVisionExperiences = [
+    ['blurred_vision', ['yes', 'sometimes']],
+    ['headaches', ['often', 'sometimes']],
+    ['squinting', ['yes', 'sometimes']],
+    ['night_vision', ['yes', 'sometimes']],
+  ].some(([questionId, values]) =>
+    values.includes(answers[questionId]?.value)
+  );
+
+  if (reportedVisionExperiences) {
+    notes.push({
+      id: 'reported_experiences',
+
+      title: {
+        en: 'Share your reported vision experiences',
+        hi: 'अपने बताए गए दृष्टि संबंधी अनुभव साझा करें',
+      },
+
+      detail: {
+        en: 'You reported one or more vision-related experiences in this questionnaire. Consider sharing these responses with a qualified eye-care professional. This tool cannot determine their cause or urgency.',
+
+        hi: 'आपने इस प्रश्नावली में दृष्टि से जुड़े एक या अधिक अनुभव बताए हैं। इन जवाबों को किसी योग्य नेत्र देखभाल पेशेवर के साथ साझा करने पर विचार करें। यह टूल इनके कारण या तात्कालिकता का निर्धारण नहीं कर सकता।',
+      },
+    });
+  }
+
+  if (answers.eye_exam?.value === 'never') {
+    notes.push({
+      id: 'no_previous_exam',
+
+      title: {
+        en: 'Professional eye examination history',
+        hi: 'पेशेवर आँखों की जाँच का इतिहास',
+      },
+
+      detail: {
+        en: 'You reported never having a professional eye examination. Ask an eye-care professional about arranging an appropriate examination.',
+
+        hi: 'आपने बताया कि आपने कभी पेशेवर आँखों की जाँच नहीं करवाई। उचित जाँच की व्यवस्था के बारे में नेत्र देखभाल पेशेवर से पूछें।',
+      },
+    });
+  } else if (
+    answers.eye_exam?.value === 'old' ||
+    answers.eye_exam?.value === 'very_old'
+  ) {
+    notes.push({
+      id: 'previous_exam',
+
+      title: {
+        en: 'Previous eye examination',
+        hi: 'पिछली आँखों की जाँच',
+      },
+
+      detail: {
+        en: 'You reported that your last professional eye examination was more than a year ago. Ask an eye-care professional when your next examination would be appropriate.',
+
+        hi: 'आपने बताया कि आपकी पिछली पेशेवर आँखों की जाँच एक वर्ष से अधिक पहले हुई थी। अगली जाँच कब उचित होगी, इस बारे में नेत्र देखभाल पेशेवर से पूछें।',
+      },
+    });
+  }
+
+  return notes;
+}
+
+/**
+ * Main public API.
+ *
+ * @param {Record<string, {value: string, label?: object}>} answers
+ *
+ * @returns {{
+ *   answeredCount: number,
+ *   groups: Array,
+ *   discussionPoints: Array,
+ *   followUpNotes: Array
+ * }}
+ */
+export function evaluateAnswers(answers = {}) {
+  const safeAnswers =
+    answers && typeof answers === 'object' ? answers : {};
+
+  const groups = GROUPS.map((group) => {
+    const observations = Object.entries(OBSERVATION_DEFINITIONS)
+      .filter(([questionId, definition]) => {
+        return (
+          definition.group === group.id &&
+          hasAnswer(safeAnswers[questionId]?.value)
+        );
+      })
+      .map(([questionId, definition]) => {
+        return buildObservation(
+          questionId,
+          safeAnswers[questionId],
+          definition
+        );
+      });
+
+    return {
+      ...group,
+      observations,
+    };
+  }).filter((group) => group.observations.length > 0);
+
+  const answeredCount = Object.values(safeAnswers).filter(
+    (answer) => answer && hasAnswer(answer.value)
+  ).length;
+
+  return {
+    answeredCount,
+    groups,
+    discussionPoints: buildDiscussionPoints(safeAnswers),
+    followUpNotes: buildFollowUpNotes(safeAnswers),
+  };
+}
+
+export default evaluateAnswers;
