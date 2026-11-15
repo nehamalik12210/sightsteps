@@ -131,7 +131,7 @@ export default function Report() {
       </header>
 
       <main className="rpt__body">
-        <section className="rpt__intro animate-fade-in">
+        <section className="rpt__intro">
           <p className="rpt__kicker">{lang === 'hi' ? 'सत्र सारांश' : 'SESSION SUMMARY'}</p>
           <h1 className="rpt__headline">
             {lang === 'hi' ? 'आपका दृष्टि वार्तालाप मानचित्र' : 'Your Vision Conversation Map'}
