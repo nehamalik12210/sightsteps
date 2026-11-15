@@ -116,13 +116,14 @@ export default function Landing() {
       <div className="landing__layout">
         <div className="landing__content">
           <div className="landing__wordmark-row">
-            <svg className="landing__wordmark-icon" viewBox="0 0 40 40" width="36" height="36" focusable="false" aria-hidden="true">
-              <circle cx="20" cy="20" r="18" fill="#1769D2" />
-              <circle cx="20" cy="20" r="10" fill="#FFFFFF" />
-              <circle cx="20" cy="20" r="5" fill="#12243A" />
-              <ellipse cx="17" cy="17" rx="2" ry="1.2" fill="white" opacity="0.7" transform="rotate(-20 17 17)" />
-            </svg>
-            <span className="landing__wordmark-text">SightSteps</span>
+            <img
+              className="landing__wordmark-logo"
+              src="/sightsteps-logo.svg"
+              alt="SightSteps"
+              width="1510"
+              height="360"
+              decoding="async"
+            />
           </div>
 
           <h1 className="landing__headline" id="landing-title">

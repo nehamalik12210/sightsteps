@@ -2,7 +2,7 @@
 .landing{position:relative;display:flex;flex-direction:column;align-items:center;min-height:100dvh;width:100%;background:var(--color-bg);overflow-x:hidden}
 .landing__layout{display:flex;flex-direction:column;align-items:center;flex:1;width:100%;max-width:460px;margin:0 auto;padding:var(--space-8) var(--space-4) var(--space-6);box-sizing:border-box}
 .landing__content{display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;animation:landingFadeUp 500ms ease both}
-.landing__wordmark-row{display:flex;align-items:center;justify-content:center;gap:var(--space-2);margin-bottom:var(--space-5)}.landing__wordmark-icon{flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(23,105,210,.18))}.landing__wordmark-text{font-family:var(--font-family);font-size:var(--fs-lg);font-weight:var(--fw-bold);color:var(--color-secondary);letter-spacing:-.02em}
+.landing__wordmark-row{display:flex;align-items:center;justify-content:center;width:100%;margin-bottom:var(--space-5)}.landing__wordmark-logo{display:block;width:min(215px,88vw);height:auto;object-fit:contain}
 .landing__headline{font-family:var(--font-family);font-size:clamp(1.75rem,5.5vw,2.25rem);font-weight:var(--fw-extrabold);line-height:1.18;letter-spacing:-.03em;color:var(--color-secondary);margin-bottom:var(--space-3);width:100%;max-width:420px;word-break:normal;overflow-wrap:break-word}
 .landing__subheading{font-size:clamp(.9375rem,3.2vw,1.0625rem);line-height:var(--lh-relaxed);color:var(--color-text-secondary);margin-bottom:var(--space-6);width:100%;max-width:400px;word-break:normal;overflow-wrap:break-word}
 .landing__actions{display:flex;flex-direction:column;gap:var(--space-3);width:100%;max-width:400px;margin-bottom:var(--space-6);animation:landingFadeUp 500ms ease 100ms both}
