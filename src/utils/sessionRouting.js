@@ -1,0 +1,67 @@
+import { getNextQuestion, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+
+function isAnswered(entry) {
+  if (!entry || entry.value === undefined || entry.value === null) return false;
+  if (Array.isArray(entry.value)) return entry.value.length > 0;
+  return true; // Empty text is a valid completed response for the optional note.
+}
+
+/** Resolve the correct resume destination from saved journey state. */
+export function getResumePath(session = {}) {
+  const answers = session.answers || {};
+
+  if (session.visionResults) return '/report';
+
+  const activities = Array.isArray(session.activities) && session.activities.length
+    ? session.activities
+    : (session.isDemo ? session.demoPersona?.activities || [] : []);
+  const primaryActivity = session.primaryActivity || (session.isDemo ? session.demoPersona?.primaryActivity : null);
+
+  if (!activities.length || !primaryActivity || !activities.includes(primaryActivity)) {
+    return '/activities';
+  }
+
+  if (session.isDemo && session.demoPersona?.skipVision) {
+    // Let Intake's completion effect set the explicit skipped state before showing Report.
+    return '/intake';
+  }
+
+  if (getNextQuestion(answers)) return '/intake';
+  return '/vision';
+}
+
+/** Return the next visible question, respecting the scripted demo's short flow. */
+export function getPendingSessionQuestion(session = {}) {
+  const answers = session.answers || {};
+  const activities = Array.isArray(session.activities) ? session.activities : [];
+  let visible = getVisibleQuestions(answers, activities);
+  if (session.isDemo && Array.isArray(session.demoPersona?.demoQuestionIds)) {
+    const allowed = new Set(session.demoPersona.demoQuestionIds);
+    visible = visible.filter((question) => allowed.has(question.id));
+  }
+  return visible.find((question) => !isAnswerComplete(answers[question.id])) || null;
+}
+
+/** Route guard policy for directly opened or refreshed application URLs. */
+export function getProtectedRouteRedirect(session = {}, requirements = {}) {
+  if (!session.sessionId || !session.consentGiven) return '/';
+
+  const activities = Array.isArray(session.activities) ? session.activities : [];
+  const primaryActivity = session.primaryActivity || null;
+  if (requirements.requireProfile && (!activities.length || !primaryActivity || !activities.includes(primaryActivity))) {
+    return '/activities';
+  }
+
+  if (requirements.requireIntake && getPendingSessionQuestion(session)) return '/intake';
+  if (requirements.requireVision && !session.visionResults && !(session.isDemo && session.demoPersona?.skipVision)) return '/vision';
+  return null;
+}
+
+export function getNewSessionRedirect(session = {}, allowNewSession = false) {
+  // The app marks a fresh onboarding transition only after clearing any old
+  // participant session. A direct visit to onboarding with an active session
+  // returns home, while a newly-created session is allowed to continue.
+  return session?.sessionId && !allowNewSession ? '/' : null;
+}
+
+export { isAnswered as isSessionAnswerComplete };

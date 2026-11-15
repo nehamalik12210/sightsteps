@@ -5,16 +5,14 @@ import {
   useEffect,
   useReducer,
 } from 'react';
-import {
-  clearLatestSession,
-  loadLatestSession,
-  saveSession,
-} from '../utils/storage.js';
+import { clearAllSessions, loadLatestSession, saveSession } from '../utils/storage.js';
+import { shouldDiscardKioskSessionOnRestore } from '../utils/kioskPolicy.js';
 
 const AppContext = createContext(null);
 
 const initialState = {
   isHydrated: false,
+  storageAvailable: null,
   language: null,
   consentGiven: false,
   isDemo: false,
@@ -26,6 +24,11 @@ const initialState = {
   answers: {},
   visionResults: null,
   report: null,
+  appointmentFollowUp: { appointmentDate: '', professionalNotes: '', followUpPlan: '', nextAppointmentDate: '' },
+  discussionPriorities: [],
+  questionsToAsk: '',
+  assistedCompletion: false,
+  kioskMode: false,
   sessionId: null,
   startedAt: null,
 };
@@ -41,11 +44,23 @@ function appReducer(state, action) {
       return {
         ...initialState,
         ...action.payload,
+        activities: Array.isArray(action.payload?.activities) ? action.payload.activities : [],
+        answers: action.payload?.answers || {},
+        appointmentFollowUp: { ...initialState.appointmentFollowUp, ...(action.payload?.appointmentFollowUp || {}) },
+        discussionPriorities: Array.isArray(action.payload?.discussionPriorities) ? action.payload.discussionPriorities : [],
+        questionsToAsk: action.payload?.questionsToAsk || '',
+        assistedCompletion: Boolean(action.payload?.assistedCompletion),
+        kioskMode: Boolean(action.payload?.kioskMode),
         isHydrated: true,
       };
 
     case 'HYDRATION_DONE':
       return { ...state, isHydrated: true };
+
+    case 'SET_STORAGE_STATUS':
+      return state.storageAvailable === action.payload
+        ? state
+        : { ...state, storageAvailable: action.payload };
 
     case 'SET_LANGUAGE':
       return { ...state, language: action.payload };
@@ -57,8 +72,10 @@ function appReducer(state, action) {
       return {
         ...initialState,
         isHydrated: true,
-        language: state.language || 'en',
+        language: action.payload?.language || state.language || 'en',
         consentGiven: true,
+        kioskMode: Boolean(state.kioskMode),
+        assistedCompletion: Boolean(state.assistedCompletion),
         sessionId: createSessionId(),
         startedAt: new Date().toISOString(),
       };
@@ -74,7 +91,7 @@ function appReducer(state, action) {
         startedAt: new Date().toISOString(),
         language: action.payload?.language || 'hi',
         consentGiven: true,
-        activities: action.payload?.activities || [],
+        activities: Array.isArray(action.payload?.activities) ? action.payload.activities : [],
         primaryActivity: action.payload?.primaryActivity || null,
       };
 
@@ -94,26 +111,46 @@ function appReducer(state, action) {
         },
       };
 
+    case 'CLEAR_ANSWERS': {
+      const nextAnswers = { ...state.answers };
+      for (const questionId of action.payload || []) {
+        delete nextAnswers[questionId];
+      }
+      return { ...state, answers: nextAnswers };
+    }
+
     case 'SET_ACTIVITIES':
-      return { ...state, activities: action.payload };
+      return { ...state, activities: Array.isArray(action.payload) ? action.payload : [] };
 
     case 'SET_PRIMARY_ACTIVITY':
-      return { ...state, primaryActivity: action.payload };
+      return { ...state, primaryActivity: action.payload || null };
 
     case 'SET_PARTICIPANT_NOTE':
-      return { ...state, participantNote: action.payload };
+      return { ...state, participantNote: action.payload || '' };
 
     case 'SET_VISION_RESULTS':
       return { ...state, visionResults: action.payload };
 
     case 'SKIP_VISION':
-      return {
-        ...state,
-        visionResults: { completed: false, skipped: true, data: null },
-      };
+      return { ...state, visionResults: { completed: false, skipped: true, data: null } };
 
     case 'SET_REPORT':
       return { ...state, report: action.payload };
+
+    case 'SET_KIOSK_MODE':
+      return { ...state, kioskMode: Boolean(action.payload) };
+
+    case 'SET_ASSISTED_COMPLETION':
+      return { ...state, assistedCompletion: Boolean(action.payload) };
+
+    case 'SET_DISCUSSION_PRIORITIES':
+      return { ...state, discussionPriorities: Array.isArray(action.payload) ? action.payload.slice(0, 2) : [] };
+
+    case 'SET_QUESTIONS_TO_ASK':
+      return { ...state, questionsToAsk: String(action.payload || '').slice(0, 1200) };
+
+    case 'SET_APPOINTMENT_FOLLOW_UP':
+      return { ...state, appointmentFollowUp: { ...state.appointmentFollowUp, ...(action.payload || {}) } };
 
     case 'RESET':
       return { ...initialState, isHydrated: true };
@@ -126,15 +163,18 @@ function appReducer(state, action) {
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Restore the latest unfinished or completed local session on page reload.
   useEffect(() => {
     let active = true;
 
     loadLatestSession()
-      .then((record) => {
+      .then(async (record) => {
         if (!active) return;
 
-        if (record?.sessionId) {
+        if (record?.sessionId && shouldDiscardKioskSessionOnRestore(record)) {
+          // A shared-device session is intentionally not restored after a reload or browser restart.
+          await clearAllSessions();
+          dispatch({ type: 'HYDRATION_DONE' });
+        } else if (record?.sessionId) {
           dispatch({
             type: 'HYDRATE',
             payload: {
@@ -143,18 +183,20 @@ export function AppProvider({ children }) {
               isDemo: Boolean(record.isDemo),
               demoPersona: record.demoPersona || null,
               demoStepIndex: Number(record.demoStepIndex || 0),
-              activities: record.activities || [],
-              primaryActivity: record.primaryActivity || null,
+              activities: record.activities || record.demoPersona?.activities || [],
+              primaryActivity: record.primaryActivity || record.demoPersona?.primaryActivity || null,
               participantNote: record.participantNote || '',
               answers: record.answers || {},
-              visionResults: (
-                record.visionResults?.skipped ||
-                record.visionResults?.data?.activityType === 'direction-awareness'
-              )
+              visionResults: (record.visionResults?.skipped || record.visionResults?.data?.activityType === 'direction-awareness')
                 ? record.visionResults
                 : null,
-              // Rebuild insights from saved answers instead of trusting legacy scores.
+              // Rebuild report content from current rules instead of trusting saved output.
               report: null,
+              appointmentFollowUp: { ...initialState.appointmentFollowUp, ...(record.appointmentFollowUp || {}) },
+              discussionPriorities: record.discussionPriorities || [],
+              questionsToAsk: record.questionsToAsk || '',
+              assistedCompletion: Boolean(record.assistedCompletion),
+              kioskMode: false,
               sessionId: record.sessionId,
               startedAt: record.startedAt || null,
             },
@@ -167,80 +209,59 @@ export function AppProvider({ children }) {
         if (active) dispatch({ type: 'HYDRATION_DONE' });
       });
 
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
-  // Save all meaningful session changes locally. Storage failures never block the UI.
+  // Persist the complete participant journey, including the activity profile.
+  // Storage status is deliberately excluded from the dependency list to avoid a save loop.
   useEffect(() => {
-    if (!state.isHydrated || !state.sessionId) return;
-    void saveSession(state);
-  }, [state]);
+    if (!state.isHydrated || !state.sessionId) return undefined;
+    let active = true;
+    saveSession(state).then((success) => {
+      if (active) dispatch({ type: 'SET_STORAGE_STATUS', payload: success });
+    });
+    return () => { active = false; };
+  }, [
+    state.isHydrated, state.sessionId, state.startedAt, state.language,
+    state.consentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
+    state.activities, state.primaryActivity, state.participantNote, state.answers,
+    state.visionResults, state.report, state.appointmentFollowUp,
+    state.discussionPriorities, state.questionsToAsk, state.assistedCompletion, state.kioskMode,
+  ]);
 
-  // Keep the document language aligned with the selected app language.
   useEffect(() => {
-    if (typeof document !== 'undefined' && state.language) {
+    if (typeof document !== 'undefined') {
       document.documentElement.lang = state.language === 'hi' ? 'hi' : 'en';
     }
   }, [state.language]);
 
-  const setLanguage = useCallback((language) => {
-    dispatch({ type: 'SET_LANGUAGE', payload: language });
-  }, []);
-
-  const giveConsent = useCallback(() => {
-    dispatch({ type: 'GIVE_CONSENT' });
-  }, []);
-
-  const startSession = useCallback(() => {
-    dispatch({ type: 'START_SESSION' });
-  }, []);
-
-  const startDemo = useCallback((persona) => {
-    dispatch({ type: 'START_DEMO', payload: persona });
-  }, []);
-
-  const demoNextStep = useCallback(() => {
-    dispatch({ type: 'DEMO_NEXT_STEP' });
-  }, []);
-
+  const setLanguage = useCallback((language) => dispatch({ type: 'SET_LANGUAGE', payload: language }), []);
+  const giveConsent = useCallback(() => dispatch({ type: 'GIVE_CONSENT' }), []);
+  const startSession = useCallback((language) => dispatch({ type: 'START_SESSION', payload: { language } }), []);
+  const startDemo = useCallback((persona) => dispatch({ type: 'START_DEMO', payload: persona }), []);
+  const demoNextStep = useCallback(() => dispatch({ type: 'DEMO_NEXT_STEP' }), []);
   const setAnswer = useCallback((questionId, value, label) => {
-    dispatch({
-      type: 'SET_ANSWER',
-      payload: { questionId, value, label },
-    });
+    dispatch({ type: 'SET_ANSWER', payload: { questionId, value, label } });
   }, []);
-
-  const setActivities = useCallback((activities) => {
-    dispatch({ type: 'SET_ACTIVITIES', payload: activities });
+  const clearAnswers = useCallback((questionIds) => {
+    dispatch({ type: 'CLEAR_ANSWERS', payload: questionIds });
   }, []);
+  const setActivities = useCallback((activities) => dispatch({ type: 'SET_ACTIVITIES', payload: activities }), []);
+  const setPrimaryActivity = useCallback((activity) => dispatch({ type: 'SET_PRIMARY_ACTIVITY', payload: activity }), []);
+  const setParticipantNote = useCallback((note) => dispatch({ type: 'SET_PARTICIPANT_NOTE', payload: note }), []);
+  const setVisionResults = useCallback((results) => dispatch({ type: 'SET_VISION_RESULTS', payload: results }), []);
+  const skipVision = useCallback(() => dispatch({ type: 'SKIP_VISION' }), []);
+  const setReport = useCallback((report) => dispatch({ type: 'SET_REPORT', payload: report }), []);
+  const setKioskMode = useCallback((enabled) => dispatch({ type: 'SET_KIOSK_MODE', payload: enabled }), []);
+  const setAssistedCompletion = useCallback((enabled) => dispatch({ type: 'SET_ASSISTED_COMPLETION', payload: enabled }), []);
+  const setDiscussionPriorities = useCallback((priorities) => dispatch({ type: 'SET_DISCUSSION_PRIORITIES', payload: priorities }), []);
+  const setQuestionsToAsk = useCallback((questions) => dispatch({ type: 'SET_QUESTIONS_TO_ASK', payload: questions }), []);
+  const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
 
-  const setPrimaryActivity = useCallback((activity) => {
-    dispatch({ type: 'SET_PRIMARY_ACTIVITY', payload: activity });
-  }, []);
-
-  const setParticipantNote = useCallback((note) => {
-    dispatch({ type: 'SET_PARTICIPANT_NOTE', payload: note });
-  }, []);
-
-  const setVisionResults = useCallback((results) => {
-    dispatch({ type: 'SET_VISION_RESULTS', payload: results });
-  }, []);
-
-  const skipVision = useCallback(() => {
-    dispatch({ type: 'SKIP_VISION' });
-  }, []);
-
-  const setReport = useCallback((report) => {
-    dispatch({ type: 'SET_REPORT', payload: report });
-  }, []);
-
-  const reset = useCallback(() => {
-    const sessionId = state.sessionId;
+  const reset = useCallback(async () => {
     dispatch({ type: 'RESET' });
-    void clearLatestSession(sessionId);
-  }, [state.sessionId]);
+    await clearAllSessions();
+  }, []);
 
   const value = {
     ...state,
@@ -250,12 +271,18 @@ export function AppProvider({ children }) {
     startDemo,
     demoNextStep,
     setAnswer,
+    clearAnswers,
     setActivities,
     setPrimaryActivity,
     setParticipantNote,
     setVisionResults,
     skipVision,
     setReport,
+    setKioskMode,
+    setAssistedCompletion,
+    setDiscussionPriorities,
+    setQuestionsToAsk,
+    setAppointmentFollowUp,
     reset,
   };
 
@@ -264,8 +291,6 @@ export function AppProvider({ children }) {
 
 export function useApp() {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used inside AppProvider');
-  }
+  if (!context) throw new Error('useApp must be used inside AppProvider');
   return context;
 }

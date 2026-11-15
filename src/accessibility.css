@@ -1,4 +1,9 @@
-/* Global keyboard visibility and motion preferences, including report controls. */
+/* Keyboard focus, disabled-state affordances and reduced-motion support. */
+:root {
+  /* The previous muted text token was below WCAG AA contrast on the ivory surface. */
+  --color-text-muted: #596575;
+}
+
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
   outline: 3px solid #153e68;
   outline-offset: 3px;
@@ -17,4 +22,29 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* A scripted demo answer is intentionally locked, but should retain its selected visual state. */
+.iq__option--demo:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* Apply the Devanagari-capable family to Hindi content without replacing the
+   dedicated Material Symbols font on icon elements. */
+html:lang(hi) body,
+html:lang(hi) body :not(.material-symbols-outlined) {
+  font-family: var(--font-family-hindi);
+}
+
+/* Keep native form controls legible when users increase browser text size. */
+input,
+textarea,
+select {
+  font-size: max(16px, 1em);
+}
+
+/* Avoid clipping focus indicators at page edges on narrow screens. */
+:focus-visible {
+  scroll-margin-block: 1rem;
 }

@@ -1,26 +1,13 @@
 /**
- * SightSteps Question Bank
- *
- * Each question has:
- *  - id: unique key (used in answers map and rule engine)
- *  - text: { en, hi } — bilingual text
- *  - type: 'single' | 'multi' | 'number' | 'textarea'
- *  - options: array of { value, label: { en, hi }, icon? }
- *  - showIf: optional function(answers) → boolean for conditional branching
- *  - category: which signal category this feeds ('refractive', 'lifestyle', 'awareness')
- *
- * Icons use Material Symbols icon names — not emojis.
+ * SightSteps bilingual question bank.
+ * Question IDs are stable because saved sessions and the rules engine use them.
  */
 
 const questions = [
   {
     id: 'blurred_vision',
-    text: {
-      en: 'Do you experience blurred or unclear vision?',
-      hi: 'क्या आपको धुंधला दिखाई देता है?',
-    },
-    type: 'single',
-    category: 'refractive',
+    text: { en: 'Do you experience blurred or unclear vision?', hi: 'क्या आपको धुंधला दिखाई देता है?' },
+    type: 'single', category: 'refractive',
     options: [
       { value: 'yes', label: { en: 'Yes', hi: 'हाँ' }, icon: 'blur_on' },
       { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'help' },
@@ -29,15 +16,9 @@ const questions = [
   },
   {
     id: 'blur_distance',
-    text: {
-      en: 'Is the blur more for near objects or far objects?',
-      hi: 'धुंधलापन पास की चीज़ों में ज़्यादा है या दूर की?',
-    },
-    type: 'single',
-    category: 'refractive',
-    showIf: (answers) =>
-      answers.blurred_vision?.value === 'yes' ||
-      answers.blurred_vision?.value === 'sometimes',
+    text: { en: 'Is the blur more noticeable with near objects or far objects?', hi: 'धुंधलापन पास की चीज़ों में ज़्यादा है या दूर की?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => ['yes', 'sometimes'].includes(answers.blurred_vision?.value),
     options: [
       { value: 'near', label: { en: 'Near objects', hi: 'पास की चीज़ें' }, icon: 'menu_book' },
       { value: 'far', label: { en: 'Far objects', hi: 'दूर की चीज़ें' }, icon: 'landscape' },
@@ -46,26 +27,18 @@ const questions = [
   },
   {
     id: 'headaches',
-    text: {
-      en: 'Do you get headaches, especially after reading or screen use?',
-      hi: 'क्या आपको सिरदर्द होता है, खासकर पढ़ने या स्क्रीन देखने के बाद?',
-    },
-    type: 'single',
-    category: 'refractive',
+    text: { en: 'Do you get headaches, especially after reading or screen use?', hi: 'क्या आपको सिरदर्द होता है, खासकर पढ़ने या स्क्रीन देखने के बाद?' },
+    type: 'single', category: 'refractive',
     options: [
       { value: 'often', label: { en: 'Often', hi: 'अक्सर' }, icon: 'sentiment_very_dissatisfied' },
       { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'sentiment_neutral' },
-      { value: 'rarely', label: { en: 'Rarely / Never', hi: 'कभी नहीं' }, icon: 'sentiment_satisfied' },
+      { value: 'rarely', label: { en: 'Rarely / Never', hi: 'बहुत कम / कभी नहीं' }, icon: 'sentiment_satisfied' },
     ],
   },
   {
     id: 'squinting',
-    text: {
-      en: 'Do you find yourself squinting to see things clearly?',
-      hi: 'क्या आप साफ देखने के लिए आँखें सिकोड़ते हैं?',
-    },
-    type: 'single',
-    category: 'refractive',
+    text: { en: 'Do you find yourself squinting to see things clearly?', hi: 'क्या आप साफ देखने के लिए आँखें सिकोड़ते हैं?' },
+    type: 'single', category: 'refractive',
     options: [
       { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' }, icon: 'visibility_off' },
       { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'help' },
@@ -74,12 +47,8 @@ const questions = [
   },
   {
     id: 'screen_hours',
-    text: {
-      en: 'How many hours per day do you spend on screens (phone, TV, computer)?',
-      hi: 'आप दिन में कितने घंटे स्क्रीन (फ़ोन, टीवी, कंप्यूटर) पर बिताते हैं?',
-    },
-    type: 'single',
-    category: 'lifestyle',
+    text: { en: 'How many hours per day do you spend on screens (phone, TV, computer)?', hi: 'आप दिन में कितने घंटे स्क्रीन (फ़ोन, टीवी, कंप्यूटर) पर बिताते हैं?' },
+    type: 'single', category: 'lifestyle',
     options: [
       { value: 'low', label: { en: 'Less than 2 hours', hi: '2 घंटे से कम' }, icon: 'smartphone' },
       { value: 'moderate', label: { en: '2–6 hours', hi: '2–6 घंटे' }, icon: 'laptop' },
@@ -88,12 +57,8 @@ const questions = [
   },
   {
     id: 'outdoor_time',
-    text: {
-      en: 'How much time do you spend outdoors in sunlight?',
-      hi: 'आप धूप में बाहर कितना समय बिताते हैं?',
-    },
-    type: 'single',
-    category: 'lifestyle',
+    text: { en: 'How much time do you spend outdoors in a typical day?', hi: 'आप आम तौर पर दिन में कितना समय बाहर बिताते हैं?' },
+    type: 'single', category: 'lifestyle',
     options: [
       { value: 'high', label: { en: 'Most of the day', hi: 'दिन का ज़्यादातर समय' }, icon: 'wb_sunny' },
       { value: 'moderate', label: { en: 'A few hours', hi: 'कुछ घंटे' }, icon: 'partly_cloudy_day' },
@@ -102,50 +67,81 @@ const questions = [
   },
   {
     id: 'close_work',
-    text: {
-      en: 'Do you do close-up work like reading, sewing, or crafts?',
-      hi: 'क्या आप पास का काम करते हैं जैसे पढ़ना, सिलाई, या दस्तकारी?',
-    },
-    type: 'single',
-    category: 'lifestyle',
+    text: { en: 'Do you do close-up work like reading, sewing, or crafts?', hi: 'क्या आप पास का काम करते हैं जैसे पढ़ना, सिलाई या दस्तकारी?' },
+    type: 'single', category: 'lifestyle',
     options: [
-      { value: 'daily', label: { en: 'Daily, for hours', hi: 'रोज़, घंटों' }, icon: 'draw' },
+      { value: 'daily', label: { en: 'Daily, for hours', hi: 'रोज़, कई घंटे' }, icon: 'draw' },
       { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'edit_note' },
       { value: 'rarely', label: { en: 'Rarely', hi: 'बहुत कम' }, icon: 'block' },
     ],
   },
   {
     id: 'night_vision',
-    text: {
-      en: 'Do you have difficulty seeing at night or in low light?',
-      hi: 'क्या आपको रात में या कम रोशनी में देखने में दिक्कत होती है?',
-    },
-    type: 'single',
-    category: 'refractive',
+    text: { en: 'Do you have difficulty seeing at night or in low light?', hi: 'क्या आपको रात में या कम रोशनी में देखने में दिक्कत होती है?' },
+    type: 'single', category: 'refractive',
     options: [
       { value: 'yes', label: { en: 'Yes', hi: 'हाँ' }, icon: 'dark_mode' },
       { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'help' },
       { value: 'no', label: { en: 'No', hi: 'नहीं' }, icon: 'check_circle' },
     ],
   },
-  // ─── Stage 3: Context Questions ───
+  {
+    id: 'primary_concern',
+    text: { en: 'Which reported experience would you most like to discuss first?', hi: 'आप सबसे पहले किस बताए गए अनुभव पर चर्चा करना चाहेंगे?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => hasReportedExperience(answers),
+    options: [
+      { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' }, icon: 'blur_on' },
+      { value: 'headaches', label: { en: 'Headaches around visual activities', hi: 'दृष्टि से जुड़ी गतिविधियों के दौरान सिरदर्द' }, icon: 'sentiment_neutral' },
+      { value: 'squinting', label: { en: 'Squinting to see clearly', hi: 'स्पष्ट देखने के लिए आँखें सिकोड़ना' }, icon: 'visibility_off' },
+      { value: 'night_vision', label: { en: 'Difficulty in low light', hi: 'कम रोशनी में देखने में कठिनाई' }, icon: 'dark_mode' },
+    ],
+  },
+  {
+    id: 'experience_onset',
+    text: { en: 'When did you first notice this main experience?', hi: 'आपने यह मुख्य अनुभव पहली बार कब महसूस किया?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value),
+    options: [
+      { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' }, icon: 'event' },
+      { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' }, icon: 'calendar_month' },
+      { value: 'over_year', label: { en: 'More than a year ago', hi: 'एक वर्ष से अधिक पहले' }, icon: 'history' },
+      { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+    ],
+  },
+  {
+    id: 'experience_change',
+    text: { en: 'How has this experience changed over time?', hi: 'समय के साथ यह अनुभव कैसे बदला है?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value),
+    options: [
+      { value: 'more_noticeable', label: { en: 'It has become more noticeable', hi: 'यह अधिक महसूस होने लगा है' }, icon: 'trending_up' },
+      { value: 'less_noticeable', label: { en: 'It has become less noticeable', hi: 'यह कम महसूस होने लगा है' }, icon: 'trending_down' },
+      { value: 'unchanged', label: { en: 'It feels about the same', hi: 'यह लगभग पहले जैसा है' }, icon: 'horizontal_rule' },
+      { value: 'varies', label: { en: 'It varies', hi: 'इसमें उतार-चढ़ाव होता है' }, icon: 'sync' },
+      { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+    ],
+  },
+  {
+    id: 'experience_context',
+    text: { en: 'In which situations do you notice this experience? Select all that apply.', hi: 'आप किन परिस्थितियों में यह अनुभव महसूस करते हैं? सभी लागू विकल्प चुनें।' },
+    type: 'multi', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value),
+    options: [
+      { value: 'near_tasks', label: { en: 'Reading or other near tasks', hi: 'पढ़ना या पास के काम' }, icon: 'menu_book' },
+      { value: 'distance_tasks', label: { en: 'Looking at distant objects', hi: 'दूर की वस्तुएँ देखना' }, icon: 'landscape' },
+      { value: 'screens', label: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' }, icon: 'devices' },
+      { value: 'low_light', label: { en: 'Low-light situations', hi: 'कम रोशनी की स्थिति' }, icon: 'dark_mode' },
+      { value: 'outdoors', label: { en: 'Outdoors or bright conditions', hi: 'बाहर या तेज़ रोशनी में' }, icon: 'wb_sunny' },
+      { value: 'driving', label: { en: 'Driving or travelling', hi: 'ड्राइविंग या यात्रा' }, icon: 'directions_car' },
+      { value: 'varies', label: { en: 'It varies / no clear pattern', hi: 'अलग-अलग / कोई स्पष्ट पैटर्न नहीं' }, icon: 'help' },
+    ],
+  },
   {
     id: 'experience_frequency',
-    text: {
-      en: 'How often do you notice these vision experiences?',
-      hi: 'आप इन दृष्टि अनुभवों को कितनी बार महसूस करते हैं?',
-    },
-    type: 'single',
-    category: 'refractive',
-    showIf: (answers) =>
-      answers.blurred_vision?.value === 'yes' ||
-      answers.blurred_vision?.value === 'sometimes' ||
-      answers.headaches?.value === 'often' ||
-      answers.headaches?.value === 'sometimes' ||
-      answers.squinting?.value === 'yes' ||
-      answers.squinting?.value === 'sometimes' ||
-      answers.night_vision?.value === 'yes' ||
-      answers.night_vision?.value === 'sometimes',
+    text: { en: 'How often do you notice the main vision experience you want to discuss?', hi: 'जिस मुख्य दृष्टि अनुभव पर आप बात करना चाहते हैं, वह कितनी बार होता है?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value),
     options: [
       { value: 'daily', label: { en: 'Every day', hi: 'रोज़' }, icon: 'today' },
       { value: 'weekly', label: { en: 'A few times a week', hi: 'हफ़्ते में कुछ बार' }, icon: 'date_range' },
@@ -154,16 +150,9 @@ const questions = [
   },
   {
     id: 'which_eye',
-    text: {
-      en: 'Do you notice it in one eye, both eyes, or are you unsure?',
-      hi: 'क्या यह एक आँख में है, दोनों में, या आप अनिश्चित हैं?',
-    },
-    type: 'single',
-    category: 'refractive',
-    showIf: (answers) =>
-      answers.blurred_vision?.value === 'yes' ||
-      answers.blurred_vision?.value === 'sometimes' ||
-      answers.squinting?.value === 'yes',
+    text: { en: 'For that main experience, do you notice it in one eye, both eyes, or are you unsure?', hi: 'उस मुख्य अनुभव में दिक्कत एक आँख में है, दोनों में, या आप अनिश्चित हैं?' },
+    type: 'single', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value) && answers.primary_concern.value !== 'headaches',
     options: [
       { value: 'left', label: { en: 'Left eye', hi: 'बाईं आँख' }, icon: 'visibility' },
       { value: 'right', label: { en: 'Right eye', hi: 'दाईं आँख' }, icon: 'visibility' },
@@ -171,15 +160,29 @@ const questions = [
       { value: 'unsure', label: { en: 'Not sure', hi: 'पता नहीं' }, icon: 'help' },
     ],
   },
-  // ─── Stage 4: Eye-care Background ───
+  {
+    id: 'affected_activities',
+    text: {
+      en: 'Which of your everyday activities feel affected by the vision experience you reported? Select all that apply.',
+      hi: 'आपके बताए गए दृष्टि अनुभव से रोज़मर्रा की कौन-सी गतिविधियाँ प्रभावित महसूस होती हैं? एक या अधिक चुनें।',
+    },
+    type: 'multi', category: 'lifestyle',
+    showIf: (answers) => Boolean(answers.primary_concern?.value),
+    options: [
+      { value: 'screen_work', label: { en: 'Screen work', hi: 'स्क्रीन पर काम' }, icon: 'devices' },
+      { value: 'reading', label: { en: 'Reading & study', hi: 'पढ़ाई और अध्ययन' }, icon: 'menu_book' },
+      { value: 'fine_detail', label: { en: 'Fine-detail work & crafts', hi: 'बारीक काम और दस्तकारी' }, icon: 'draw' },
+      { value: 'driving', label: { en: 'Driving & travel', hi: 'ड्राइविंग और यात्रा' }, icon: 'directions_car' },
+      { value: 'outdoor', label: { en: 'Outdoor activities', hi: 'बाहरी गतिविधियाँ' }, icon: 'park' },
+      { value: 'other', label: { en: 'Other', hi: 'अन्य' }, icon: 'more_horiz' },
+      { value: 'none', label: { en: 'None of these', hi: 'इनमें से कोई नहीं' }, icon: 'check_circle' },
+      { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+    ],
+  },
   {
     id: 'existing_glasses',
-    text: {
-      en: 'Do you currently wear glasses or contact lenses?',
-      hi: 'क्या आप अभी चश्मा या कॉन्टैक्ट लेंस पहनते हैं?',
-    },
-    type: 'single',
-    category: 'awareness',
+    text: { en: 'Do you currently wear glasses or contact lenses?', hi: 'क्या आप अभी चश्मा या कॉन्टैक्ट लेंस पहनते हैं?' },
+    type: 'single', category: 'awareness',
     options: [
       { value: 'glasses', label: { en: 'Yes, glasses', hi: 'हाँ, चश्मा' }, icon: 'eyeglasses' },
       { value: 'contacts', label: { en: 'Yes, contacts', hi: 'हाँ, कॉन्टैक्ट लेंस' }, icon: 'lens' },
@@ -189,16 +192,9 @@ const questions = [
   },
   {
     id: 'glasses_age',
-    text: {
-      en: 'How old is your current prescription?',
-      hi: 'आपका मौजूदा चश्मा कितना पुराना है?',
-    },
-    type: 'single',
-    category: 'awareness',
-    showIf: (answers) =>
-      answers.existing_glasses?.value === 'glasses' ||
-      answers.existing_glasses?.value === 'contacts' ||
-      answers.existing_glasses?.value === 'both',
+    text: { en: 'How old is your current prescription?', hi: 'आपका मौजूदा चश्मे का प्रिस्क्रिप्शन कितना पुराना है?' },
+    type: 'single', category: 'awareness',
+    showIf: (answers) => ['glasses', 'contacts', 'both'].includes(answers.existing_glasses?.value),
     options: [
       { value: 'recent', label: { en: 'Less than 1 year', hi: '1 साल से कम' }, icon: 'new_releases' },
       { value: 'old', label: { en: '1–2 years', hi: '1–2 साल' }, icon: 'calendar_month' },
@@ -208,27 +204,19 @@ const questions = [
   },
   {
     id: 'eye_exam',
-    text: {
-      en: 'When was your last professional eye examination?',
-      hi: 'आपकी आखिरी आँखों की जाँच कब हुई थी?',
-    },
-    type: 'single',
-    category: 'awareness',
+    text: { en: 'When was your last professional eye examination?', hi: 'आपकी आखिरी पेशेवर आँखों की जाँच कब हुई थी?' },
+    type: 'single', category: 'awareness',
     options: [
-      { value: 'recent', label: { en: 'Within last year', hi: 'पिछले साल' }, icon: 'check_circle' },
+      { value: 'recent', label: { en: 'Within the last year', hi: 'पिछले एक साल में' }, icon: 'check_circle' },
       { value: 'old', label: { en: '1–3 years ago', hi: '1–3 साल पहले' }, icon: 'calendar_month' },
-      { value: 'very_old', label: { en: 'More than 3 years', hi: '3 साल से ज़्यादा' }, icon: 'schedule' },
+      { value: 'very_old', label: { en: 'More than 3 years ago', hi: '3 साल से ज़्यादा पहले' }, icon: 'schedule' },
       { value: 'never', label: { en: 'Never', hi: 'कभी नहीं' }, icon: 'cancel' },
     ],
   },
   {
     id: 'age_group',
-    text: {
-      en: 'Which age group do you belong to?',
-      hi: 'आपकी उम्र कितनी है?',
-    },
-    type: 'single',
-    category: 'awareness',
+    text: { en: 'Which age group do you belong to?', hi: 'आप किस आयु वर्ग में आते हैं?' },
+    type: 'single', category: 'awareness',
     options: [
       { value: 'young', label: { en: 'Under 18', hi: '18 से कम' }, icon: 'child_care' },
       { value: 'adult', label: { en: '18–39', hi: '18–39' }, icon: 'person' },
@@ -236,46 +224,157 @@ const questions = [
       { value: 'senior', label: { en: 'Above 55', hi: '55 से ऊपर' }, icon: 'elderly' },
     ],
   },
-  // ─── Stage 5: Optional Note ───
   {
     id: 'participant_note',
-    text: {
-      en: 'Is there anything else you would like to mention about your vision?',
-      hi: 'क्या आप अपनी दृष्टि के बारे में कुछ और बताना चाहेंगे?',
-    },
-    type: 'textarea',
-    category: 'awareness',
-    optional: true,
-    options: [],
+    text: { en: 'Is there anything else you would like to mention about your vision?', hi: 'क्या आप अपनी दृष्टि के बारे में कुछ और बताना चाहेंगे?' },
+    type: 'textarea', category: 'awareness', optional: true, options: [],
   },
 ];
 
 export default questions;
 
-/**
- * Get the ordered list of questions that should be shown
- * based on current answers (respecting showIf branching).
- */
-export function getVisibleQuestions(answers) {
-  return questions.filter((q) => {
-    if (!q.showIf) return true;
-    return q.showIf(answers);
-  });
+const EXPERIENCE_ANSWER_VALUES = {
+  blurred_vision: ['yes', 'sometimes'],
+  headaches: ['often', 'sometimes'],
+  squinting: ['yes', 'sometimes'],
+  night_vision: ['yes', 'sometimes'],
+};
+
+const ACTIVITY_LABELS = {
+  screen_work: { en: 'Screen work', hi: 'स्क्रीन पर काम' },
+  reading: { en: 'Reading & study', hi: 'पढ़ाई और अध्ययन' },
+  fine_detail: { en: 'Fine-detail work & crafts', hi: 'बारीक काम और दस्तकारी' },
+  driving: { en: 'Driving & travel', hi: 'ड्राइविंग और यात्रा' },
+  outdoor: { en: 'Outdoor activities', hi: 'बाहरी गतिविधियाँ' },
+  other: { en: 'Other', hi: 'अन्य' },
+};
+
+const IMPACT_FREQUENCY_OPTIONS = [
+  { value: 'most_times', label: { en: 'Most times I do this activity', hi: 'जब भी मैं यह गतिविधि करता/करती हूँ, अधिकतर बार' }, icon: 'repeat' },
+  { value: 'often', label: { en: 'Often', hi: 'अक्सर' }, icon: 'event_repeat' },
+  { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' }, icon: 'schedule' },
+  { value: 'rarely', label: { en: 'Rarely', hi: 'बहुत कम' }, icon: 'event' },
+  { value: 'varies', label: { en: 'It varies', hi: 'यह बदलता रहता है' }, icon: 'sync' },
+  { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+];
+
+const IMPACT_OPTIONS = [
+  { value: 'takes_longer', label: { en: 'It takes me longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' }, icon: 'schedule' },
+  { value: 'discomfort', label: { en: 'I feel discomfort', hi: 'मुझे असहजता महसूस होती है' }, icon: 'sentiment_dissatisfied' },
+  { value: 'avoid_stop', label: { en: 'I sometimes avoid or stop the activity', hi: 'मैं कभी-कभी गतिविधि टालता/रोकता हूँ' }, icon: 'pause_circle' },
+  { value: 'adjustments', label: { en: 'I need to adjust distance, lighting or position', hi: 'मुझे दूरी, रोशनी या स्थिति बदलनी पड़ती है' }, icon: 'tune' },
+  { value: 'other', label: { en: 'Something else', hi: 'कुछ और' }, icon: 'more_horiz' },
+  { value: 'none', label: { en: 'Actually, I do not notice an impact', hi: 'वास्तव में, मुझे कोई प्रभाव महसूस नहीं होता' }, icon: 'check_circle' },
+  { value: 'unsure', label: { en: 'Not sure how to describe it', hi: 'कैसे बताएँ, निश्चित नहीं' }, icon: 'help' },
+];
+
+export function isAnswerComplete(answer) {
+  if (!answer || answer.value === undefined || answer.value === null) return false;
+  if (Array.isArray(answer.value)) return answer.value.length > 0;
+  return true;
+}
+
+export function hasReportedExperience(answers = {}) {
+  return Object.entries(EXPERIENCE_ANSWER_VALUES).some(([id, values]) => values.includes(answers[id]?.value));
+}
+
+export function getReportedExperienceOptions(answers = {}) {
+  const labels = {
+    blurred_vision: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+    headaches: { en: 'Headaches around visual activities', hi: 'दृष्टि से जुड़ी गतिविधियों के दौरान सिरदर्द' },
+    squinting: { en: 'Squinting to see clearly', hi: 'स्पष्ट देखने के लिए आँखें सिकोड़ना' },
+    night_vision: { en: 'Difficulty in low light', hi: 'कम रोशनी में देखने में कठिनाई' },
+  };
+  return Object.entries(EXPERIENCE_ANSWER_VALUES)
+    .filter(([id, values]) => values.includes(answers[id]?.value))
+    .map(([id]) => ({ value: id, label: labels[id], icon: questions.find((q) => q.id === id)?.options?.[0]?.icon || 'visibility' }));
 }
 
 /**
- * Get the next unanswered question from the visible list.
+ * Keep the affected-activities follow-up constrained to the participant's
+ * previously selected routine, while retaining explicit none/unsure choices.
  */
-export function getNextQuestion(answers) {
-  const visible = getVisibleQuestions(answers);
-  return visible.find((q) => !answers[q.id]) || null;
+export function getQuestionForActivities(question, activities = []) {
+  if (question?.id !== 'affected_activities') return question;
+  const selectedActivities = new Set(Array.isArray(activities) ? activities : []);
+  return {
+    ...question,
+    options: question.options.filter((option) => (
+      ['none', 'unsure'].includes(option.value) || selectedActivities.has(option.value)
+    )),
+  };
 }
 
-/**
- * Get progress as a fraction.
- */
-export function getProgress(answers) {
-  const visible = getVisibleQuestions(answers);
-  const answered = visible.filter((q) => answers[q.id]).length;
-  return { answered, total: visible.length, fraction: answered / visible.length };
+function buildActivityImpactQuestions(answers = []) {
+  const selected = Array.isArray(answers) ? answers : [];
+  return selected
+    .filter((id) => ACTIVITY_LABELS[id])
+    .flatMap((activityId) => ([
+      {
+        id: `activity_impact_${activityId}`,
+        text: {
+          en: `How does ${ACTIVITY_LABELS[activityId].en.toLowerCase()} feel affected? Select all that apply.`,
+          hi: `${ACTIVITY_LABELS[activityId].hi} किस तरह प्रभावित महसूस होती है? सभी लागू विकल्प चुनें।`,
+        },
+        type: 'multi',
+        category: 'lifestyle',
+        dynamicActivityId: activityId,
+        showIf: (currentAnswers) => Boolean(currentAnswers.affected_activities?.value?.includes(activityId)),
+        options: IMPACT_OPTIONS,
+      },
+      {
+        id: `activity_impact_frequency_${activityId}`,
+        text: {
+          en: `How often do you notice this impact during ${ACTIVITY_LABELS[activityId].en.toLowerCase()}?`,
+          hi: `${ACTIVITY_LABELS[activityId].hi} के दौरान आप यह प्रभाव कितनी बार महसूस करते हैं?`,
+        },
+        type: 'single',
+        category: 'lifestyle',
+        dynamicActivityId: activityId,
+        showIf: (currentAnswers) => {
+          const values = currentAnswers[`activity_impact_${activityId}`]?.value;
+          return Boolean(currentAnswers.affected_activities?.value?.includes(activityId))
+            && Array.isArray(values)
+            && values.some((value) => !['none', 'unsure'].includes(value));
+        },
+        options: IMPACT_FREQUENCY_OPTIONS,
+      },
+    ]));
+}
+
+/** Invalidate activity-specific answers when a participant edits their routine. */
+export function getActivityDependentAnswerIds(answers = {}, previousActivities = [], nextActivities = []) {
+  const previous = [...new Set(Array.isArray(previousActivities) ? previousActivities : [])].sort();
+  const next = [...new Set(Array.isArray(nextActivities) ? nextActivities : [])].sort();
+  if (previous.length === next.length && previous.every((id, index) => id === next[index])) return [];
+  return Object.keys(answers).filter((id) => id === 'affected_activities' || id.startsWith('activity_impact_'));
+}
+
+
+export function getVisibleQuestions(answers = {}, activities = []) {
+  const visible = questions.filter((question) => !question.showIf || question.showIf(answers)).map((question) => ({ ...question, options: [...(question.options || [])] }));
+  const primaryIndex = visible.findIndex((question) => question.id === 'primary_concern');
+  if (primaryIndex >= 0) visible[primaryIndex] = { ...visible[primaryIndex], options: getReportedExperienceOptions(answers) };
+
+  const affected = Array.isArray(answers.affected_activities?.value) ? answers.affected_activities.value : [];
+  const impactQuestions = buildActivityImpactQuestions(affected).filter((question) => !question.showIf || question.showIf(answers));
+  const noteIndex = visible.findIndex((question) => question.id === 'participant_note');
+  if (noteIndex >= 0) visible.splice(noteIndex, 0, ...impactQuestions);
+  else visible.push(...impactQuestions);
+
+  return visible;
+}
+
+export function getNextQuestion(answers = {}, activities = []) {
+  return getVisibleQuestions(answers, activities).find((question) => !isAnswerComplete(answers[question.id])) || null;
+}
+
+export function getProgress(answers = {}, activities = []) {
+  const visible = getVisibleQuestions(answers, activities);
+  const answered = visible.filter((question) => isAnswerComplete(answers[question.id])).length;
+  return {
+    answered,
+    total: visible.length,
+    fraction: visible.length ? answered / visible.length : 0,
+  };
 }

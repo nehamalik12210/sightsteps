@@ -1,0 +1,10 @@
+ .voice-field { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.voice-field__label { color: var(--color-text-secondary); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.voice-field__input { width: 100%; min-height: 104px; padding: var(--space-4); border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-container-lowest); color: var(--color-text); font: inherit; line-height: var(--lh-relaxed); resize: vertical; }
+.voice-field__input:focus-visible { outline: 3px solid var(--color-secondary); outline-offset: 2px; border-color: var(--color-primary); }
+.voice-field__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.voice-field__button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 7px 13px; border: 1px solid var(--color-primary); border-radius: var(--radius-full); background: var(--color-primary-bg); color: var(--color-primary); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; }
+.voice-field__button:focus-visible { outline: 3px solid var(--color-secondary); outline-offset: 2px; }
+.voice-field__button .material-symbols-outlined { font-size: 18px; }
+.voice-field__count, .voice-field__privacy, .voice-field__status { color: var(--color-text-muted); font-size: 11px; line-height: 1.5; }
+.voice-field__status { color: var(--color-primary); font-weight: var(--fw-semibold); }
