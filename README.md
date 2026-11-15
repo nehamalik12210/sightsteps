@@ -1,143 +1,116 @@
 # SightSteps
 
-**A bilingual, smartphone-first vision-awareness and conversation-support experience.**
+**A bilingual, mobile-first vision-awareness and eye-care conversation companion.**
 
-> ZEISS Beyond Code 2026 · No-Device Vision Intelligence & Accessible Clinical UX
+[Live application](https://sightsteps.vercel.app/) · [Source code](https://github.com/nehamalik12210/sightsteps)
 
-SightSteps helps participants organise self-reported visual experiences, daily activity context and eye-care background before speaking with an optician or eye-care professional. It is designed for an ordinary smartphone or a shared optical-shop tablet; it does not require a dedicated vision-testing device.
+Built for **ZEISS Beyond Code 2026** under the theme *No-Device Vision Intelligence & Accessible Clinical UX*.
 
-**Clinical boundary:** SightSteps is an awareness and conversation-preparation prototype. It is not an eye examination, visual-acuity test, diagnostic or triage system, medical device, urgency classifier or source of lens prescriptions.
+SightSteps helps people organise visual experiences they have noticed, understand how those experiences relate to everyday activities, and prepare a clearer conversation with an optician or eye-care professional. It runs on a smartphone or shared tablet and does not require dedicated vision-testing hardware.
 
-## Participant journey
+> **Important:** SightSteps is a conversation-preparation prototype. It is not an eye examination, visual-acuity test, screening or diagnostic system. It does not triage, determine urgency, assess clinical risk or prescribe lenses.
 
-1. Start a private session or explore the clearly labelled Ramesh demo.
-2. Choose English or Hindi, review the purpose and consent information, and optionally identify assisted completion.
-3. Select everyday visual activities and choose the activity that takes most of the day.
-4. Answer the bilingual questionnaire. When relevant, choose the reported experience to discuss first and describe when it began, how it has changed, the situations in which it appears, its frequency and (where meaningful) whether it is noticed in one or both eyes.
-5. Identify which selected daily activities feel affected. For each one, describe the type of impact and how often it is noticed. Follow-ups are conditional: frequency is not asked when a participant says there is no impact or is unsure.
-6. Optionally complete the uncalibrated direction-awareness interaction. It is not an eye examination or a visual-acuity measurement.
-7. Review the Vision Conversation Map, select up to two conversation priorities, prepare questions, and print either a concise one-page handoff or the detailed response/source report.
+## What it does
+
+- **Bilingual guided journey:** English and Hindi onboarding, questions and report content.
+- **Experience intelligence:** Participants choose from experiences they actually reported and can describe onset, changes over time, context and frequency.
+- **Everyday activity impact:** Participants identify which selected activities feel affected and describe the kind and frequency of the impact. Follow-up questions depend on their answers.
+- **Explainable conversation brief:** A deterministic rules engine groups self-reported information and creates discussion prompts with references to the source answers. Participants can bring up to two priorities to the front; this is a personal preference, not a clinical ranking.
+- **Two report formats:** A concise, printable priority brief and a detailed report with observations and source references.
+- **Appointment continuity:** Optional participant-written appointment notes, next steps and follow-up date.
+- **Shared-device kiosk mode:** A dedicated participant flow with a five-minute inactivity timeout and session clearing on reload/reopen.
+- **Assisted and voice interaction:** Optional assisted-completion disclosure, question read-aloud and browser speech-to-text where supported. Typed input is always available.
+- **Installable PWA:** App manifest and service worker support installation and asset caching.
+
+## How the experience works
+
+1. Start a private session or open the clearly labelled Ramesh demo.
+2. Choose English or Hindi, review the purpose and consent information, and indicate whether someone is assisting.
+3. Select everyday activities that are part of the participant's routine.
+4. Complete the guided questions and describe the visual experiences they have noticed.
+5. Identify activities that feel affected and describe the impact.
+6. Optionally try the direction-awareness interaction. It is uncalibrated and does not measure visual acuity.
+7. Review the Vision Conversation Map, choose conversation priorities and print a brief or detailed report.
 8. Optionally record what was discussed at the appointment and any follow-up steps in the participant's own words.
 
-## Functional capabilities
+## Technology
 
-### Experience Intelligence
+| Area | Implementation |
+|---|---|
+| Frontend | React 19 |
+| Build tooling | Vite 6 |
+| Navigation | React Router 7 |
+| Local session storage | IndexedDB |
+| Explainable logic | Deterministic JavaScript rules engine |
+| PWA | vite-plugin-pwa, web app manifest and service worker |
+| Voice features | Browser Web Speech APIs where available |
 
-- Main-concern selection is limited to experiences the participant actually reported.
-- The main concern has its own onset, change-over-time, context and frequency follow-ups.
-- Eye-side wording is omitted for the headache item, where asking which eye is involved would be inappropriate.
-- Secondary reported experiences remain visible in the report and each receives its own traceable discussion prompt.
-- Conditional branches are rebuilt from current answers. Changing an earlier answer or changing the activity profile clears dependent answers instead of keeping stale branches.
-
-### Activity Impact Mapping
-
-- Routine activities are kept separate from activities the participant says feel affected.
-- The affected-activity list is constrained to activities selected in the profile, with explicit none/unsure choices.
-- Each affected activity gets its own impact question. The participant can describe tasks taking longer, discomfort, avoiding/stopping, adjustments or another impact.
-- A separate frequency question appears only after a positive impact selection. A no-impact or unsure answer does not trigger it.
-- Activity impacts and their frequencies are linked back to the selected main experience in the structured report data.
-
-### Explainable Vision Conversation Map
-
-- Observations are grouped into experiences, daily habits and eye-care background.
-- Discussion prompts are generated with deterministic rules, not a generative medical model.
-- Every generated discussion point includes source question/activity references; the detailed report exposes those sources.
-- Participants can choose up to two reported experiences as their conversation priorities. Matching prompts are moved forward in the discussion list. This is a participant preference, not a clinical ranking.
-- The report includes routine activities, reported impacts, participant notes and optional questions to ask the professional.
-- Separate one-page priority and detailed report print modes are available.
-
-### Appointment Continuity
-
-- Optional appointment date, participant-recorded professional notes, suggested follow-up steps and next appointment date.
-- Notes are explicitly presented as the participant's own account, not a professional clinical record or advice generated by SightSteps.
-- Voice input is available where supported; typed input remains available.
-
-### Shared-device Kiosk Mode
-
-- A dedicated kiosk setup explains the single-participant workflow.
-- Only the active participant session is available while kiosk mode is active; the normal demo and new-session entry points are hidden.
-- The active session is cleared after five minutes without interaction and is not restored after a page reload/reopen.
-- A clear-session action is available from the report and landing state.
-- Kiosk mode is a privacy aid, not a security guarantee. Browser print/PDF exports, downloads, OS caches, device backups and copies made outside SightSteps are not cleared by the app. Use the device owner's normal security procedures.
-
-### Assisted and Voice Interaction
-
-- Onboarding can mark that another person is assisting the participant. The report discloses this.
-- The Web Speech API can read the current question and its answer options aloud in the selected language when supported.
-- Optional speech-to-text is available for notes and questions on supporting browsers. Users can review/edit the transcript before saving.
-- Browser speech recognition may send audio to a browser-configured or external speech provider. SightSteps does not promise that microphone processing is on-device. Typing is always available as an alternative.
-
-### Reliability, privacy and PWA
-
-- IndexedDB stores the current participant session locally when browser storage is available; there is no SightSteps account, backend or cloud session sync.
-- Saved records include activity profile, answers, session state, questions, priorities and appointment follow-up.
-- Resume routing checks the participant's progress; protected routes prevent a direct URL or cleared kiosk session from opening a questionnaire/report without a valid session and completed prior stages. A fresh-onboarding navigation marker prevents the new session created by the consent action from being mistaken for an old session, while direct `/onboarding` visits with an active participant session still return home.
-- Storage failures are surfaced to the participant rather than implying a save succeeded.
-- Clear my data clears the SightSteps session store and latest-session pointer in this browser database.
-- Vite PWA creates a manifest and service worker. App assets are precached; Google Fonts CSS and font files use runtime caching after successful online retrieval.
-
-## How the rules work
-
-`src/engine/ruleEngine.js` is a deterministic and inspectable rules engine. It converts recorded answers into observation groups, activity context, experience profiles, discussion points and follow-up notes. Source references are attached at generation time so the report can show which answers produced a prompt.
-
-The engine does not infer a cause, diagnose, triage, calculate clinical risk, determine urgency, measure visual acuity or prescribe correction. It does not interpret answers as clinical evidence. All summaries are self-reported context to support a conversation with a qualified professional.
+The rules engine is implemented in `src/engine/ruleEngine.js`. It turns recorded answers into observation groups, activity context and discussion prompts. Prompts retain references to their source questions so the report can explain where each point came from. It does not use a generative medical model or infer a diagnosis.
 
 ## Run locally
 
-Requirements: Node.js 20+ and npm.
+**Requirements:** Node.js 20 or later and npm.
 
 ```bash
+git clone https://github.com/nehamalik12210/sightsteps.git
+cd sightsteps
 npm ci
-npm run check
-npm run build
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`). The repository includes `package-lock.json`; use `npm ci` for a clean, reproducible install. Use `npm install` when intentionally changing dependencies, then review and commit any resulting lockfile changes. `node_modules` and `dist` are generated locally and are not committed.
+Open the local URL printed by Vite (normally `http://localhost:5173`).
 
-### Checks
+### Project checks
 
 ```bash
-npm run audit   # static project/data/accessibility/feature audit
-npm test        # deterministic rules, branching, persistence shape and routing tests
-npm run check   # both checks together
-npm run build   # Vite production bundle (requires installed dependencies)
+npm run audit   # Static project, data and feature checks
+npm test        # Rules-engine, branching, persistence and routing tests
+npm run check   # Runs the audit and regression tests
+npm run build   # Creates the production build in dist/
+npm run preview # Serves the production build locally
 ```
 
-The dependency-free audit and regression suite can run before the frontend dependencies are installed. `npm run build` requires Vite/React packages from `npm install`.
+Use `npm ci` for a clean install from the committed `package-lock.json`. Use `npm install` when intentionally changing dependencies, then review and commit the lockfile changes.
 
-## Deploy to Vercel
+## Deploy
 
-The production site is a Vite single-page application and is configured for Vercel through the root-level `vercel.json` rewrite. This sends app routes such as `/report` back to `index.html`, allowing React Router to handle direct visits and page refreshes.
+The project is configured for Vercel. Import `nehamalik12210/sightsteps` and use:
 
-To deploy:
+| Vercel setting | Value |
+|---|---|
+| Framework preset | Vite |
+| Root directory | Repository root |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Production branch | `main` |
 
-1. Import `nehamalik12210/sightsteps` from GitHub in Vercel.
-2. Set the production branch to `main`.
-3. Use the repository root (`./`) as the project root.
-4. Use `npm ci` as the install command, `npm run build` as the build command, and `dist` as the output directory.
-5. Deploy and test the landing page, direct route refreshes, bilingual flow, PWA installation and session clearing on the deployed URL.
-
-The app currently has no SightSteps backend or cloud database. Participant sessions remain in the user's browser storage; hosting the static app does not synchronize participant data across devices. Every merge or push to the configured production branch can trigger a new production deployment when Git integration is enabled. Pull requests and non-production branches can receive preview deployments.
+The root `vercel.json` rewrite sends application routes back to `index.html`, allowing the client-side router to handle direct visits and page refreshes.
 
 ## Privacy and limitations
 
-- Participant and appointment data are stored in the current browser's IndexedDB when available. They are not sent to a SightSteps application server.
-- Local browser storage is not encrypted by SightSteps and is accessible to users with sufficient access to the same device/browser profile. Do not use this prototype for sensitive clinical records.
-- The explicit Clear my data action clears the app's IndexedDB session records and pointer. It cannot clear browser print/PDF files, downloads, screenshots, OS backups or external speech-provider processing.
-- Kiosk auto-clear is not a full security boundary; test it on the actual managed device and combine it with the shop's normal device controls. Returning to a still-valid browser tab restarts the inactivity window; sessions that have exceeded the five-minute limit are cleared.
-- Speech synthesis depends on installed system voices. Speech recognition support and audio handling vary by browser and provider.
-- External Google Fonts may not be available offline until successfully cached once; fallback fonts are used otherwise.
-- Offline behavior, browser compatibility, keyboard/screen-reader behavior, participant comprehension and clinical wording require real-world validation before deployment.
+- SightSteps has no user account, application backend or cloud session synchronisation. Participant sessions are stored in the current browser's IndexedDB.
+- Data is stored locally and is not encrypted by SightSteps. Anyone with sufficient access to the same browser profile may be able to access it. Do not use this prototype to store sensitive clinical records.
+- **Clear my data** clears the app's local session records and latest-session pointer. It cannot remove browser downloads, printed or saved PDFs, screenshots, operating-system backups or copies made outside the app.
+- Kiosk mode is a privacy aid, not a security guarantee. Its timeout and reload behavior should be tested on the actual managed device and combined with the device owner's normal security controls.
+- Speech synthesis and speech recognition depend on browser and device support. Speech recognition audio may be processed by a browser-configured or external provider; SightSteps does not claim that microphone processing always happens on-device.
+- App assets are precached by the service worker. External fonts may require a successful online fetch before they are available from cache. Offline behavior should be tested on the target browser and device.
+
+## Validation status
+
+The latest local verification completed during project preparation reported:
+
+- **423 passed, 0 failed** in the static quality audit.
+- **542 passed, 0 failed** in the regression test suite.
+- `npm run check` completed successfully.
+- `npm run build` completed and generated the Vite production bundle and PWA service-worker assets.
+
+These are code-side and build checks, not proof of clinical suitability or full accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional have not been established by these automated checks. Complete the relevant reviews before any clinical-context use.
 
 ## Responsible use
 
-SightSteps supports awareness and preparation for a conversation with an optician or qualified eye-care professional. Participants should seek qualified care for vision concerns. The prototype must not be used to diagnose, triage, prescribe, determine urgency or replace a professional eye examination. Do not test minors without appropriate guardian/ethics approval.
+SightSteps is intended only to help people organise their own observations and prepare for a conversation with a qualified professional. It must not be used to diagnose, screen, triage, determine urgency, reassure someone that care is unnecessary, prescribe correction or replace a professional eye examination. Do not test minors without an appropriate guardian and ethics process.
 
-## Validation documents
+## License
 
-- `QA_RESULTS.md` — code-side checks run in the preparation environment and what remains unverified.
-- `ACCESSIBILITY_AND_VALIDATION.md` — device, browser, assistive-technology and participant test protocols.
-- `CLINICAL_WORDING_REVIEW.md` — product boundary and independent professional review checklist.
-- `REAL_WORLD_TEST_CHECKLIST.md` — release/demo readiness checklist.
-- `CHANGELOG.md` — summary of this functional upgrade.
+This project is available under the [MIT License](LICENSE).
