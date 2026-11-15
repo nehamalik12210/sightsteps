@@ -2,7 +2,7 @@
 
 **A bilingual, mobile-first vision-awareness and eye-care conversation companion.**
 
-[Live application](https://sightsteps.vercel.app/) · [Source code](https://github.com/nehamalik12210/sightsteps)
+Live Application link : [SightSteps](https://sightsteps.vercel.app/) 
 
 Built for **ZEISS Beyond Code 2026** under the theme *No-Device Vision Intelligence & Accessible Clinical UX*.
 
