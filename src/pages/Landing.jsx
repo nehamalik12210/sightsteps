@@ -118,7 +118,7 @@ export default function Landing() {
           <div className="landing__wordmark-row">
             <img
               className="landing__wordmark-logo"
-              src="/sightsteps-logo.svg"
+              src="/sightsteps_logo.png"
               alt="SightSteps"
               width="1510"
               height="360"
