@@ -326,6 +326,63 @@ const OBSERVATION_DEFINITIONS = {
     },
     notes: {},
   },
+
+  experience_frequency: {
+    group: 'experiences',
+    question: {
+      en: 'How often experiences are noticed',
+      hi: 'अनुभव कितनी बार महसूस होते हैं',
+    },
+    notes: {
+      daily: {
+        en: 'You reported noticing these vision experiences every day.',
+        hi: 'आपने बताया कि आप ये दृष्टि अनुभव रोज़ महसूस करते हैं।',
+      },
+      weekly: {
+        en: 'You reported noticing these vision experiences a few times a week.',
+        hi: 'आपने बताया कि आप ये दृष्टि अनुभव हफ़्ते में कुछ बार महसूस करते हैं।',
+      },
+      occasional: {
+        en: 'You reported noticing these vision experiences occasionally.',
+        hi: 'आपने बताया कि आप ये दृष्टि अनुभव कभी-कभी महसूस करते हैं।',
+      },
+    },
+  },
+
+  which_eye: {
+    group: 'experiences',
+    question: {
+      en: 'Which eye is affected',
+      hi: 'कौन-सी आँख प्रभावित है',
+    },
+    notes: {
+      left: {
+        en: 'You reported that the left eye is primarily affected.',
+        hi: 'आपने बताया कि मुख्य रूप से बाईं आँख प्रभावित है।',
+      },
+      right: {
+        en: 'You reported that the right eye is primarily affected.',
+        hi: 'आपने बताया कि मुख्य रूप से दाईं आँख प्रभावित है।',
+      },
+      both: {
+        en: 'You reported that both eyes are affected.',
+        hi: 'आपने बताया कि दोनों आँखें प्रभावित हैं।',
+      },
+      unsure: {
+        en: 'You were not sure which eye is affected.',
+        hi: 'आप निश्चित नहीं थे कि कौन-सी आँख प्रभावित है।',
+      },
+    },
+  },
+
+  participant_note: {
+    group: 'eyeCare',
+    question: {
+      en: 'Additional information',
+      hi: 'अतिरिक्त जानकारी',
+    },
+    notes: {},
+  },
 };
 
 /**
@@ -383,8 +440,47 @@ function buildObservation(questionId, answer, definition) {
  * These are generated only from relevant questionnaire answers.
  * They do not determine a prescription or diagnose a condition.
  */
-function buildDiscussionPoints(answers) {
+function buildDiscussionPoints(answers, context = {}) {
   const points = [];
+
+  // Activity-based discussion point
+  if (context.primaryActivity === 'fine_detail' || context.primaryActivity === 'reading') {
+    points.push({
+      id: 'primary_activity_context',
+      title: {
+        en: 'Your primary daily activity',
+        hi: 'आपकी मुख्य दैनिक गतिविधि',
+      },
+      context: {
+        en: `Your primary activity is ${context.primaryActivity === 'fine_detail' ? 'fine-detail work' : 'reading and study'}, which involves sustained near-focus tasks.`,
+        hi: `आपकी मुख्य गतिविधि ${context.primaryActivity === 'fine_detail' ? 'बारीक काम' : 'पढ़ाई और अध्ययन'} है, जिसमें लगातार पास से देखने का काम शामिल है।`,
+      },
+      prompt: {
+        en: 'Describe the working distance and duration of your daily tasks to the optician. Ask whether any lens features would be relevant for your specific activities.',
+        hi: 'अपने दैनिक काम की दूरी और अवधि ऑप्टिशियन को बताएं। पूछें कि आपकी विशिष्ट गतिविधियों के लिए कोई लेंस सुविधा उपयोगी होगी या नहीं।',
+      },
+      icon: context.primaryActivity === 'fine_detail' ? 'draw' : 'menu_book',
+    });
+  }
+
+  if (context.primaryActivity === 'driving') {
+    points.push({
+      id: 'driving_context',
+      title: {
+        en: 'Driving and distance vision',
+        hi: 'ड्राइविंग और दूर की दृष्टि',
+      },
+      context: {
+        en: 'Your primary activity involves driving and travel, which requires clear distance vision.',
+        hi: 'आपकी मुख्य गतिविधि ड्राइविंग और यात्रा है, जिसमें स्पष्ट दूर की दृष्टि ज़रूरी है।',
+      },
+      prompt: {
+        en: 'Mention your driving habits and any difficulty with road signs, night driving or glare. Ask about lenses suitable for driving conditions.',
+        hi: 'अपनी ड्राइविंग की आदतें और सड़क के संकेतों, रात में गाड़ी चलाने या चकाचौंध में कोई दिक्कत बताएं।',
+      },
+      icon: 'directions_car',
+    });
+  }
 
   const screenUse = answers.screen_hours?.value;
 
@@ -580,25 +676,31 @@ function buildFollowUpNotes(answers) {
  * Main public API.
  *
  * @param {Record<string, {value: string, label?: object}>} answers
+ * @param {object} [context] — optional context including activities
+ * @param {string[]} [context.activities] — selected daily activities
+ * @param {string|null} [context.primaryActivity] — primary activity
+ * @param {string} [context.participantNote] — optional free-text note
  *
  * @returns {{
  *   answeredCount: number,
  *   groups: Array,
  *   discussionPoints: Array,
- *   followUpNotes: Array
+ *   followUpNotes: Array,
+ *   activitiesContext: object|null,
+ *   participantNote: string
  * }}
  */
-export function evaluateAnswers(answers = {}) {
+export function evaluateAnswers(answers = {}, context = {}) {
   const safeAnswers =
     answers && typeof answers === 'object' ? answers : {};
 
   const groups = GROUPS.map((group) => {
     const observations = Object.entries(OBSERVATION_DEFINITIONS)
       .filter(([questionId, definition]) => {
-        return (
-          definition.group === group.id &&
-          hasAnswer(safeAnswers[questionId]?.value)
-        );
+        if (definition.group !== group.id) return false;
+        // participant_note handled separately
+        if (questionId === 'participant_note') return false;
+        return hasAnswer(safeAnswers[questionId]?.value);
       })
       .map(([questionId, definition]) => {
         return buildObservation(
@@ -618,11 +720,43 @@ export function evaluateAnswers(answers = {}) {
     (answer) => answer && hasAnswer(answer.value)
   ).length;
 
+  // Activities context
+  const activityLabels = {
+    screen_work: { en: 'Screen work', hi: 'स्क्रीन पर काम' },
+    reading: { en: 'Reading & study', hi: 'पढ़ाई और अध्ययन' },
+    fine_detail: { en: 'Fine-detail work', hi: 'बारीक काम' },
+    driving: { en: 'Driving & travel', hi: 'ड्राइविंग और यात्रा' },
+    outdoor: { en: 'Outdoor activities', hi: 'बाहरी गतिविधियाँ' },
+    other: { en: 'Other', hi: 'अन्य' },
+  };
+
+  let activitiesContext = null;
+  if (context.activities && context.activities.length > 0) {
+    activitiesContext = {
+      selected: context.activities.map((id) => ({
+        id,
+        label: activityLabels[id] || { en: id, hi: id },
+      })),
+      primary: context.primaryActivity
+        ? {
+            id: context.primaryActivity,
+            label: activityLabels[context.primaryActivity] || { en: context.primaryActivity, hi: context.primaryActivity },
+          }
+        : null,
+    };
+  }
+
+  // Participant note
+  const participantNote = context.participantNote ||
+    (safeAnswers.participant_note?.value || '');
+
   return {
     answeredCount,
     groups,
-    discussionPoints: buildDiscussionPoints(safeAnswers),
+    discussionPoints: buildDiscussionPoints(safeAnswers, context),
     followUpNotes: buildFollowUpNotes(safeAnswers),
+    activitiesContext,
+    participantNote,
   };
 }
 

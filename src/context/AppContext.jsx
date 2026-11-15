@@ -20,6 +20,9 @@ const initialState = {
   isDemo: false,
   demoPersona: null,
   demoStepIndex: 0,
+  activities: [],
+  primaryActivity: null,
+  participantNote: '',
   answers: {},
   visionResults: null,
   report: null,
@@ -71,6 +74,8 @@ function appReducer(state, action) {
         startedAt: new Date().toISOString(),
         language: action.payload?.language || 'hi',
         consentGiven: true,
+        activities: action.payload?.activities || [],
+        primaryActivity: action.payload?.primaryActivity || null,
       };
 
     case 'DEMO_NEXT_STEP':
@@ -88,6 +93,15 @@ function appReducer(state, action) {
           },
         },
       };
+
+    case 'SET_ACTIVITIES':
+      return { ...state, activities: action.payload };
+
+    case 'SET_PRIMARY_ACTIVITY':
+      return { ...state, primaryActivity: action.payload };
+
+    case 'SET_PARTICIPANT_NOTE':
+      return { ...state, participantNote: action.payload };
 
     case 'SET_VISION_RESULTS':
       return { ...state, visionResults: action.payload };
@@ -129,6 +143,9 @@ export function AppProvider({ children }) {
               isDemo: Boolean(record.isDemo),
               demoPersona: record.demoPersona || null,
               demoStepIndex: Number(record.demoStepIndex || 0),
+              activities: record.activities || [],
+              primaryActivity: record.primaryActivity || null,
+              participantNote: record.participantNote || '',
               answers: record.answers || {},
               visionResults: (
                 record.visionResults?.skipped ||
@@ -195,6 +212,18 @@ export function AppProvider({ children }) {
     });
   }, []);
 
+  const setActivities = useCallback((activities) => {
+    dispatch({ type: 'SET_ACTIVITIES', payload: activities });
+  }, []);
+
+  const setPrimaryActivity = useCallback((activity) => {
+    dispatch({ type: 'SET_PRIMARY_ACTIVITY', payload: activity });
+  }, []);
+
+  const setParticipantNote = useCallback((note) => {
+    dispatch({ type: 'SET_PARTICIPANT_NOTE', payload: note });
+  }, []);
+
   const setVisionResults = useCallback((results) => {
     dispatch({ type: 'SET_VISION_RESULTS', payload: results });
   }, []);
@@ -221,6 +250,9 @@ export function AppProvider({ children }) {
     startDemo,
     demoNextStep,
     setAnswer,
+    setActivities,
+    setPrimaryActivity,
+    setParticipantNote,
     setVisionResults,
     skipVision,
     setReport,

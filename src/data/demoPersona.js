@@ -17,6 +17,10 @@ const rameshPersona = {
   occupationHi: 'दर्ज़ी',
   language: 'hi',
 
+  // Daily visual activities
+  activities: ['fine_detail', 'reading', 'screen_work'],
+  primaryActivity: 'fine_detail',
+
   // Pre-scripted answers keyed by question ID
   // These are fed into the real engine — branching is natural
   answers: {
@@ -31,6 +35,8 @@ const rameshPersona = {
     night_vision: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
     squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
     outdoor_time: { value: 'moderate', label: { en: 'A few hours', hi: 'कुछ घंटे' } },
+    experience_frequency: { value: 'daily', label: { en: 'Every day', hi: 'रोज़' } },
+    which_eye: { value: 'both', label: { en: 'Both eyes', hi: 'दोनों आँखें' } },
   },
 
   // The 6 questions shown in demo (picked for max branching visibility)

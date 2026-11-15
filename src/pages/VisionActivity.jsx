@@ -4,142 +4,88 @@ import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import './VisionActivity.css';
 
-// This activity is not calibrated or suitable for measuring visual acuity.
 const SYMBOL_SIZE = 88;
 const DIRECTIONS = ['up', 'down', 'left', 'right'];
-
-const ROTATION = {
-  up: 270,
-  down: 90,
-  left: 180,
-  right: 0,
-};
-
-const ARROWS = {
-  up: '↑',
-  down: '↓',
-  left: '←',
-  right: '→',
-};
-
+const ROTATION = { up: 270, down: 90, left: 180, right: 0 };
 const TRIALS_PER_EYE = 5;
 const TOTAL_TRIALS = TRIALS_PER_EYE * 2;
+
+const DIR_ICONS = { up: 'arrow_upward', down: 'arrow_downward', left: 'arrow_back', right: 'arrow_forward' };
 
 function randomDirection() {
   return DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
 }
 
-function directionLabel(direction, language) {
-  const labels = {
-    up: language === 'hi' ? 'ऊपर' : 'Up',
-    down: language === 'hi' ? 'नीचे' : 'Down',
-    left: language === 'hi' ? 'बाएँ' : 'Left',
-    right: language === 'hi' ? 'दाएँ' : 'Right',
+function dirLabel(dir, lang) {
+  const map = {
+    up: lang === 'hi' ? 'ऊपर' : 'Up',
+    down: lang === 'hi' ? 'नीचे' : 'Down',
+    left: lang === 'hi' ? 'बाएँ' : 'Left',
+    right: lang === 'hi' ? 'दाएँ' : 'Right',
   };
-
-  return labels[direction];
+  return map[dir];
 }
 
 export default function VisionActivity() {
   const navigate = useNavigate();
-
-  const {
-    language,
-    skipVision,
-    setVisionResults,
-    isDemo,
-    demoPersona,
-  } = useApp();
-
+  const { language, skipVision, setVisionResults, isDemo, demoPersona } = useApp();
   const lang = language || 'en';
 
   const [phase, setPhase] = useState('intro');
   const [currentEye, setCurrentEye] = useState('left');
   const [trialIndex, setTrialIndex] = useState(0);
-
   const [direction, setDirection] = useState(randomDirection);
-
-  const [results, setResults] = useState({
-    left: [],
-    right: [],
-  });
-
+  const [results, setResults] = useState({ left: [], right: [] });
   const [feedback, setFeedback] = useState(null);
-  const [isAnswerLocked, setIsAnswerLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const timeoutRef = useRef(null);
   const demoSkipHandled = useRef(false);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-      }
-    };
+  useEffect(() => () => {
+    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
   }, []);
 
   useEffect(() => {
-    if (
-      isDemo &&
-      demoPersona?.skipVision &&
-      !demoSkipHandled.current
-    ) {
+    if (isDemo && demoPersona?.skipVision && !demoSkipHandled.current) {
       demoSkipHandled.current = true;
       skipVision();
       navigate('/report', { replace: true });
     }
   }, [isDemo, demoPersona, skipVision, navigate]);
 
-  const handleSkip = () => {
-    skipVision();
-    navigate('/report');
-  };
+  const handleSkip = () => { skipVision(); navigate('/report'); };
 
   const startActivity = () => {
-    setResults({
-      left: [],
-      right: [],
-    });
-
+    setResults({ left: [], right: [] });
     setCurrentEye('left');
     setTrialIndex(0);
     setDirection(randomDirection());
     setFeedback(null);
-    setIsAnswerLocked(false);
+    setIsLocked(false);
     setPhase('testing');
   };
 
-  const handleResponse = useCallback((chosenDirection) => {
-    if (isAnswerLocked || phase !== 'testing') return;
+  const handleResponse = useCallback((chosen) => {
+    if (isLocked || phase !== 'testing') return;
+    setIsLocked(true);
 
-    setIsAnswerLocked(true);
-
-    const correct = chosenDirection === direction;
-
+    const correct = chosen === direction;
     setFeedback(correct ? 'correct' : 'wrong');
 
-    setResults((previous) => ({
-      ...previous,
-      [currentEye]: [
-        ...previous[currentEye],
-        {
-          round: trialIndex + 1,
-          expected: direction,
-          answered: chosenDirection,
-          correct,
-        },
-      ],
+    setResults((prev) => ({
+      ...prev,
+      [currentEye]: [...prev[currentEye], {
+        round: trialIndex + 1, expected: direction, answered: chosen, correct,
+      }],
     }));
 
     timeoutRef.current = window.setTimeout(() => {
       setFeedback(null);
+      const next = trialIndex + 1;
 
-      const nextTrial = trialIndex + 1;
-
-      if (nextTrial >= TRIALS_PER_EYE) {
+      if (next >= TRIALS_PER_EYE) {
         if (currentEye === 'left') {
-          // The global counter continues at 6/10 on the right eye.
-          // trialIndex is reset only for eye-specific result storage.
           setCurrentEye('right');
           setTrialIndex(0);
           setDirection(randomDirection());
@@ -147,224 +93,97 @@ export default function VisionActivity() {
           setPhase('results');
         }
       } else {
-        setTrialIndex(nextTrial);
+        setTrialIndex(next);
         setDirection(randomDirection());
       }
-
-      setIsAnswerLocked(false);
-    }, 450);
-  }, [
-    currentEye,
-    direction,
-    isAnswerLocked,
-    phase,
-    trialIndex,
-  ]);
+      setIsLocked(false);
+    }, 420);
+  }, [currentEye, direction, isLocked, phase, trialIndex]);
 
   const handleFinish = () => {
-    const leftCorrect = results.left.filter(
-      (trial) => trial.correct,
-    ).length;
-
-    const rightCorrect = results.right.filter(
-      (trial) => trial.correct,
-    ).length;
-
+    const leftCorrect = results.left.filter((t) => t.correct).length;
+    const rightCorrect = results.right.filter((t) => t.correct).length;
     setVisionResults({
-      completed: true,
-      skipped: false,
+      completed: true, skipped: false,
       data: {
         activityType: 'direction-awareness',
-
-        left: {
-          correct: leftCorrect,
-          total: results.left.length,
-          trials: results.left,
-        },
-
-        right: {
-          correct: rightCorrect,
-          total: results.right.length,
-          trials: results.right,
-        },
+        left: { correct: leftCorrect, total: results.left.length, trials: results.left },
+        right: { correct: rightCorrect, total: results.right.length, trials: results.right },
       },
     });
-
     navigate('/report');
   };
 
-  if (isDemo && demoPersona?.skipVision) {
-    return null;
-  }
+  if (isDemo && demoPersona?.skipVision) return null;
 
+  /* ───── INTRO ───── */
   if (phase === 'intro') {
     return (
-      <main className="vision-activity">
-        <header className="app-header">
-          <button
-            className="app-header__back"
-            type="button"
-            onClick={() => navigate(-1)}
-            aria-label={
-              lang === 'hi' ? 'वापस जाएँ' : 'Go back'
-            }
-          >
-            <span
-              className="material-symbols-outlined"
-              aria-hidden="true"
-            >
-              arrow_back
-            </span>
+      <main className="va">
+        <header className="va__topbar">
+          <button className="va__back-btn" type="button" onClick={() => navigate(-1)} aria-label={t('common.back', lang)}>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
-
-          <span className="app-header__title">
-            {t('vision.title', lang)}
-          </span>
-
-          <span className="app-header__action" />
+          <span className="va__topbar-title">{t('vision.title', lang)}</span>
+          <span className="va__topbar-spacer" />
         </header>
 
-        <div className="vision-activity__content">
-          <section
-            className="vision-activity__hero"
-            aria-labelledby="vision-activity-title"
-          >
-            <div
-              className="vision-activity__icon-ring"
-              aria-hidden="true"
-            >
-              <div className="vision-activity__icon-inner">
-                <span className="vision-activity__e-letter">E</span>
-              </div>
-            </div>
+        <div className="va__intro animate-fade-in">
+          {/* Hero E */}
+          <div className="va__hero-ring" aria-hidden="true">
+            <span className="va__hero-e">E</span>
+          </div>
 
-            <h1
-              id="vision-activity-title"
-              className="vision-activity__title"
-            >
-              {lang === 'hi'
-                ? 'दिशा पहचान गतिविधि'
-                : 'Direction Awareness Activity'}
-            </h1>
+          <h1 className="va__intro-title">
+            {lang === 'hi' ? 'दिशा पहचान गतिविधि' : 'Direction Awareness Activity'}
+          </h1>
 
-            <p className="vision-activity__desc">
-              {lang === 'hi'
-                ? 'यह एक वैकल्पिक इंटरैक्टिव गतिविधि है। यह आँखों की जाँच या दृष्टि की तीक्ष्णता मापने का तरीका नहीं है।'
-                : 'An optional interactive activity. It is not an eye examination and does not measure visual acuity.'}
-            </p>
-          </section>
-
-          <section
-            className="vision-activity__card"
-            aria-labelledby="vision-activity-steps-title"
-          >
-            <h2
-              id="vision-activity-steps-title"
-              className="vision-activity__card-title"
-            >
-              <span
-                className="material-symbols-outlined"
-                aria-hidden="true"
-              >
-                checklist
-              </span>
-
-              {lang === 'hi' ? 'क्या करना होगा' : 'What to do'}
-            </h2>
-
-            <ol className="vision-activity__steps">
-              <li className="vision-activity__step">
-                <span className="vision-activity__step-num">1</span>
-
-                <span className="vision-activity__step-text">
-                  <strong className="vision-activity__step-label">
-                    {lang === 'hi'
-                      ? 'स्क्रीन आराम से देखें'
-                      : 'Look at the screen comfortably'}
-                  </strong>
-
-                  <span className="vision-activity__step-desc">
-                    {lang === 'hi'
-                      ? 'फ़ोन को आरामदायक दूरी पर रखें।'
-                      : 'Hold your phone at a comfortable distance.'}
-                  </span>
-                </span>
-              </li>
-
-              <li className="vision-activity__step">
-                <span className="vision-activity__step-num">2</span>
-
-                <span className="vision-activity__step-text">
-                  <strong className="vision-activity__step-label">
-                    {lang === 'hi'
-                      ? 'E की दिशा पहचानें'
-                      : 'Identify the direction of E'}
-                  </strong>
-
-                  <span className="vision-activity__step-desc">
-                    {lang === 'hi'
-                      ? 'ऊपर, नीचे, बाएँ या दाएँ चुनें।'
-                      : 'Choose up, down, left, or right.'}
-                  </span>
-                </span>
-              </li>
-
-              <li className="vision-activity__step">
-                <span className="vision-activity__step-num">3</span>
-
-                <span className="vision-activity__step-text">
-                  <strong className="vision-activity__step-label">
-                    {lang === 'hi'
-                      ? 'दोनों आँखों के राउंड करें'
-                      : 'Complete one round for each eye'}
-                  </strong>
-
-                  <span className="vision-activity__step-desc">
-                    {lang === 'hi'
-                      ? 'हर आँख के लिए पाँच सवाल होंगे। दूसरी आँख पर बिना दबाव डाले हाथ रखें; असुविधा हो तो गतिविधि छोड़ दें।'
-                      : 'There are five prompts for each eye. Gently cover the other eye without pressing on it; skip if uncomfortable.'}
-                  </span>
-                </span>
-              </li>
-            </ol>
-          </section>
-
-          <p className="vision-activity__notice" role="note">
+          <p className="va__intro-desc">
             {lang === 'hi'
-              ? 'परिणाम केवल इस गतिविधि में चुने गए उत्तरों की गिनती है। इससे चश्मे का नंबर या आँखों की सेहत का निष्कर्ष नहीं निकाला जाता।'
-              : 'The result only counts answers selected in this activity. It cannot determine a prescription or indicate eye health.'}
+              ? 'एक वैकल्पिक इंटरैक्टिव गतिविधि। यह आँखों की जाँच या दृष्टि की तीक्ष्णता मापने का तरीका नहीं है।'
+              : 'An optional interactive activity. This is not an eye examination and does not measure visual acuity.'}
           </p>
 
-          <div className="vision-activity__actions">
-            <button
-              className="btn btn--primary btn--full btn--lg"
-              type="button"
-              onClick={startActivity}
-            >
-              <span
-                className="material-symbols-outlined"
-                aria-hidden="true"
-              >
-                play_arrow
+          {/* Steps — inline, no card wrapper */}
+          <ol className="va__steps">
+            <li className="va__step">
+              <span className="va__step-num">1</span>
+              <span className="va__step-body">
+                <strong>{lang === 'hi' ? 'स्क्रीन आराम से देखें' : 'Look at the screen comfortably'}</strong>
+                <span>{lang === 'hi' ? 'फ़ोन को आरामदायक दूरी पर रखें।' : 'Hold your phone at a comfortable distance.'}</span>
               </span>
+            </li>
+            <li className="va__step">
+              <span className="va__step-num">2</span>
+              <span className="va__step-body">
+                <strong>{lang === 'hi' ? 'E की दिशा पहचानें' : 'Identify the direction of E'}</strong>
+                <span>{lang === 'hi' ? 'ऊपर, नीचे, बाएँ या दाएँ चुनें।' : 'Choose up, down, left, or right.'}</span>
+              </span>
+            </li>
+            <li className="va__step">
+              <span className="va__step-num">3</span>
+              <span className="va__step-body">
+                <strong>{lang === 'hi' ? 'दोनों आँखों के राउंड करें' : 'Complete rounds for each eye'}</strong>
+                <span>{lang === 'hi' ? '5 प्रॉम्प्ट प्रति आँख। दूसरी आँख बिना दबाव डाले ढकें।' : '5 prompts per eye. Cover the other eye without pressing.'}</span>
+              </span>
+            </li>
+          </ol>
 
-              {lang === 'hi'
-                ? 'गतिविधि शुरू करें'
-                : 'Start Activity'}
+          {/* Disclaimer */}
+          <p className="va__notice" role="note">
+            <span className="material-symbols-outlined" aria-hidden="true">info</span>
+            {lang === 'hi'
+              ? 'परिणाम केवल चुने गए उत्तरों की गिनती है। चश्मे का नंबर या आँखों की सेहत का निष्कर्ष नहीं निकाला जाता।'
+              : 'The result only counts answers selected. It cannot determine a prescription or indicate eye health.'}
+          </p>
+
+          <div className="va__intro-actions">
+            <button className="btn btn--primary btn--full btn--lg va__start-btn" type="button" onClick={startActivity}>
+              {lang === 'hi' ? 'गतिविधि शुरू करें' : 'Start activity'}
+              <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
             </button>
-
-            <button
-              className="btn btn--ghost btn--full"
-              type="button"
-              onClick={handleSkip}
-            >
-              <span
-                className="material-symbols-outlined"
-                aria-hidden="true"
-              >
-                skip_next
-              </span>
-
+            <button className="btn btn--ghost btn--full" type="button" onClick={handleSkip}>
+              <span className="material-symbols-outlined" aria-hidden="true">skip_next</span>
               {t('vision.skip', lang)}
             </button>
           </div>
@@ -373,256 +192,158 @@ export default function VisionActivity() {
     );
   }
 
+  /* ───── TESTING ───── */
   if (phase === 'testing') {
     const eyeLabel = currentEye === 'left'
       ? (lang === 'hi' ? 'बाईं आँख' : 'Left eye')
       : (lang === 'hi' ? 'दाईं आँख' : 'Right eye');
 
     const coverLabel = currentEye === 'left'
-      ? (lang === 'hi'
-          ? 'दाईं आँख को बिना दबाव डाले ढकें'
-          : 'Cover your right eye without pressing on it')
-      : (lang === 'hi'
-          ? 'बाईं आँख को बिना दबाव डाले ढकें'
-          : 'Cover your left eye without pressing on it');
+      ? (lang === 'hi' ? 'दाईं आँख बिना दबाव डाले ढकें' : 'Cover your right eye gently')
+      : (lang === 'hi' ? 'बाईं आँख बिना दबाव डाले ढकें' : 'Cover your left eye gently');
 
-    // Calculate one continuous count from 1/10 to 10/10.
-    // trialIndex remains eye-local for storing each eye's results.
-    const overallTrialNumber = currentEye === 'left'
-      ? trialIndex + 1
-      : TRIALS_PER_EYE + trialIndex + 1;
-
-    const progress = (
-      ((overallTrialNumber - 1) / TOTAL_TRIALS) * 100
-    );
+    const overallTrial = currentEye === 'left' ? trialIndex + 1 : TRIALS_PER_EYE + trialIndex + 1;
+    const progressPct = ((overallTrial - 1) / TOTAL_TRIALS) * 100;
 
     return (
-      <main className="vision-activity">
-        <header className="app-header">
-          <span className="app-header__back" />
-
-          <span className="app-header__title">
-            {eyeLabel}
-          </span>
-
-          <span className="app-header__action">
-            {overallTrialNumber}/{TOTAL_TRIALS}
-          </span>
+      <main className="va va--testing">
+        {/* Topbar */}
+        <header className="va__topbar">
+          <span className="va__topbar-spacer" />
+          <span className="va__topbar-title">{eyeLabel}</span>
+          <span className="va__topbar-counter">{overallTrial}/{TOTAL_TRIALS}</span>
         </header>
 
-        <div className="va-progress">
-          <div
-            className="progress"
-            role="progressbar"
-            aria-label={
-              lang === 'hi'
-                ? 'गतिविधि की प्रगति'
-                : 'Activity progress'
-            }
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(progress)}
+        {/* Progress */}
+        <div className="va__progress-bar-wrap">
+          <div className="va__progress-track" role="progressbar"
+            aria-label={lang === 'hi' ? 'गतिविधि प्रगति' : 'Activity progress'}
+            aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progressPct)}
           >
-            <div
-              className="progress__bar"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="va__progress-fill" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
 
-        <section className="va-test" aria-labelledby="va-test-title">
-          <p className="va-test__cover">
-            {coverLabel}
-          </p>
+        {/* Test area */}
+        <section className="va__test" aria-labelledby="va-test-q">
+          <p className="va__cover-hint">{coverLabel}</p>
 
-          <p className="va-test__round-note">
-            {lang === 'hi'
-              ? 'यह दृष्टि परीक्षण नहीं है'
-              : 'This is not a vision test'}
-          </p>
+          <div className="va__disclaimer-pill">
+            {lang === 'hi' ? 'यह दृष्टि परीक्षण नहीं है' : 'Not a vision test'}
+          </div>
 
-          <div className="va-test__e-area" aria-live="off">
+          {/* E display */}
+          <div className="va__e-zone" aria-live="off">
             {feedback && (
-              <span
-                className={`va-test__feedback va-test__feedback--${feedback}`}
-                aria-hidden="true"
-              >
-                {feedback === 'correct' ? '✓' : '×'}
+              <span className={`va__fb va__fb--${feedback}`} aria-hidden="true">
+                <span className="material-symbols-outlined">
+                  {feedback === 'correct' ? 'check' : 'close'}
+                </span>
               </span>
             )}
-
             <span
-              className="va-test__e"
-              aria-label={
-                lang === 'hi'
-                  ? 'घुमाया हुआ अंग्रेज़ी अक्षर E'
-                  : 'Rotated letter E'
-              }
+              className="va__e-char"
+              aria-label={lang === 'hi' ? 'घुमाया हुआ अक्षर E' : 'Rotated letter E'}
               style={{
                 fontSize: `${SYMBOL_SIZE}px`,
                 transform: `rotate(${ROTATION[direction]}deg)`,
-                opacity: feedback ? 0.35 : 1,
+                opacity: feedback ? 0.3 : 1,
               }}
-            >
-              E
-            </span>
+            >E</span>
           </div>
 
-          <h1 id="va-test-title" className="va-test__hint">
-            {lang === 'hi'
-              ? 'E किस दिशा में खुला है?'
-              : 'Which way is the E pointing?'}
+          <h1 id="va-test-q" className="va__test-prompt">
+            {lang === 'hi' ? 'E किस दिशा में खुला है?' : 'Which way is the E pointing?'}
           </h1>
 
-          <div
-            className="va-test__buttons"
-            role="group"
-            aria-label={
-              lang === 'hi'
-                ? 'दिशा चुनें'
-                : 'Choose a direction'
-            }
+          {/* Direction buttons — 2×2 grid */}
+          <div className="va__dir-grid" role="group"
+            aria-label={lang === 'hi' ? 'दिशा चुनें' : 'Choose a direction'}
           >
-            {DIRECTIONS.map((item) => (
+            {DIRECTIONS.map((d) => (
               <button
-                key={item}
+                key={d}
                 type="button"
-                className="va-test__dir-btn"
-                onClick={() => handleResponse(item)}
-                disabled={isAnswerLocked}
-                aria-label={directionLabel(item, lang)}
+                className="va__dir-btn"
+                onClick={() => handleResponse(d)}
+                disabled={isLocked}
+                aria-label={dirLabel(d, lang)}
               >
-                <span
-                  className="va-test__dir-arrow"
-                  aria-hidden="true"
-                >
-                  {ARROWS[item]}
+                <span className="material-symbols-outlined va__dir-icon" aria-hidden="true">
+                  {DIR_ICONS[d]}
                 </span>
-
-                <span className="va-test__dir-label">
-                  {directionLabel(item, lang)}
-                </span>
+                <span className="va__dir-label">{dirLabel(d, lang)}</span>
               </button>
             ))}
           </div>
 
-          <p className="va-test__round-count" aria-live="polite">
+          <p className="va__trial-count" aria-live="polite">
             {lang === 'hi'
-              ? `प्रश्न ${overallTrialNumber} / ${TOTAL_TRIALS}`
-              : `Prompt ${overallTrialNumber} of ${TOTAL_TRIALS}`}
+              ? `प्रश्न ${overallTrial} / ${TOTAL_TRIALS}`
+              : `Prompt ${overallTrial} of ${TOTAL_TRIALS}`}
           </p>
 
-          <button
-            className="btn btn--ghost va-test__skip"
-            type="button"
-            onClick={handleSkip}
-          >
-            {lang === 'hi'
-              ? 'गतिविधि छोड़ें'
-              : 'Skip this activity'}
+          <button className="btn btn--ghost va__skip-link" type="button" onClick={handleSkip}>
+            {lang === 'hi' ? 'गतिविधि छोड़ें' : 'Skip activity'}
           </button>
         </section>
       </main>
     );
   }
 
-  const leftCorrect = results.left.filter(
-    (trial) => trial.correct,
-  ).length;
-
-  const rightCorrect = results.right.filter(
-    (trial) => trial.correct,
-  ).length;
+  /* ───── RESULTS ───── */
+  const leftCorrect = results.left.filter((t) => t.correct).length;
+  const rightCorrect = results.right.filter((t) => t.correct).length;
 
   return (
-    <main className="vision-activity">
-      <header className="app-header">
-        <span className="app-header__back" />
-
-        <span className="app-header__title">
-          {lang === 'hi' ? 'गतिविधि परिणाम' : 'Activity Results'}
-        </span>
-
-        <span className="app-header__action" />
+    <main className="va">
+      <header className="va__topbar">
+        <span className="va__topbar-spacer" />
+        <span className="va__topbar-title">{lang === 'hi' ? 'गतिविधि परिणाम' : 'Activity Results'}</span>
+        <span className="va__topbar-spacer" />
       </header>
 
-      <section
-        className="va-results"
-        aria-labelledby="va-results-title"
-      >
-        <h1
-          id="va-results-title"
-          className="va-results__title"
-        >
-          {lang === 'hi'
-            ? 'गतिविधि पूरी हुई'
-            : 'Activity Complete'}
-        </h1>
-
-        <p className="va-results__subtitle">
-          {lang === 'hi'
-            ? 'ये केवल चुने गए उत्तरों की गिनती है।'
-            : 'These numbers only count the answers selected.'}
-        </p>
-
-        <div className="va-results__summary" aria-live="polite">
-          <div className="va-results__eye-card">
-            <span className="va-results__eye-label">
-              {lang === 'hi' ? 'बाईं आँख' : 'Left eye'}
-            </span>
-
-            <strong className="va-results__eye-score">
-              {leftCorrect}/{results.left.length}
-            </strong>
-
-            <span className="va-results__eye-caption">
-              {lang === 'hi'
-                ? 'सही दिशा-चयन'
-                : 'Matching direction choices'}
-            </span>
-          </div>
-
-          <div className="va-results__eye-card">
-            <span className="va-results__eye-label">
-              {lang === 'hi' ? 'दाईं आँख' : 'Right eye'}
-            </span>
-
-            <strong className="va-results__eye-score">
-              {rightCorrect}/{results.right.length}
-            </strong>
-
-            <span className="va-results__eye-caption">
-              {lang === 'hi'
-                ? 'सही दिशा-चयन'
-                : 'Matching direction choices'}
-            </span>
-          </div>
-        </div>
-
-        <p className="vision-activity__notice" role="note">
-          {lang === 'hi'
-            ? 'यह परिणाम दृष्टि की तीक्ष्णता, चश्मे के नंबर या किसी नेत्र रोग का आकलन नहीं करता। किसी चिंता के लिए नेत्र-देखभाल पेशेवर से संपर्क करें।'
-            : 'This result does not assess visual acuity, eyeglass prescription, or eye disease. Contact an eye-care professional about any concern.'}
-        </p>
-
-        <div className="vision-activity__actions">
-          <button
-            className="btn btn--primary btn--full btn--lg"
-            type="button"
-            onClick={handleFinish}
-          >
-            <span
-              className="material-symbols-outlined"
-              aria-hidden="true"
-            >
-              description
-            </span>
-
+      <section className="va__results animate-fade-in" aria-labelledby="va-results-heading">
+        <div className="va__results-header">
+          <span className="material-symbols-outlined va__results-check" aria-hidden="true">check_circle</span>
+          <h1 id="va-results-heading" className="va__results-title">
+            {lang === 'hi' ? 'गतिविधि पूरी हुई' : 'Activity Complete'}
+          </h1>
+          <p className="va__results-sub">
             {lang === 'hi'
-              ? 'इनसाइट्स देखें'
-              : 'View Insights'}
-          </button>
+              ? 'ये केवल चुने गए उत्तरों की गिनती है।'
+              : 'These numbers only count the answers you selected.'}
+          </p>
         </div>
+
+        <div className="va__results-grid" aria-live="polite">
+          <div className="va__eye-card">
+            <span className="va__eye-label">{lang === 'hi' ? 'बाईं आँख' : 'Left eye'}</span>
+            <strong className="va__eye-score">{leftCorrect}/{results.left.length}</strong>
+            <span className="va__eye-caption">
+              {lang === 'hi' ? 'सही दिशा-चयन' : 'Matching directions'}
+            </span>
+          </div>
+          <div className="va__eye-card">
+            <span className="va__eye-label">{lang === 'hi' ? 'दाईं आँख' : 'Right eye'}</span>
+            <strong className="va__eye-score">{rightCorrect}/{results.right.length}</strong>
+            <span className="va__eye-caption">
+              {lang === 'hi' ? 'सही दिशा-चयन' : 'Matching directions'}
+            </span>
+          </div>
+        </div>
+
+        <p className="va__notice" role="note">
+          <span className="material-symbols-outlined" aria-hidden="true">info</span>
+          {lang === 'hi'
+            ? 'यह परिणाम दृष्टि की तीक्ष्णता, चश्मे के नंबर या नेत्र रोग का आकलन नहीं करता। किसी चिंता के लिए नेत्र-देखभाल पेशेवर से संपर्क करें।'
+            : 'This result does not assess visual acuity, prescription, or eye disease. Contact an eye-care professional for any concern.'}
+        </p>
+
+        <button className="btn btn--primary btn--full btn--lg va__finish-btn" type="button" onClick={handleFinish}>
+          {lang === 'hi' ? 'रिपोर्ट देखें' : 'View your report'}
+          <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
       </section>
     </main>
   );

@@ -7,23 +7,38 @@ const strings = {
   },
 
   'landing.tagline': {
-    en: 'Accessible vision-support conversations for optical shops',
-    hi: 'ऑप्टिकल शॉप के लिए आसान दृष्टि-सहायता बातचीत',
+    en: 'A clearer conversation starts here.',
+    hi: 'एक स्पष्ट बातचीत यहाँ से शुरू होती है।',
   },
 
   'landing.description': {
-    en: 'Answer a few questions about your vision experiences and daily habits. Review a plain-language summary and topics you may wish to discuss with an eye-care professional.',
-    hi: 'अपने दृष्टि अनुभव और दैनिक आदतों के बारे में कुछ सवालों के जवाब दें। आसान भाषा में सारांश और नेत्र-देखभाल पेशेवर से चर्चा के विषय देखें।',
+    en: 'Organise your everyday vision experiences and prepare for a conversation with an eye-care professional.',
+    hi: 'अपने रोज़मर्रा के दृष्टि अनुभवों को व्यवस्थित करें और नेत्र-देखभाल पेशेवर से बातचीत की तैयारी करें।',
   },
 
   'landing.start': {
-    en: 'Start Assessment',
-    hi: 'शुरू करें',
+    en: 'Start your journey',
+    hi: 'अपनी यात्रा शुरू करें',
   },
 
   'landing.tryDemo': {
-    en: 'Try Demo: Ramesh, 42, Tailor',
-    hi: 'डेमो देखें: रमेश, 42, दर्ज़ी',
+    en: "Explore Ramesh's demo",
+    hi: 'रमेश का डेमो देखें',
+  },
+
+  'landing.trust.bilingual': {
+    en: 'English & Hindi',
+    hi: 'अंग्रेज़ी और हिंदी',
+  },
+
+  'landing.trust.local': {
+    en: 'Local session storage',
+    hi: 'स्थानीय सेशन स्टोरेज',
+  },
+
+  'landing.trust.accessible': {
+    en: 'Accessible experience',
+    hi: 'सुलभ अनुभव',
   },
 
   'landing.notMedical': {
@@ -66,6 +81,31 @@ const strings = {
     hi: 'मैं समझता/समझती हूँ, आगे बढ़ें',
   },
 
+  'activities.title': {
+    en: 'Daily Activities',
+    hi: 'दैनिक गतिविधियाँ',
+  },
+
+  'activities.heading': {
+    en: 'Your everyday visual activities',
+    hi: 'आपकी रोज़मर्रा की गतिविधियाँ',
+  },
+
+  'activities.description': {
+    en: 'What activities are part of your daily routine? Select one or more.',
+    hi: 'आपकी दिनचर्या का हिस्सा कौन-कौन सी गतिविधियाँ हैं? एक या अधिक चुनें।',
+  },
+
+  'activities.primaryHeading': {
+    en: 'Which activity takes up most of your day?',
+    hi: 'सबसे ज़्यादा समय किसमें लगता है?',
+  },
+
+  'activities.primaryDescription': {
+    en: 'Choose one from the activities you selected.',
+    hi: 'अपनी चुनी हुई गतिविधियों में से एक चुनें।',
+  },
+
   'intake.title': {
     en: 'Vision Questions',
     hi: 'दृष्टि संबंधी सवाल',
@@ -74,6 +114,21 @@ const strings = {
   'intake.questionOf': {
     en: 'Question {current} of {total}',
     hi: 'सवाल {current} / {total}',
+  },
+
+  'intake.note.placeholder': {
+    en: 'Type here (optional)...',
+    hi: 'यहाँ लिखें (वैकल्पिक)...',
+  },
+
+  'intake.note.skip': {
+    en: 'Skip',
+    hi: 'छोड़ें',
+  },
+
+  'intake.note.save': {
+    en: 'Save',
+    hi: 'सहेजें',
   },
 
   'vision.title': {
@@ -131,6 +186,31 @@ const strings = {
     hi: 'वैकल्पिक दिशा गतिविधि छोड़ी गई — कोई गतिविधि उत्तर दर्ज नहीं हुआ।',
   },
 
+  'report.printBrief': {
+    en: 'Prepare my conversation brief',
+    hi: 'मेरा वार्तालाप सारांश तैयार करें',
+  },
+
+  'report.clearData': {
+    en: 'Clear my data',
+    hi: 'मेरा डेटा हटाएँ',
+  },
+
+  'report.deleteConfirm': {
+    en: 'Are you sure you want to delete all your session data? This action cannot be undone.',
+    hi: 'क्या आप वाकई अपना सारा सेशन डेटा हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
+  },
+
+  'report.privacy.title': {
+    en: 'Your data stays on this device',
+    hi: 'आपकी जानकारी आपके डिवाइस पर सुरक्षित है',
+  },
+
+  'report.privacy.text': {
+    en: 'All responses are saved locally on this device using IndexedDB. No data is sent to any server. You can delete all your data using the button below.',
+    hi: 'सभी जवाब केवल इस डिवाइस पर IndexedDB में सहेजे जाते हैं। कोई डेटा सर्वर पर नहीं भेजा जाता। आप नीचे दिए बटन से अपना सारा डेटा हटा सकते हैं।',
+  },
+
   'demo.banner': {
     en: 'Demo Mode — Ramesh, 42, Tailor',
     hi: 'डेमो मोड — रमेश, 42, दर्ज़ी',
@@ -154,6 +234,16 @@ const strings = {
   'common.loading': {
     en: 'Loading…',
     hi: 'लोड हो रहा है…',
+  },
+
+  'common.cancel': {
+    en: 'Cancel',
+    hi: 'रद्द करें',
+  },
+
+  'common.yesDelete': {
+    en: 'Yes, delete',
+    hi: 'हाँ, हटाएँ',
   },
 };
 

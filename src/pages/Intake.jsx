@@ -6,6 +6,25 @@ import { getVisibleQuestions } from '../data/questions.js';
 import { speakWhenReady, stopSpeaking } from '../utils/tts.js';
 import './Intake.css';
 
+/* Stage metadata for category badges */
+const STAGE_META = {
+  refractive: {
+    en: 'Vision experience',
+    hi: 'दृष्टि अनुभव',
+    icon: 'visibility',
+  },
+  lifestyle: {
+    en: 'Daily habits',
+    hi: 'दैनिक आदतें',
+    icon: 'self_improvement',
+  },
+  awareness: {
+    en: 'Eye-care background',
+    hi: 'आँखों की देखभाल',
+    icon: 'health_and_safety',
+  },
+};
+
 export default function Intake() {
   const navigate = useNavigate();
 
@@ -26,13 +45,13 @@ export default function Intake() {
   const [waitingForDemoTap, setWaitingForDemoTap] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [hasSpokenCurrent, setHasSpokenCurrent] = useState(false);
+  const [noteText, setNoteText] = useState('');
 
   const answerTimerRef = useRef(null);
   const playedQuestionsRef = useRef(new Set());
   const demoPrefillHandledRef = useRef(false);
 
-  // Demo mode displays only Ramesh's six selected questions.
-  // Normal mode continues to display the full conditional questionnaire.
+  /* Visible questions (full conditional bank or demo subset) */
   const visibleQuestions = useMemo(() => {
     const questionsForAnswers = getVisibleQuestions(answers);
 
@@ -41,129 +60,74 @@ export default function Intake() {
     }
 
     const demoQuestionIds = new Set(demoPersona.demoQuestionIds);
-
-    return questionsForAnswers.filter((question) =>
-      demoQuestionIds.has(question.id),
-    );
+    return questionsForAnswers.filter((q) => demoQuestionIds.has(q.id));
   }, [answers, isDemo, demoPersona]);
 
-  // Calculate progress using only the questions actually displayed.
+  /* Progress */
   const progress = useMemo(() => {
     const total = visibleQuestions.length;
-
-    const answered = visibleQuestions.filter(
-      (question) => Boolean(answers[question.id]),
-    ).length;
-
-    return {
-      answered,
-      total,
-      fraction: total > 0 ? answered / total : 0,
-    };
+    const answered = visibleQuestions.filter((q) => Boolean(answers[q.id])).length;
+    return { answered, total, fraction: total > 0 ? answered / total : 0 };
   }, [answers, visibleQuestions]);
 
-  // Always select the next unanswered question from the visible sequence.
+  /* Select next unanswered question */
   useEffect(() => {
-    const nextQuestion =
-      visibleQuestions.find((question) => !answers[question.id]) || null;
+    const nextQ = visibleQuestions.find((q) => !answers[q.id]) || null;
 
-    if (!nextQuestion) {
+    if (!nextQ) {
       stopSpeaking();
-
       if (isDemo && demoPersona?.skipVision) {
         skipVision();
         navigate('/report', { replace: true });
       } else {
         navigate('/vision', { replace: true });
       }
-
       return;
     }
 
-    setCurrentQuestion(nextQuestion);
+    setCurrentQuestion(nextQ);
     setAnimDir('in');
+    setHasSpokenCurrent(playedQuestionsRef.current.has(nextQ.id));
+  }, [answers, visibleQuestions, demoPersona, isDemo, navigate, skipVision]);
 
-    setHasSpokenCurrent(
-      playedQuestionsRef.current.has(nextQuestion.id),
-    );
-  }, [
-    answers,
-    visibleQuestions,
-    demoPersona,
-    isDemo,
-    navigate,
-    skipVision,
-  ]);
-
-  // Fill hidden persona answers for report insights.
-  // These questions are never displayed or used to advance the visible demo.
+  /* Pre-fill hidden demo answers */
   useEffect(() => {
-    if (!isDemo || !demoPersona || demoPrefillHandledRef.current) {
-      return;
-    }
-
+    if (!isDemo || !demoPersona || demoPrefillHandledRef.current) return;
     demoPrefillHandledRef.current = true;
 
-    const visibleDemoIds = new Set(
-      demoPersona.demoQuestionIds || [],
-    );
-
-    Object.entries(demoPersona.answers || {}).forEach(
-      ([questionId, predefinedAnswer]) => {
-        if (
-          !visibleDemoIds.has(questionId) &&
-          !answers[questionId] &&
-          predefinedAnswer
-        ) {
-          setAnswer(
-            questionId,
-            predefinedAnswer.value,
-            predefinedAnswer.label,
-          );
-        }
-      },
-    );
+    const visibleDemoIds = new Set(demoPersona.demoQuestionIds || []);
+    Object.entries(demoPersona.answers || {}).forEach(([qId, preAns]) => {
+      if (!visibleDemoIds.has(qId) && !answers[qId] && preAns) {
+        setAnswer(qId, preAns.value, preAns.label);
+      }
+    });
   }, [isDemo, demoPersona, answers, setAnswer]);
 
-  // Each visible demo question waits for an explicit Continue tap.
+  /* Demo: wait for explicit tap */
   useEffect(() => {
     if (!isDemo || !currentQuestion) {
       setWaitingForDemoTap(false);
       return;
     }
-
-    const hasDemoAnswer = Boolean(
-      demoPersona?.answers?.[currentQuestion.id],
-    );
-
-    setWaitingForDemoTap(hasDemoAnswer);
+    setWaitingForDemoTap(Boolean(demoPersona?.answers?.[currentQuestion.id]));
   }, [isDemo, demoPersona, currentQuestion]);
 
+  /* Cleanup */
   useEffect(() => () => {
-    if (answerTimerRef.current) {
-      window.clearTimeout(answerTimerRef.current);
-    }
-
+    if (answerTimerRef.current) window.clearTimeout(answerTimerRef.current);
     stopSpeaking();
   }, []);
 
+  /* TTS */
   const speakCurrentQuestion = useCallback(async () => {
     if (!currentQuestion || speaking) return;
-
-    if (
-      !isDemo ||
-      !demoPersona?.ttsQuestionIds?.includes(currentQuestion.id)
-    ) {
-      return;
-    }
+    if (!isDemo || !demoPersona?.ttsQuestionIds?.includes(currentQuestion.id)) return;
 
     playedQuestionsRef.current.add(currentQuestion.id);
     setHasSpokenCurrent(true);
     setSpeaking(true);
 
-    const spokenText =
-      currentQuestion.text[lang] || currentQuestion.text.en;
-
+    const spokenText = currentQuestion.text[lang] || currentQuestion.text.en;
     await speakWhenReady(spokenText, lang, {
       rate: lang === 'hi' ? 0.88 : 1,
       onStart: () => setSpeaking(true),
@@ -172,55 +136,64 @@ export default function Intake() {
     });
   }, [currentQuestion, demoPersona, isDemo, lang, speaking]);
 
+  /* Answer handler */
   const handleAnswer = useCallback((option) => {
     if (!currentQuestion || animDir === 'out') return;
 
     setAnimDir('out');
     setWaitingForDemoTap(false);
-
     stopSpeaking();
     setSpeaking(false);
 
-    if (answerTimerRef.current) {
-      window.clearTimeout(answerTimerRef.current);
-    }
+    if (answerTimerRef.current) window.clearTimeout(answerTimerRef.current);
 
     answerTimerRef.current = window.setTimeout(() => {
-      setAnswer(
-        currentQuestion.id,
-        option.value,
-        option.label,
-      );
+      setAnswer(currentQuestion.id, option.value, option.label);
+      if (isDemo) demoNextStep();
+    }, 200);
+  }, [animDir, currentQuestion, demoNextStep, isDemo, setAnswer]);
 
-      if (isDemo) {
-        demoNextStep();
-      }
-    }, 180);
-  }, [
-    animDir,
-    currentQuestion,
-    demoNextStep,
-    isDemo,
-    setAnswer,
-  ]);
-
+  /* Demo next */
   const handleDemoNext = useCallback(() => {
     if (!currentQuestion || !demoPersona) return;
-
-    const predefinedAnswer =
-      demoPersona.answers?.[currentQuestion.id];
-
-    if (!predefinedAnswer) return;
-
-    handleAnswer({
-      value: predefinedAnswer.value,
-      label: predefinedAnswer.label,
-    });
+    const preAns = demoPersona.answers?.[currentQuestion.id];
+    if (!preAns) return;
+    handleAnswer({ value: preAns.value, label: preAns.label });
   }, [currentQuestion, demoPersona, handleAnswer]);
 
+  /* Go back */
+  const handleGoBack = useCallback(() => {
+    if (!currentQuestion) return;
+    stopSpeaking();
+
+    const idx = visibleQuestions.findIndex((q) => q.id === currentQuestion.id);
+    if (idx <= 0) {
+      navigate(isDemo ? '/' : '/activities');
+      return;
+    }
+
+    const prevQ = visibleQuestions[idx - 1];
+    setAnswer(prevQ.id, undefined, undefined);
+
+    visibleQuestions.slice(idx).forEach((q) => {
+      if (answers[q.id]) setAnswer(q.id, undefined, undefined);
+    });
+  }, [currentQuestion, visibleQuestions, navigate, isDemo, setAnswer, answers]);
+
+  /* Note submit */
+  const handleNoteSubmit = useCallback(() => {
+    if (!currentQuestion) return;
+    setAnimDir('out');
+    setTimeout(() => {
+      setAnswer(currentQuestion.id, noteText || '', { en: noteText || '', hi: noteText || '' });
+      if (isDemo) demoNextStep();
+    }, 200);
+  }, [currentQuestion, noteText, setAnswer, isDemo, demoNextStep]);
+
+  /* Loading state */
   if (!currentQuestion) {
     return (
-      <main className="intake intake--loading" aria-live="polite">
+      <main className="iq iq--loading" aria-live="polite">
         <p>{t('common.loading', lang)}</p>
       </main>
     );
@@ -228,149 +201,95 @@ export default function Intake() {
 
   const questionIndex = Math.max(
     0,
-    visibleQuestions.findIndex(
-      (question) => question.id === currentQuestion.id,
-    ),
+    visibleQuestions.findIndex((q) => q.id === currentQuestion.id),
   );
 
-  const demoAnswer = isDemo
-    ? demoPersona?.answers?.[currentQuestion.id]
-    : null;
+  const demoAnswer = isDemo ? demoPersona?.answers?.[currentQuestion.id] : null;
 
   const isTTSQuestion = Boolean(
-    isDemo &&
-    demoPersona?.ttsQuestionIds?.includes(currentQuestion.id),
+    isDemo && demoPersona?.ttsQuestionIds?.includes(currentQuestion.id),
   );
 
-  const categoryLabels = {
-    refractive: {
-      en: 'Vision experience',
-      hi: 'दृष्टि अनुभव',
-      icon: 'visibility',
-    },
-    lifestyle: {
-      en: 'Daily habits',
-      hi: 'दैनिक आदतें',
-      icon: 'self_improvement',
-    },
-    awareness: {
-      en: 'Eye-care history',
-      hi: 'आँखों की देखभाल',
-      icon: 'health_and_safety',
-    },
+  const stage = STAGE_META[currentQuestion.category] || {
+    en: 'Question', hi: 'सवाल', icon: 'help',
   };
 
-  const category = categoryLabels[currentQuestion.category] || {
-    en: 'Question',
-    hi: 'सवाल',
-    icon: 'help',
-  };
+  /* Is this a conditional question? */
+  const isConditional = Boolean(currentQuestion.showIf);
 
   return (
-    <main className="intake">
+    <main className="iq">
+      {/* Demo banner */}
       {isDemo && (
-        <div className="demo-banner" role="status">
-          <span
-            className="demo-banner__icon material-symbols-outlined"
-            aria-hidden="true"
-          >
-            target
-          </span>
+        <div className="iq__demo-banner" role="status">
+          <span className="material-symbols-outlined" aria-hidden="true">target</span>
           <span>{t('demo.banner', lang)}</span>
         </div>
       )}
 
-      <header className="app-header">
+      {/* Top bar */}
+      <header className="iq__topbar">
         <button
-          className="app-header__back"
+          className="iq__back-btn"
           type="button"
-          onClick={() => {
-            stopSpeaking();
-            navigate('/');
-          }}
-          aria-label={
-            lang === 'hi'
-              ? 'मुख्य पृष्ठ पर वापस जाएँ'
-              : 'Return to home'
-          }
+          onClick={() => { stopSpeaking(); handleGoBack(); }}
+          aria-label={t('common.back', lang)}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            arrow_back
-          </span>
+          <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
         </button>
 
-        <span className="app-header__title">
-          {t('intake.title', lang)}
-        </span>
-
-        <span className="app-header__action" />
+        <div className="iq__progress-area">
+          <div className="iq__progress-track" role="progressbar"
+            aria-label={lang === 'hi' ? 'सवालों की प्रगति' : 'Question progress'}
+            aria-valuemin={0} aria-valuemax={100}
+            aria-valuenow={Math.round(progress.fraction * 100)}
+          >
+            <div className="iq__progress-fill" style={{ width: `${progress.fraction * 100}%` }} />
+          </div>
+          <div className="iq__progress-meta">
+            <span className="iq__progress-step">
+              {t('intake.questionOf', lang, { current: questionIndex + 1, total: visibleQuestions.length })}
+            </span>
+            <span className="iq__progress-pct">
+              {Math.round(progress.fraction * 100)}%
+            </span>
+          </div>
+        </div>
       </header>
 
-      <div className="intake__progress">
-        <div className="progress-label">
-          <span>
-            {t('intake.questionOf', lang, {
-              current: questionIndex + 1,
-              total: visibleQuestions.length,
-            })}
-          </span>
-
-          <span className="intake__progress-pct">
-            {Math.round(progress.fraction * 100)}%
-          </span>
-        </div>
-
-        <div
-          className="progress"
-          role="progressbar"
-          aria-label={
-            lang === 'hi'
-              ? 'सवालों की प्रगति'
-              : 'Question progress'
-          }
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(progress.fraction * 100)}
-        >
-          <div
-            className="progress__bar"
-            style={{
-              width: `${progress.fraction * 100}%`,
-            }}
-          />
-        </div>
-      </div>
-
+      {/* Question card */}
       <section
-        className={`intake__question intake__question--${animDir}`}
+        className={`iq__card iq__card--${animDir}`}
         key={currentQuestion.id}
-        aria-labelledby="intake-question-title"
+        aria-labelledby="iq-question-title"
       >
-        <div className="intake__category-badge">
-          <span
-            className="material-symbols-outlined"
-            aria-hidden="true"
-          >
-            {category.icon}
-          </span>
-
-          <span>{category[lang] || category.en}</span>
+        {/* Category badge */}
+        <div className="iq__stage-badge">
+          <span className="material-symbols-outlined" aria-hidden="true">{stage.icon}</span>
+          <span>{stage[lang] || stage.en}</span>
         </div>
 
+        {/* Conditional explanation */}
+        {isConditional && (
+          <p className="iq__conditional-note">
+            <span className="material-symbols-outlined" aria-hidden="true">subdirectory_arrow_right</span>
+            {lang === 'hi'
+              ? 'आपके पिछले जवाब के आधार पर यह सवाल दिखाया गया है।'
+              : 'This question appeared based on your previous answer.'}
+          </p>
+        )}
+
+        {/* TTS control */}
         {isTTSQuestion && (
           <button
-            className="intake__play-btn"
+            className="iq__tts-btn"
             type="button"
             onClick={speakCurrentQuestion}
             disabled={speaking}
           >
-            <span
-              className="material-symbols-outlined"
-              aria-hidden="true"
-            >
-              volume_up
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {speaking ? 'graphic_eq' : 'volume_up'}
             </span>
-
             {speaking
               ? (lang === 'hi' ? 'बोल रहा है…' : 'Speaking…')
               : hasSpokenCurrent
@@ -380,104 +299,108 @@ export default function Intake() {
         )}
 
         {speaking && (
-          <p
-            className="intake__speaking"
-            role="status"
-            aria-live="polite"
-          >
-            {lang === 'hi'
-              ? 'ऑडियो चल रहा है।'
-              : 'Audio is playing.'}
+          <p className="iq__speaking-status" role="status" aria-live="polite">
+            {lang === 'hi' ? 'ऑडियो चल रहा है।' : 'Audio is playing.'}
           </p>
         )}
 
-        <h1
-          id="intake-question-title"
-          className="intake__question-text"
-        >
+        {/* Question text */}
+        <h1 id="iq-question-title" className="iq__question-text">
           {currentQuestion.text[lang] || currentQuestion.text.en}
         </h1>
 
-        <div
-          className="intake__options"
-          role="group"
-          aria-label={
-            lang === 'hi'
-              ? 'अपना उत्तर चुनें'
-              : 'Choose your answer'
-          }
-        >
-          {currentQuestion.options.map((option) => {
-            const isPreselected =
-              isDemo && demoAnswer?.value === option.value;
-
-            const optionLabel =
-              option.label[lang] || option.label.en;
-
-            return (
+        {/* Textarea (participant note) */}
+        {currentQuestion.type === 'textarea' ? (
+          <div className="iq__note-area">
+            <textarea
+              className="iq__note-input"
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder={t('intake.note.placeholder', lang)}
+              rows={4}
+              maxLength={500}
+            />
+            <div className="iq__note-actions">
               <button
-                key={option.value}
                 type="button"
-                className={
-                  `intake__option${isPreselected ? ' intake__option--demo' : ''}`
-                }
-                onClick={() => handleAnswer(option)}
-                disabled={animDir === 'out'}
-                aria-pressed={false}
+                className="btn btn--ghost btn--sm"
+                onClick={() => {
+                  setAnimDir('out');
+                  setTimeout(() => {
+                    setAnswer(currentQuestion.id, '', { en: '', hi: '' });
+                    if (isDemo) demoNextStep();
+                  }, 200);
+                }}
               >
-                {option.icon && (
-                  <span
-                    className="intake__option-icon"
-                    aria-hidden="true"
-                  >
-                    {option.icon}
-                  </span>
-                )}
-
-                <span className="intake__option-label">
-                  {optionLabel}
-                </span>
-
-                {isPreselected && (
-                  <span className="intake__option-demo-badge">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                    >
-                      person
-                    </span>
-
-                    {lang === 'hi' ? 'रमेश' : 'Ramesh'}
-                  </span>
-                )}
+                {t('intake.note.skip', lang)}
               </button>
-            );
-          })}
-        </div>
+              <button
+                type="button"
+                className="btn btn--primary btn--sm"
+                onClick={handleNoteSubmit}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                {t('intake.note.save', lang)}
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Answer options */
+          <div className="iq__options" role="group"
+            aria-label={lang === 'hi' ? 'अपना उत्तर चुनें' : 'Choose your answer'}
+          >
+            {currentQuestion.options.map((option) => {
+              const isPreselected = isDemo && demoAnswer?.value === option.value;
+              const optionLabel = option.label[lang] || option.label.en;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`iq__option${isPreselected ? ' iq__option--demo' : ''}`}
+                  onClick={() => handleAnswer(option)}
+                  disabled={animDir === 'out'}
+                  aria-pressed={false}
+                >
+                  {option.icon && (
+                    <span className="iq__option-icon-wrap" aria-hidden="true">
+                      <span className="material-symbols-outlined iq__option-icon">
+                        {option.icon}
+                      </span>
+                    </span>
+                  )}
+
+                  <span className="iq__option-label">{optionLabel}</span>
+
+                  {isPreselected && (
+                    <span className="iq__option-demo-tag">
+                      <span className="material-symbols-outlined" aria-hidden="true">person</span>
+                      {lang === 'hi' ? 'रमेश' : 'Ramesh'}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </section>
 
+      {/* Demo mode: explicit continue control */}
       {isDemo && waitingForDemoTap && (
-        <div className="intake__demo-control">
+        <div className="iq__demo-footer">
           <button
-            className="btn btn--primary btn--full btn--lg"
+            className="btn btn--primary btn--full btn--lg iq__demo-continue"
             type="button"
             onClick={handleDemoNext}
             disabled={!demoAnswer || animDir === 'out'}
           >
-            <span
-              className="material-symbols-outlined"
-              aria-hidden="true"
-            >
-              touch_app
-            </span>
-
+            <span className="material-symbols-outlined" aria-hidden="true">touch_app</span>
             {t('demo.next', lang)}
           </button>
-
-          <p className="intake__demo-hint">
+          <p className="iq__demo-hint">
             {lang === 'hi'
               ? 'डेमो उत्तर चुनने के लिए आगे बढ़ें।'
-              : 'Continue to select the demo answer.'}
+              : 'Press to confirm the demo answer and continue.'}
           </p>
         </div>
       )}

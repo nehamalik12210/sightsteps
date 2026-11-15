@@ -11,181 +11,178 @@ export default function Onboarding() {
   const [step, setStep] = useState(
     language ? 'consent' : 'language',
   );
+  const [selectedLang, setSelectedLang] = useState(language || null);
 
-  const lang = language || 'en';
+  const lang = selectedLang || 'en';
 
-  const handleLanguageSelect = (selectedLanguage) => {
-    setLanguage(selectedLanguage);
+  const handleLanguageSelect = (chosen) => {
+    setSelectedLang(chosen);
+    setLanguage(chosen);
     setStep('consent');
   };
 
-  const handleConsent = () => {
-    // A new session is created once, after language selection and consent.
-    startSession();
-    navigate('/intake');
+  const handleBack = () => {
+    setStep('language');
   };
 
+  const handleConsent = () => {
+    startSession();
+    navigate('/activities');
+  };
+
+  /* ---- STATE A: Language selection ---- */
   if (step === 'language') {
     return (
-      <main className="onboarding animate-fade-in">
-        <section
-          className="onboarding__content"
-          aria-labelledby="onboarding-language-title"
-        >
-          <div className="onboarding__icon-wrap" aria-hidden="true">
-            <span className="material-symbols-outlined">
-              translate
-            </span>
+      <main className="onboarding">
+        <div className="onboarding__container animate-fade-in">
+          {/* Back to landing */}
+          <button
+            className="onboarding__back"
+            type="button"
+            onClick={() => navigate('/')}
+            aria-label="Back to home"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          </button>
+
+          <div className="onboarding__header">
+            <div className="onboarding__step-indicator" aria-hidden="true">
+              <span className="onboarding__step-dot onboarding__step-dot--active" />
+              <span className="onboarding__step-dot" />
+            </div>
+
+            <h1 className="onboarding__heading" id="onboarding-language-title">
+              {t('onboarding.chooseLanguage', 'en')}
+            </h1>
+            <p className="onboarding__heading-hi text-hindi">
+              अपनी भाषा चुनें
+            </p>
           </div>
 
-          <h1
-            id="onboarding-language-title"
-            className="onboarding__title"
-          >
-            {t('onboarding.chooseLanguage', 'en')}
-          </h1>
-
-          <p className="onboarding__subtitle text-hindi">
-            अपनी भाषा चुनें
-          </p>
-
           <div
-            className="onboarding__language-grid"
+            className="onboarding__lang-grid"
             role="group"
-            aria-label="Choose language"
+            aria-labelledby="onboarding-language-title"
           >
+            {/* English */}
             <button
-              className="onboarding__language-btn"
+              className={`onboarding__lang-card${selectedLang === 'en' ? ' onboarding__lang-card--selected' : ''}`}
               type="button"
               onClick={() => handleLanguageSelect('en')}
             >
-              <span
-                className="onboarding__lang-icon-wrap"
-                aria-hidden="true"
-              >
-                <span className="material-symbols-outlined">
-                  language
+              <span className="onboarding__lang-icon-box" aria-hidden="true">
+                <span className="material-symbols-outlined">language</span>
+              </span>
+              <span className="onboarding__lang-name">English</span>
+              <span className="onboarding__lang-code">EN</span>
+              {selectedLang === 'en' && (
+                <span className="onboarding__lang-check material-symbols-outlined" aria-hidden="true">
+                  check_circle
                 </span>
-              </span>
-
-              <span className="onboarding__language-name">
-                English
-              </span>
-
-              <span className="onboarding__language-sub">
-                EN
-              </span>
+              )}
             </button>
 
+            {/* Hindi */}
             <button
-              className="onboarding__language-btn"
+              className={`onboarding__lang-card${selectedLang === 'hi' ? ' onboarding__lang-card--selected' : ''}`}
               type="button"
               onClick={() => handleLanguageSelect('hi')}
             >
-              <span
-                className="onboarding__lang-icon-wrap onboarding__lang-icon-wrap--hi"
-                aria-hidden="true"
-              >
-                <span className="text-hindi onboarding__devanagari">
-                  अ
+              <span className="onboarding__lang-icon-box onboarding__lang-icon-box--hi" aria-hidden="true">
+                <span className="text-hindi onboarding__devanagari-char">अ</span>
+              </span>
+              <span className="onboarding__lang-name text-hindi">हिन्दी</span>
+              <span className="onboarding__lang-code">HI</span>
+              {selectedLang === 'hi' && (
+                <span className="onboarding__lang-check material-symbols-outlined" aria-hidden="true">
+                  check_circle
                 </span>
-              </span>
-
-              <span className="onboarding__language-name text-hindi">
-                हिन्दी
-              </span>
-
-              <span className="onboarding__language-sub">
-                HI
-              </span>
+              )}
             </button>
           </div>
-        </section>
+        </div>
       </main>
     );
   }
 
+  /* ---- STATE B: Consent ---- */
   return (
-    <main className="onboarding animate-fade-in">
-      <section
-        className="onboarding__content"
-        aria-labelledby="onboarding-consent-title"
-      >
-        <div
-          className="onboarding__icon-wrap onboarding__icon-wrap--shield"
-          aria-hidden="true"
+    <main className="onboarding">
+      <div className="onboarding__container animate-fade-in">
+        {/* Back to language */}
+        <button
+          className="onboarding__back"
+          type="button"
+          onClick={handleBack}
+          aria-label={t('common.back', lang)}
         >
-          <span className="material-symbols-outlined">
-            shield
-          </span>
+          <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        </button>
+
+        <div className="onboarding__header">
+          <div className="onboarding__step-indicator" aria-hidden="true">
+            <span className="onboarding__step-dot onboarding__step-dot--done" />
+            <span className="onboarding__step-dot onboarding__step-dot--active" />
+          </div>
+
+          <h1 className="onboarding__heading" id="onboarding-consent-title">
+            {t('onboarding.consent.title', lang)}
+          </h1>
         </div>
 
-        <h1
-          id="onboarding-consent-title"
-          className="onboarding__title"
-        >
-          {t('onboarding.consent.title', lang)}
-        </h1>
-
-        <div className="onboarding__consent-box">
-          <p>{t('onboarding.consent.text', lang)}</p>
+        {/* Purpose explanation */}
+        <div className="onboarding__consent-card">
+          <p className="onboarding__consent-text">
+            {t('onboarding.consent.text', lang)}
+          </p>
         </div>
 
-        <ul className="onboarding__checklist">
-          <li>
-            <span
-              className="onboarding__check-icon material-symbols-outlined"
-              aria-hidden="true"
-            >
-              check_circle
+        {/* Key points */}
+        <ul className="onboarding__points" role="list">
+          <li className="onboarding__point">
+            <span className="material-symbols-outlined onboarding__point-icon onboarding__point-icon--teal" aria-hidden="true">
+              smartphone
             </span>
             <span>
               {lang === 'hi'
-                ? 'सेशन डेटा इसी डिवाइस पर सेव होता है'
-                : 'Session data is saved on this device'}
+                ? 'सेशन डेटा केवल इसी डिवाइस पर सेव होता है'
+                : 'Session data is stored locally on this device'}
             </span>
           </li>
-
-          <li>
-            <span
-              className="onboarding__check-icon material-symbols-outlined"
-              aria-hidden="true"
-            >
-              check_circle
+          <li className="onboarding__point">
+            <span className="material-symbols-outlined onboarding__point-icon" aria-hidden="true">
+              info
             </span>
             <span>
               {lang === 'hi'
-                ? 'यह चिकित्सा निदान नहीं है'
-                : 'This is not a medical diagnosis'}
+                ? 'यह आँखों की जाँच, निदान या चश्मे का नंबर नहीं है'
+                : 'This is not an eye examination, diagnosis or prescription'}
             </span>
           </li>
-
-          <li>
-            <span
-              className="onboarding__check-icon material-symbols-outlined"
-              aria-hidden="true"
-            >
-              check_circle
+          <li className="onboarding__point">
+            <span className="material-symbols-outlined onboarding__point-icon onboarding__point-icon--teal" aria-hidden="true">
+              shield
             </span>
             <span>
               {lang === 'hi'
-                ? 'यह पेशेवर आँखों की जाँच का विकल्प नहीं है'
-                : 'It does not replace a professional eye examination'}
+                ? 'यह पेशेवर नेत्र-देखभाल का विकल्प नहीं है'
+                : 'It does not replace a professional eye-care consultation'}
             </span>
           </li>
         </ul>
 
+        {/* Continue */}
         <button
-          className="btn btn--primary btn--full btn--lg"
+          className="btn btn--primary btn--full btn--lg onboarding__continue-btn"
           type="button"
           onClick={handleConsent}
         >
+          {t('onboarding.consent.agree', lang)}
           <span className="material-symbols-outlined" aria-hidden="true">
             arrow_forward
           </span>
-          {t('onboarding.consent.agree', lang)}
         </button>
-      </section>
+      </div>
     </main>
   );
 }

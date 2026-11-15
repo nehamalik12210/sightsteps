@@ -1,56 +1,56 @@
 /* ============================================
-   SightSteps Design System — Clinical Clarity
+   SightSteps Design System — Optical Editorial
    Mobile-first · Accessible · PWA-ready
    ============================================ */
 
 /* --- Design Tokens --- */
 :root {
-  /* Primary palette */
-  --color-primary: #004e9f;
-  --color-primary-container: #0066cc;
-  --color-primary-light: #0066cc;
-  --color-primary-dark: #004e9f;
-  --color-primary-bg: #eff4ff;
+  /* Primary palette — Optical Editorial */
+  --color-primary: #1769D2;
+  --color-primary-container: #1769D2;
+  --color-primary-light: #2B7AE8;
+  --color-primary-dark: #1258B0;
+  --color-primary-bg: #E8F2FC;
 
-  /* Secondary */
-  --color-secondary: #006591;
+  /* Secondary — Deep ink navy */
+  --color-secondary: #12243A;
 
-  /* Tertiary (success green) */
-  --color-tertiary: #005c3f;
-  --color-tertiary-container: #007752;
+  /* Tertiary (teal) */
+  --color-tertiary: #187A72;
+  --color-tertiary-container: #1A9B91;
 
   /* Semantic colors */
-  --color-success: #005c3f;
-  --color-success-bg: #e6f4ed;
+  --color-success: #187A72;
+  --color-success-bg: #E6F5F3;
   --color-warning: #CC7A00;
   --color-warning-bg: #FFF3E0;
   --color-danger: #ba1a1a;
   --color-danger-bg: #ffdad6;
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
-  --color-info: #0066cc;
-  --color-info-bg: #eff4ff;
+  --color-info: #1769D2;
+  --color-info-bg: #E8F2FC;
 
-  /* Surfaces */
-  --color-bg: #f8f9ff;
-  --color-background: #f8f9ff;
-  --color-surface: #f8f9ff;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #eff4ff;
-  --color-surface-container: #e5eeff;
-  --color-surface-container-high: #dce9ff;
+  /* Surfaces — warm ivory base */
+  --color-bg: #F4F2EC;
+  --color-background: #F4F2EC;
+  --color-surface: #F4F2EC;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F9F7F3;
+  --color-surface-container: #EFEDE7;
+  --color-surface-container-high: #E8E6E0;
 
-  /* On-surface text */
-  --color-on-surface: #0b1c30;
-  --color-on-surface-variant: #414753;
-  --color-text: #0b1c30;
-  --color-text-secondary: #414753;
-  --color-text-muted: #727784;
+  /* On-surface text — deep ink navy */
+  --color-on-surface: #12243A;
+  --color-on-surface-variant: #4A5568;
+  --color-text: #12243A;
+  --color-text-secondary: #4A5568;
+  --color-text-muted: #8C95A6;
 
   /* Outlines / borders */
-  --color-outline: #727784;
-  --color-outline-variant: #c1c6d5;
-  --color-border: #E2E8F0;
+  --color-outline: #8C95A6;
+  --color-outline-variant: #C8CDD6;
+  --color-border: #D4D9E2;
 
   /* Typography */
   --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -63,23 +63,23 @@
   --fs-md: 1.125rem;   /* 18px */
   --fs-lg: 1.25rem;    /* 20px */
   --fs-xl: 1.5rem;     /* 24px */
-  --fs-2xl: 2rem;      /* 32px */
+  --fs-2xl: 2.25rem;   /* 36px */
 
   /* Named typography tokens */
-  --headline-xl-size: 2rem;         /* 32px */
-  --headline-xl-line: 2.5rem;       /* 40px */
-  --headline-xl-weight: 700;
-  --headline-xl-tracking: -0.02em;
+  --headline-xl-size: 2.25rem;        /* 36px */
+  --headline-xl-line: 2.75rem;        /* 44px */
+  --headline-xl-weight: 800;
+  --headline-xl-tracking: -0.025em;
 
   --headline-lg-size: 1.5rem;       /* 24px */
   --headline-lg-line: 2rem;         /* 32px */
-  --headline-lg-weight: 600;
-  --headline-lg-tracking: -0.01em;
+  --headline-lg-weight: 700;
+  --headline-lg-tracking: -0.015em;
 
   --headline-md-size: 1.25rem;      /* 20px */
   --headline-md-line: 1.75rem;      /* 28px */
   --headline-md-weight: 600;
-  --headline-md-tracking: 0;
+  --headline-md-tracking: -0.01em;
 
   --headline-sm-size: 1.125rem;     /* 18px */
   --headline-sm-line: 1.625rem;     /* 26px */
@@ -117,6 +117,7 @@
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
+  --fw-extrabold: 800;
   --lh-tight: 1.25;
   --lh-normal: 1.5;
   --lh-relaxed: 1.75;
@@ -132,21 +133,21 @@
   --space-10: 2.5rem;  /* 40px */
   --space-12: 3rem;    /* 48px */
 
-  /* Border radius */
+  /* Border radius — round-12 scale */
   --radius-sm: 0.375rem;  /* 6px */
-  --radius-md: 0.5rem;    /* 8px */
-  --radius-lg: 0.75rem;   /* 12px */
-  --radius-xl: 1rem;      /* 16px */
+  --radius-md: 0.625rem;  /* 10px */
+  --radius-lg: 0.875rem;  /* 14px */
+  --radius-xl: 1.25rem;   /* 20px */
   --radius-full: 9999px;
   --radius-pill: 9999px;
 
-  /* Shadows — medical-grade */
-  --shadow-sm: 0px 2px 8px rgba(0, 102, 204, 0.04), 0px 1px 3px rgba(100, 116, 139, 0.06);
-  --shadow-md: 0px 2px 8px rgba(0, 102, 204, 0.04), 0px 1px 3px rgba(100, 116, 139, 0.06);
-  --shadow-level-1: 0px 2px 8px rgba(0, 102, 204, 0.04), 0px 1px 3px rgba(100, 116, 139, 0.06);
-  --shadow-lg: 0px 8px 24px rgba(0, 102, 204, 0.08);
-  --shadow-level-2: 0px 8px 24px rgba(0, 102, 204, 0.08);
-  --shadow-xl: 0px 8px 24px rgba(0, 102, 204, 0.08);
+  /* Shadows — warm editorial */
+  --shadow-sm: 0px 2px 8px rgba(18, 36, 58, 0.04), 0px 1px 3px rgba(18, 36, 58, 0.06);
+  --shadow-md: 0px 2px 8px rgba(18, 36, 58, 0.04), 0px 1px 3px rgba(18, 36, 58, 0.06);
+  --shadow-level-1: 0px 2px 8px rgba(18, 36, 58, 0.04), 0px 1px 3px rgba(18, 36, 58, 0.06);
+  --shadow-lg: 0px 8px 24px rgba(18, 36, 58, 0.08);
+  --shadow-level-2: 0px 8px 24px rgba(18, 36, 58, 0.08);
+  --shadow-xl: 0px 8px 24px rgba(18, 36, 58, 0.08);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -284,7 +285,7 @@ ul, ol {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  max-width: var(--max-width);
+  width: 100%;
   margin: 0 auto;
   position: relative;
 }
@@ -770,12 +771,4 @@ ul, ol {
 /* --- Hindi text --- */
 .text-hindi {
   font-family: var(--font-family-hindi);
-}
-
-/* --- Responsive --- */
-@media (min-width: 481px) {
-  .app {
-    border-left: 1px solid var(--color-border);
-    border-right: 1px solid var(--color-border);
-  }
 }

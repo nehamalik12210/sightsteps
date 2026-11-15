@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
@@ -7,292 +6,162 @@ import { evaluateAnswers } from '../engine/ruleEngine.js';
 import './Report.css';
 
 function localized(value, lang) {
-  if (value && typeof value === 'object') {
-    return value[lang] || value.en || '';
-  }
-
+  if (value && typeof value === 'object') return value[lang] || value.en || '';
   return value || '';
 }
 
 export default function Report() {
   const navigate = useNavigate();
-
   const {
-    language,
-    answers,
-    visionResults,
-    isDemo,
-    reset,
+    language, answers, activities, primaryActivity,
+    participantNote, visionResults, isDemo, reset,
   } = useApp();
 
   const lang = language || 'en';
-
   const [expandedGroups, setExpandedGroups] = useState({});
-  const [animateIn, setAnimateIn] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Build the report directly from the actual questionnaire answers.
-  // No clinical scores, risk categories or urgency labels are generated.
   const report = useMemo(
-    () => evaluateAnswers(answers),
-    [answers]
+    () => evaluateAnswers(answers, { activities, primaryActivity, participantNote }),
+    [answers, activities, primaryActivity, participantNote]
   );
 
   useEffect(() => {
-    if (Object.keys(answers).length === 0) {
-      navigate('/', { replace: true });
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setAnimateIn(true);
-    }, 80);
-
-    return () => clearTimeout(timer);
+    if (Object.keys(answers).length === 0) navigate('/', { replace: true });
   }, [answers, navigate]);
 
-  const toggleGroup = (groupId) => {
-    setExpandedGroups((previous) => ({
-      ...previous,
-      [groupId]: !previous[groupId],
-    }));
-  };
+  const toggleGroup = (id) => setExpandedGroups((p) => ({ ...p, [id]: !p[id] }));
+  const handleNew = () => { reset(); navigate('/', { replace: true }); };
 
-  const handleNewAssessment = () => {
-    reset();
-    navigate('/', { replace: true });
-  };
+  const hasVisionData = visionResults?.completed === true && visionResults?.data?.left && visionResults?.data?.right;
+  const hasFollowUp = report.followUpNotes.length > 0;
+  const hasDiscussion = report.discussionPoints.length > 0;
 
-  const hasVisionData =
-    visionResults?.completed === true &&
-    visionResults?.data?.left &&
-    visionResults?.data?.right;
-
-  const hasFollowUpNotes = report.followUpNotes.length > 0;
-  const hasDiscussionPoints = report.discussionPoints.length > 0;
-
-  const groupCountLabel = lang === 'hi'
-    ? `${report.answeredCount} जवाब शामिल`
-    : `${report.answeredCount} responses included`;
-
-  if (Object.keys(answers).length === 0) {
-    return null;
-  }
+  if (Object.keys(answers).length === 0) return null;
 
   return (
-    <div className="report">
+    <div className="rpt">
       {isDemo && (
-        <div className="demo-banner">
-          <span className="demo-banner__icon material-symbols-outlined">
-            target
-          </span>
+        <div className="rpt__demo-banner" role="status">
+          <span className="material-symbols-outlined" aria-hidden="true">target</span>
           <span>{t('demo.banner', lang)}</span>
         </div>
       )}
 
-      <header className="app-header">
-        <button
-          type="button"
-          className="app-header__back"
-          onClick={() => navigate('/')}
-          aria-label={
-            lang === 'hi'
-              ? 'मुख्य पृष्ठ पर वापस जाएँ'
-              : 'Back to home'
-          }
-        >
-          <span className="material-symbols-outlined">
-            arrow_back
-          </span>
+      <header className="rpt__topbar">
+        <button className="rpt__back-btn" type="button" onClick={() => navigate('/')}
+          aria-label={t('common.back', lang)}>
+          <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
         </button>
-
-        <span className="app-header__title">
-          {lang === 'hi' ? 'आपकी जानकारी' : 'Your Insights'}
+        <span className="rpt__topbar-title">
+          {lang === 'hi' ? 'आपका वार्तालाप मानचित्र' : 'Your Conversation Map'}
         </span>
-
-        <span
-          className="app-header__action"
-          aria-hidden="true"
-        />
+        <span className="rpt__topbar-spacer" />
       </header>
 
-      <main className="report__body">
-
-        {/* ─── Hero ─── */}
-
-        <section
-          className={`report__hero ${
-            animateIn ? 'report__hero--visible' : ''
-          }`}
-        >
-          <div className="report__hero-icon">
-            <span className="material-symbols-outlined">
-              assignment_turned_in
-            </span>
-          </div>
-
-          <p className="report__eyebrow">
-            {lang === 'hi'
-              ? 'आपका सत्र पूरा हुआ'
-              : 'ASSESSMENT SUMMARY'}
+      <main className="rpt__body">
+        {/* ── 1. Introduction ── */}
+        <section className="rpt__intro animate-fade-in">
+          <p className="rpt__kicker">
+            {lang === 'hi' ? 'सत्र सारांश' : 'SESSION SUMMARY'}
           </p>
-
-          <h1 className="report__main-title">
-            {lang === 'hi'
-              ? 'आपकी दृष्टि संबंधी जानकारी'
-              : 'Your Vision Insights'}
+          <h1 className="rpt__headline">
+            {lang === 'hi' ? 'आपका दृष्टि वार्तालाप मानचित्र' : 'Your Vision Conversation Map'}
           </h1>
-
-          <p className="report__hero-description">
+          <p className="rpt__intro-desc">
             {lang === 'hi'
-              ? 'आपके द्वारा दिए गए जवाबों का एक सरल सारांश। इसे ऑप्टिशियन या नेत्र देखभाल पेशेवर के साथ चर्चा के लिए उपयोग करें।'
-              : 'A clear summary of the answers you shared. Use it as a conversation guide with an optician or eye-care professional.'}
+              ? 'आपके जवाबों का सारांश। इसे ऑप्टिशियन या नेत्र देखभाल पेशेवर के साथ बातचीत के लिए उपयोग करें।'
+              : 'A structured summary of your responses. Use it to guide a conversation with an optician or eye-care professional.'}
           </p>
-
-          <div className="report__response-count">
-            <span className="material-symbols-outlined">
-              checklist
-            </span>
-
-            {groupCountLabel}
+          <div className="rpt__meta-pill">
+            <span className="material-symbols-outlined" aria-hidden="true">checklist</span>
+            {lang === 'hi' ? `${report.answeredCount} जवाब शामिल` : `${report.answeredCount} responses included`}
           </div>
         </section>
 
-        {/* ─── Important Notice ─── */}
+        {/* ── Notice ── */}
+        <div className="rpt__notice">
+          <span className="material-symbols-outlined" aria-hidden="true">info</span>
+          <p>
+            {lang === 'hi'
+              ? 'यह रिपोर्ट केवल आपके बताए गए जवाबों को व्यवस्थित करती है। यह आँखों की जाँच, निदान, दृष्टि मापन या प्रिस्क्रिप्शन नहीं है।'
+              : 'This report organises only your self-reported responses. It is not an eye examination, diagnosis, visual acuity measurement or prescription.'}
+          </p>
+        </div>
 
-        <section
-          className="report__notice"
-          aria-label={
-            lang === 'hi'
-              ? 'महत्वपूर्ण जानकारी'
-              : 'Important information'
-          }
-        >
-          <span className="material-symbols-outlined report__notice-icon">
-            info
-          </span>
+        {/* ── 3. Daily visual activities ── */}
+        {report.activitiesContext && (
+          <section className="rpt__section" aria-labelledby="rpt-activities">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'आपकी दिनचर्या' : 'YOUR ROUTINE'}</p>
+                <h2 id="rpt-activities" className="rpt__sec-title">
+                  {lang === 'hi' ? 'दैनिक दृष्टि संबंधी गतिविधियाँ' : 'Daily visual activities'}
+                </h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">routine</span>
+            </div>
+            <div className="rpt__chip-row">
+              {report.activitiesContext.selected.map((act) => (
+                <span key={act.id} className={`rpt__chip${report.activitiesContext.primary?.id === act.id ? ' rpt__chip--primary' : ''}`}>
+                  {localized(act.label, lang)}
+                  {report.activitiesContext.primary?.id === act.id && (
+                    <span className="rpt__chip-tag">
+                      <span className="material-symbols-outlined" aria-hidden="true">star</span>
+                      {lang === 'hi' ? 'मुख्य' : 'Primary'}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
 
-          <div>
-            <h2 className="report__notice-title">
-              {lang === 'hi'
-                ? 'यह रिपोर्ट क्या बताती है'
-                : 'What this report means'}
-            </h2>
-
-            <p>
-              {lang === 'hi'
-                ? 'यह रिपोर्ट केवल आपके स्वयं बताए गए जवाबों को व्यवस्थित करती है। यह आँखों की जाँच, चिकित्सा निदान, दृष्टि की तीक्ष्णता का मापन या प्रिस्क्रिप्शन नहीं है।'
-                : 'This report organises only the responses you provided. It is not an eye examination, medical diagnosis, visual acuity measurement or prescription.'}
-            </p>
-          </div>
-        </section>
-
-        {/* ─── Answer-based Insights ─── */}
-
-        <section
-          className={`report__section ${
-            animateIn ? 'report__section--visible' : ''
-          }`}
-          aria-labelledby="report-insights-title"
-        >
-          <div className="report__section-heading">
+        {/* ── 2. Reported vision experiences ── */}
+        <section className="rpt__section" aria-labelledby="rpt-responses">
+          <div className="rpt__sec-head">
             <div>
-              <p className="report__section-kicker">
-                {lang === 'hi' ? 'आपके जवाब' : 'YOUR RESPONSES'}
-              </p>
-
-              <h2
-                id="report-insights-title"
-                className="report__section-title"
-              >
-                {lang === 'hi'
-                  ? 'आपने क्या साझा किया'
-                  : 'What you shared'}
+              <p className="rpt__kicker">{lang === 'hi' ? 'आपके जवाब' : 'YOUR RESPONSES'}</p>
+              <h2 id="rpt-responses" className="rpt__sec-title">
+                {lang === 'hi' ? 'बताए गए दृष्टि अनुभव' : 'Reported vision experiences'}
               </h2>
             </div>
-
-            <span className="material-symbols-outlined report__section-icon">
-              subject
-            </span>
+            <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">visibility</span>
           </div>
 
-          <div className="report__groups">
-            {report.groups.map((group, index) => {
-              const isExpanded = expandedGroups[group.id] ?? true;
-              const panelId = `report-group-${group.id}`;
-
+          <div className="rpt__groups">
+            {report.groups.map((group) => {
+              const isOpen = expandedGroups[group.id] ?? true;
+              const panelId = `rpt-panel-${group.id}`;
               return (
-                <article
-                  key={group.id}
-                  className="report__group-card"
-                  style={{ animationDelay: `${index * 90}ms` }}
-                >
-                  <div className="report__group-header">
-                    <div className="report__group-icon">
-                      <span className="material-symbols-outlined">
-                        {group.icon}
-                      </span>
+                <article key={group.id} className="rpt__group">
+                  <div className="rpt__group-head">
+                    <div className="rpt__group-icon-box">
+                      <span className="material-symbols-outlined" aria-hidden="true">{group.icon}</span>
                     </div>
-
-                    <div className="report__group-heading">
-                      <h3 className="report__group-title">
-                        {localized(group.title, lang)}
-                      </h3>
-
-                      <p className="report__group-description">
-                        {localized(group.description, lang)}
-                      </p>
+                    <div className="rpt__group-info">
+                      <h3 className="rpt__group-title">{localized(group.title, lang)}</h3>
+                      <p className="rpt__group-desc">{localized(group.description, lang)}</p>
                     </div>
-
-                    <span className="report__group-count">
-                      {group.observations.length}
-                    </span>
+                    <span className="rpt__group-count">{group.observations.length}</span>
                   </div>
 
-                  <button
-                    type="button"
-                    className="report__expand-button"
-                    onClick={() => toggleGroup(group.id)}
-                    aria-expanded={isExpanded}
-                    aria-controls={panelId}
-                  >
-                    <span>
-                      {isExpanded
-                        ? (lang === 'hi'
-                          ? 'जवाब छिपाएँ'
-                          : 'Hide responses')
-                        : (lang === 'hi'
-                          ? 'जवाब देखें'
-                          : 'View responses')}
-                    </span>
-
-                    <span className="material-symbols-outlined">
-                      {isExpanded ? 'expand_less' : 'expand_more'}
+                  <button type="button" className="rpt__expand-btn" onClick={() => toggleGroup(group.id)}
+                    aria-expanded={isOpen} aria-controls={panelId}>
+                    <span>{isOpen ? (lang === 'hi' ? 'छिपाएँ' : 'Hide') : (lang === 'hi' ? 'देखें' : 'View')}</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      {isOpen ? 'expand_less' : 'expand_more'}
                     </span>
                   </button>
 
-                  <div
-                    id={panelId}
-                    className="report__observations"
-                    hidden={!isExpanded}
-                  >
-                    {group.observations.map((observation) => (
-                      <div
-                        key={observation.id}
-                        className="report__observation"
-                      >
-                        <div className="report__observation-top">
-                          <h4 className="report__observation-question">
-                            {localized(observation.question, lang)}
-                          </h4>
-
-                          <span className="report__answer-chip">
-                            {localized(observation.answer, lang)}
-                          </span>
+                  <div id={panelId} className="rpt__obs-list" hidden={!isOpen}>
+                    {group.observations.map((obs) => (
+                      <div key={obs.id} className="rpt__obs">
+                        <div className="rpt__obs-row">
+                          <h4 className="rpt__obs-q">{localized(obs.question, lang)}</h4>
+                          <span className="rpt__obs-answer">{localized(obs.answer, lang)}</span>
                         </div>
-
-                        <p className="report__observation-detail">
-                          {localized(observation.detail, lang)}
-                        </p>
+                        <p className="rpt__obs-detail">{localized(obs.detail, lang)}</p>
                       </div>
                     ))}
                   </div>
@@ -302,127 +171,69 @@ export default function Report() {
           </div>
         </section>
 
-        {/* ─── Optician Discussion Topics ─── */}
+        {/* ── 4. Eye-care background is part of groups above ── */}
 
-        <section
-          className={`report__section ${
-            animateIn ? 'report__section--visible' : ''
-          }`}
-          aria-labelledby="report-discussion-title"
-        >
-          <div className="report__section-heading">
+        {/* ── 5. Discussion topics ── */}
+        <section className="rpt__section" aria-labelledby="rpt-discuss">
+          <div className="rpt__sec-head">
             <div>
-              <p className="report__section-kicker">
-                {lang === 'hi' ? 'अगला कदम' : 'NEXT CONVERSATION'}
-              </p>
-
-              <h2
-                id="report-discussion-title"
-                className="report__section-title"
-              >
-                {lang === 'hi'
-                  ? 'ऑप्टिशियन से चर्चा के विषय'
-                  : 'Topics to discuss with an optician'}
+              <p className="rpt__kicker">{lang === 'hi' ? 'अगला कदम' : 'NEXT CONVERSATION'}</p>
+              <h2 id="rpt-discuss" className="rpt__sec-title">
+                {lang === 'hi' ? 'ऑप्टिशियन से चर्चा के विषय' : 'Topics to discuss with an optician'}
               </h2>
             </div>
-
-            <span className="material-symbols-outlined report__section-icon">
-              forum
-            </span>
+            <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">forum</span>
           </div>
 
-          <p className="report__section-intro">
+          <p className="rpt__sec-intro">
             {lang === 'hi'
-              ? 'ये विषय आपकी बताई गई आदतों और उपयोग के आधार पर बातचीत शुरू करने में मदद कर सकते हैं। ये लेंस के प्रिस्क्रिप्शन या व्यक्तिगत चिकित्सा सलाह नहीं हैं।'
-              : 'These topics can help start a conversation based on the habits and activities you reported. They are not lens prescriptions or individual medical advice.'}
+              ? 'ये विषय आपकी बताई गई आदतों के आधार पर बातचीत शुरू करने में मदद कर सकते हैं। ये प्रिस्क्रिप्शन या चिकित्सा सलाह नहीं हैं।'
+              : 'These topics can help start a conversation based on the habits you reported. They are not prescriptions or medical advice.'}
           </p>
 
-          {hasDiscussionPoints ? (
-            <div className="report__discussion-list">
-              {report.discussionPoints.map((point) => (
-                <article
-                  className="report__discussion-card"
-                  key={point.id}
-                >
-                  <div className="report__discussion-icon">
-                    <span className="material-symbols-outlined">
-                      {point.icon}
-                    </span>
+          {hasDiscussion ? (
+            <div className="rpt__discuss-list">
+              {report.discussionPoints.map((pt) => (
+                <article key={pt.id} className="rpt__discuss-item">
+                  <div className="rpt__discuss-icon-box">
+                    <span className="material-symbols-outlined" aria-hidden="true">{pt.icon}</span>
                   </div>
-
-                  <div className="report__discussion-content">
-                    <h3 className="report__discussion-title">
-                      {localized(point.title, lang)}
-                    </h3>
-
-                    <p className="report__discussion-context">
-                      {localized(point.context, lang)}
-                    </p>
-
-                    <div className="report__discussion-prompt">
-                      <span className="material-symbols-outlined">
-                        chat
-                      </span>
-
-                      <p>
-                        {localized(point.prompt, lang)}
-                      </p>
+                  <div className="rpt__discuss-body">
+                    <h3>{localized(pt.title, lang)}</h3>
+                    <p className="rpt__discuss-ctx">{localized(pt.context, lang)}</p>
+                    <div className="rpt__discuss-prompt">
+                      <span className="material-symbols-outlined" aria-hidden="true">chat</span>
+                      <p>{localized(pt.prompt, lang)}</p>
                     </div>
                   </div>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="report__empty-state">
-              <span className="material-symbols-outlined">
-                lightbulb
-              </span>
-
-              <p>
-                {lang === 'hi'
-                  ? 'आपके जवाबों से कोई विशेष लेंस चर्चा विषय नहीं निकला। ऑप्टिशियन आपकी जरूरतों के आधार पर सामान्य विकल्प समझा सकते हैं।'
-                  : 'Your responses did not identify a specific lens discussion topic. An optician can explain general options based on your needs.'}
-              </p>
+            <div className="rpt__empty">
+              <span className="material-symbols-outlined" aria-hidden="true">lightbulb</span>
+              <p>{lang === 'hi'
+                ? 'आपके जवाबों से कोई विशेष चर्चा विषय नहीं निकला। ऑप्टिशियन आपकी ज़रूरतों के आधार पर सामान्य विकल्प बता सकते हैं।'
+                : 'Your responses did not identify a specific discussion topic. An optician can explain general options based on your needs.'}</p>
             </div>
           )}
         </section>
 
-        {/* ─── Professional Follow-up Notes ─── */}
-
-        {hasFollowUpNotes && (
-          <section
-            className="report__section"
-            aria-labelledby="report-followup-title"
-          >
-            <div className="report__section-heading">
+        {/* ── Follow-up notes ── */}
+        {hasFollowUp && (
+          <section className="rpt__section" aria-labelledby="rpt-followup">
+            <div className="rpt__sec-head">
               <div>
-                <p className="report__section-kicker">
-                  {lang === 'hi'
-                    ? 'ध्यान देने योग्य बातें'
-                    : 'POINTS TO SHARE'}
-                </p>
-
-                <h2
-                  id="report-followup-title"
-                  className="report__section-title"
-                >
-                  {lang === 'hi'
-                    ? 'नेत्र देखभाल पेशेवर से चर्चा करें'
-                    : 'Discuss with an eye-care professional'}
+                <p className="rpt__kicker">{lang === 'hi' ? 'ध्यान देने योग्य' : 'POINTS TO SHARE'}</p>
+                <h2 id="rpt-followup" className="rpt__sec-title">
+                  {lang === 'hi' ? 'पेशेवर से चर्चा करें' : 'Discuss with a professional'}
                 </h2>
               </div>
-
-              <span className="material-symbols-outlined report__section-icon">
-                medical_services
-              </span>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">medical_services</span>
             </div>
-
-            <div className="report__followup-list">
+            <div className="rpt__followup-list">
               {report.followUpNotes.map((note) => (
-                <article
-                  className="report__followup-card"
-                  key={note.id}
-                >
+                <article key={note.id} className="rpt__followup-item">
                   <h3>{localized(note.title, lang)}</h3>
                   <p>{localized(note.detail, lang)}</p>
                 </article>
@@ -431,150 +242,133 @@ export default function Report() {
           </section>
         )}
 
-        {/* ─── Awareness Activity Results ─── */}
-
+        {/* ── Direction activity results ── */}
         {hasVisionData && (
-          <section
-            className="report__section"
-            aria-labelledby="report-activity-title"
-          >
-            <div className="report__section-heading">
+          <section className="rpt__section" aria-labelledby="rpt-activity">
+            <div className="rpt__sec-head">
               <div>
-                <p className="report__section-kicker">
-                  {lang === 'hi'
-                    ? 'वैकल्पिक गतिविधि'
-                    : 'OPTIONAL ACTIVITY'}
-                </p>
-
-                <h2
-                  id="report-activity-title"
-                  className="report__section-title"
-                >
-                  {lang === 'hi'
-                    ? 'दिशा पहचान गतिविधि'
-                    : 'Direction activity responses'}
+                <p className="rpt__kicker">{lang === 'hi' ? 'वैकल्पिक गतिविधि' : 'OPTIONAL ACTIVITY'}</p>
+                <h2 id="rpt-activity" className="rpt__sec-title">
+                  {lang === 'hi' ? 'दिशा पहचान गतिविधि' : 'Direction activity responses'}
                 </h2>
               </div>
-
-              <span className="material-symbols-outlined report__section-icon">
-                explore
-              </span>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">explore</span>
             </div>
-
-            <div className="report__activity-results">
+            <div className="rpt__eye-grid">
               {['left', 'right'].map((eye) => {
-                const result = visionResults.data[eye];
-
-                const correct = Number.isFinite(result?.correct)
-                  ? result.correct
-                  : 0;
-
-                const total = Number.isFinite(result?.total)
-                  ? result.total
-                  : 0;
-
+                const r = visionResults.data[eye];
+                const correct = Number.isFinite(r?.correct) ? r.correct : 0;
+                const total = Number.isFinite(r?.total) ? r.total : 0;
                 return (
-                  <div
-                    key={eye}
-                    className="report__activity-eye"
-                  >
-                    <span className="report__activity-eye-label">
-                      <span className="material-symbols-outlined">
-                        visibility
-                      </span>
-
-                      {eye === 'left'
-                        ? (lang === 'hi' ? 'बाईं ओर' : 'Left side')
-                        : (lang === 'hi' ? 'दाईं ओर' : 'Right side')}
+                  <div key={eye} className="rpt__eye-card">
+                    <span className="rpt__eye-label">
+                      {eye === 'left' ? (lang === 'hi' ? 'बाईं ओर' : 'Left side') : (lang === 'hi' ? 'दाईं ओर' : 'Right side')}
                     </span>
-
-                    <strong className="report__activity-count">
-                      {correct} / {total}
-                    </strong>
-
-                    <span className="report__activity-caption">
-                      {lang === 'hi'
-                        ? 'सही दिशा पहचान'
-                        : 'Correct direction selections'}
+                    <strong className="rpt__eye-score">{correct}/{total}</strong>
+                    <span className="rpt__eye-caption">
+                      {lang === 'hi' ? 'सही दिशा पहचान' : 'Matching directions'}
                     </span>
                   </div>
                 );
               })}
             </div>
-
-            <div className="report__activity-disclaimer">
-              <span className="material-symbols-outlined">
-                info
-              </span>
-
-              <p>
-                {lang === 'hi'
-                  ? 'ये केवल गतिविधि के दौरान दिए गए जवाब हैं। इन्हें दृष्टि की तीक्ष्णता, आँखों की क्षमता या किसी चिकित्सा परिणाम के रूप में न समझें।'
-                  : 'These are only responses recorded during the activity. They must not be interpreted as visual acuity, eye capability or a medical result.'}
-              </p>
+            <div className="rpt__inline-note">
+              <span className="material-symbols-outlined" aria-hidden="true">info</span>
+              <p>{lang === 'hi'
+                ? 'ये केवल गतिविधि के दौरान दिए गए जवाब हैं। दृष्टि तीक्ष्णता या चिकित्सा परिणाम के रूप में न समझें।'
+                : 'These are only responses recorded during the activity. They must not be interpreted as visual acuity or a medical result.'}</p>
             </div>
           </section>
         )}
 
         {visionResults?.skipped && (
-          <div className="report__skipped">
-            <span className="material-symbols-outlined">
-              visibility_off
-            </span>
-
-            <p>
-              {lang === 'hi'
-                ? 'आपने वैकल्पिक दिशा पहचान गतिविधि छोड़ दी।'
-                : 'You skipped the optional direction awareness activity.'}
-            </p>
+          <div className="rpt__skipped">
+            <span className="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+            <p>{lang === 'hi'
+              ? 'आपने वैकल्पिक दिशा पहचान गतिविधि छोड़ दी।'
+              : 'You skipped the optional direction awareness activity.'}</p>
           </div>
         )}
 
-        {/* ─── Final Disclaimer ─── */}
+        {/* ── 6. Participant note ── */}
+        {report.participantNote && (
+          <section className="rpt__section" aria-labelledby="rpt-note">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'आपकी टिप्पणी' : 'YOUR NOTE'}</p>
+                <h2 id="rpt-note" className="rpt__sec-title">
+                  {lang === 'hi' ? 'अतिरिक्त जानकारी' : 'Additional information'}
+                </h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">edit_note</span>
+            </div>
+            <blockquote className="rpt__note-block">
+              <p>{report.participantNote}</p>
+            </blockquote>
+          </section>
+        )}
 
-        <section className="report__disclaimer">
-          <span className="material-symbols-outlined">
-            verified_user
-          </span>
-
+        {/* ── Disclaimer ── */}
+        <div className="rpt__disclaimer">
+          <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
           <div>
-            <h3>
-              {lang === 'hi'
-                ? 'महत्वपूर्ण सूचना'
-                : 'Important reminder'}
-            </h3>
-
-            <p>
-              {lang === 'hi'
-                ? 'SightSteps एक जागरूकता और बातचीत में सहायता करने वाला टूल है। यह चिकित्सा निदान, पेशेवर आँखों की जाँच या निर्धारित प्रिस्क्रिप्शन का विकल्प नहीं है।'
-                : 'SightSteps is an awareness and conversation-support tool. It does not replace a medical diagnosis, professional eye examination or prescribed vision correction.'}
-            </p>
+            <h3>{lang === 'hi' ? 'महत्वपूर्ण सूचना' : 'Important reminder'}</h3>
+            <p>{lang === 'hi'
+              ? 'SightSteps एक जागरूकता और बातचीत सहायता टूल है। यह चिकित्सा निदान, पेशेवर जाँच या प्रिस्क्रिप्शन का विकल्प नहीं है।'
+              : 'SightSteps is an awareness and conversation-support tool. It does not replace a medical diagnosis, professional eye examination or prescribed vision correction.'}</p>
           </div>
-        </section>
+        </div>
 
-        {/* ─── Actions ─── */}
+        {/* ── Privacy ── */}
+        <div className="rpt__privacy">
+          <span className="material-symbols-outlined" aria-hidden="true">shield</span>
+          <div>
+            <h3>{lang === 'hi' ? 'आपकी जानकारी सुरक्षित है' : 'Your data stays on this device'}</h3>
+            <p>{lang === 'hi'
+              ? 'सभी जवाब केवल इस डिवाइस पर सहेजे जाते हैं। कोई डेटा सर्वर पर नहीं भेजा जाता।'
+              : 'All responses are saved locally on this device. No data is sent to any server.'}</p>
+          </div>
+        </div>
 
-        <div className="report__actions">
-          <button
-            type="button"
-            className="btn btn--primary btn--full"
-            onClick={handleNewAssessment}
-          >
-            <span className="material-symbols-outlined">
-              refresh
-            </span>
+        {/* ── 7. Handoff actions ── */}
+        <div className="rpt__actions">
+          <button type="button" className="btn btn--primary btn--full btn--lg rpt__print-btn" onClick={() => window.print()}>
+            <span className="material-symbols-outlined" aria-hidden="true">print</span>
+            {lang === 'hi' ? 'मेरा वार्तालाप सारांश तैयार करें' : 'Prepare my conversation brief'}
+          </button>
 
+          <button type="button" className="btn btn--secondary btn--full" onClick={handleNew}>
+            <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
             {t('report.startNew', lang)}
           </button>
 
-          <button
-            type="button"
-            className="btn btn--ghost btn--full"
-            onClick={() => navigate('/')}
-          >
-            {lang === 'hi'
-              ? 'मुख्य पृष्ठ पर जाएँ'
-              : 'Back to home'}
+          {!showDeleteConfirm ? (
+            <button type="button" className="btn btn--danger-outline btn--full" onClick={() => setShowDeleteConfirm(true)}>
+              <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+              {lang === 'hi' ? 'मेरा डेटा हटाएँ' : 'Clear my data'}
+            </button>
+          ) : (
+            <div className="rpt__delete-confirm">
+              <p>
+                <span className="material-symbols-outlined" aria-hidden="true">warning</span>
+                {lang === 'hi'
+                  ? 'क्या आप वाकई अपना सारा डेटा हटाना चाहते हैं? यह पूर्ववत नहीं होगा।'
+                  : 'Are you sure? This action cannot be undone.'}
+              </p>
+              <div className="rpt__delete-actions">
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowDeleteConfirm(false)}>
+                  {t('common.cancel', lang)}
+                </button>
+                <button type="button" className="btn btn--danger btn--sm" onClick={() => { reset(); navigate('/', { replace: true }); }}>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                  {t('common.yesDelete', lang)}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button type="button" className="btn btn--ghost btn--full" onClick={() => navigate('/')}>
+            {lang === 'hi' ? 'मुख्य पृष्ठ पर जाएँ' : 'Back to home'}
           </button>
         </div>
       </main>
