@@ -7,37 +7,50 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'audio/*.mp3'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'SightSteps — Vision Support Tool',
         short_name: 'SightSteps',
-        description: 'Smartphone-based vision support for optical shops',
-        theme_color: '#0066CC',
-        background_color: '#FFFFFF',
+        description: 'Bilingual self-reported vision-experience and eye-care conversation support',
+        theme_color: '#1769D2',
+        background_color: '#F4F2EC',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         icons: [
           { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
-        ]
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,png,svg,mp3}'],
         runtimeCaching: [
           {
+            // Cache the Google Fonts stylesheet after it has been fetched once.
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
-            options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } }
-          }
-        ]
-      }
-    })
+            options: {
+              cacheName: 'google-fonts-css-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          {
+            // Google Fonts CSS references font binaries on a separate host.
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-font-files-cache',
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+        ],
+      },
+    }),
   ],
   server: {
     host: true,
-    port: 5173
-  }
+    port: 5173,
+  },
 });
-
