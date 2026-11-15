@@ -87,13 +87,13 @@ The engine does not infer a cause, diagnose, triage, calculate clinical risk, de
 Requirements: Node.js 20+ and npm.
 
 ```bash
-npm install
+npm ci
 npm run check
 npm run build
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`). The project intentionally omits `node_modules` and the repository's package lock. `npm install` resolves the dependencies listed in `package.json` and creates a local lock file. Keep that lock file in your working Git repository once dependencies are settled.
+Open the local URL printed by Vite (usually `http://localhost:5173`). The repository includes `package-lock.json`; use `npm ci` for a clean, reproducible install. Use `npm install` when intentionally changing dependencies, then review and commit any resulting lockfile changes. `node_modules` and `dist` are generated locally and are not committed.
 
 ### Checks
 
@@ -105,6 +105,20 @@ npm run build   # Vite production bundle (requires installed dependencies)
 ```
 
 The dependency-free audit and regression suite can run before the frontend dependencies are installed. `npm run build` requires Vite/React packages from `npm install`.
+
+## Deploy to Vercel
+
+The production site is a Vite single-page application and is configured for Vercel through the root-level `vercel.json` rewrite. This sends app routes such as `/report` back to `index.html`, allowing React Router to handle direct visits and page refreshes.
+
+To deploy:
+
+1. Import `nehamalik12210/sightsteps` from GitHub in Vercel.
+2. Set the production branch to `main`.
+3. Use the repository root (`./`) as the project root.
+4. Use `npm ci` as the install command, `npm run build` as the build command, and `dist` as the output directory.
+5. Deploy and test the landing page, direct route refreshes, bilingual flow, PWA installation and session clearing on the deployed URL.
+
+The app currently has no SightSteps backend or cloud database. Participant sessions remain in the user's browser storage; hosting the static app does not synchronize participant data across devices. Every merge or push to the configured production branch can trigger a new production deployment when Git integration is enabled. Pull requests and non-production branches can receive preview deployments.
 
 ## Privacy and limitations
 
