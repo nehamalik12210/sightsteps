@@ -200,5 +200,21 @@ check(/shouldDiscardKioskSessionOnRestore/.test(contextSource) && /clearAllSessi
 check(/not a complete security guarantee/.test(read('src/pages/KioskSetup.jsx')), 'kiosk setup explains that its privacy behavior is not a complete security guarantee');
 check(/assistedCompletion/.test(report) && /setAssistedCompletion/.test(onboarding), 'assisted completion is disclosed in the report');
 
+// Participant timeline and appointment preparation output.
+const timelinePageSource = read('src/pages/VisionTimeline.jsx');
+const timelineUtilitySource = read('src/utils/visionTimeline.js');
+const timelineCssSource = read('src/pages/VisionTimeline.css');
+const reportCssSource = read('src/pages/Report.css');
+check(appSource.includes('path="/timeline"') && appSource.includes('VisionTimeline'), 'participant timeline has a guarded application route');
+check(contextSource.includes('visionTimelineEntries') && contextSource.includes('setVisionTimelineEntries'), 'timeline is part of shared application state');
+check(storageSource.includes('visionTimelineEntries') && storageSource.includes('schemaVersion: 4'), 'timeline entries persist in the versioned local session record');
+check(timelineUtilitySource.includes('normalizeVisionTimelineEntries') && timelineUtilitySource.includes('MAX_VISION_TIMELINE_ENTRIES'), 'timeline data is sanitized and record count is bounded');
+check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineUtilitySource.includes('futureDate'), 'timeline validation rejects invalid and future dates');
+check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
+check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
+check(report.includes('Appointment Preparation Pack') && report.includes('rpt__brief-timeline'), 'appointment preparation pack includes a concise timeline summary');
+check(reportCssSource.includes('.rpt__timeline-list') && reportCssSource.includes('.rpt__brief-timeline'), 'report includes timeline and print styles');
+check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
+
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed) process.exitCode = 1;
