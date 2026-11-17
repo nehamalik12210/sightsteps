@@ -143,7 +143,7 @@ export default function Landing() {
   };
 
   return (
-    <main className="landing">
+    <main className="landing" id="main-content" tabIndex="-1">
       <div className="landing__layout">
         <div className="landing__content">
           <div className="landing__wordmark-row">
