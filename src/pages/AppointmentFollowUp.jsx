@@ -11,7 +11,7 @@ export default function AppointmentFollowUp() {
   const update = (key, value) => setAppointmentFollowUp({ [key]: value });
 
   return (
-    <main className="afu">
+    <main className="afu" id="main-content" tabIndex="-1">
       <header className="afu__topbar">
         <button type="button" className="afu__back" onClick={() => navigate('/report')} aria-label={lang === 'hi' ? 'रिपोर्ट पर वापस जाएँ' : 'Back to report'}>
           <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
