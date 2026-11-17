@@ -6,11 +6,15 @@ import './KioskSetup.css';
 export default function KioskSetup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { setKioskMode, language, isHydrated, sessionId, kioskMode, reset } = useApp();
+  const { setKioskMode, language, isHydrated, sessionId, kioskMode, kioskCleanupFailed, reset } = useApp();
   const [startPending, setStartPending] = useState(false);
-  const [clearError, setClearError] = useState(searchParams.get('clearError') === '1');
+  const [clearError, setClearError] = useState(searchParams.get('clearError') === '1' || kioskCleanupFailed);
   const lang = language || 'en';
   const timedOut = searchParams.get('timeout') === '1';
+
+  useEffect(() => {
+    if (isHydrated && kioskCleanupFailed) setClearError(true);
+  }, [isHydrated, kioskCleanupFailed]);
 
   useEffect(() => {
     if (startPending && isHydrated && !sessionId && kioskMode) {
