@@ -128,6 +128,7 @@ for (const [token, label] of foregrounds) {
 const intake = read('src/pages/Intake.jsx');
 const activity = read('src/pages/ActivityProfile.jsx');
 const onboarding = read('src/pages/Onboarding.jsx');
+const landingSource = read('src/pages/Landing.jsx');
 const report = read('src/pages/Report.jsx');
 const vision = read('src/pages/VisionActivity.jsx');
 const engine = read('src/engine/ruleEngine.js');
@@ -200,6 +201,12 @@ check(/shouldDiscardKioskSessionOnRestore/.test(contextSource) && /clearAllSessi
 check(/not a complete security guarantee/.test(read('src/pages/KioskSetup.jsx')), 'kiosk setup explains that its privacy behavior is not a complete security guarantee');
 check(/assistedCompletion/.test(report) && /setAssistedCompletion/.test(onboarding), 'assisted completion is disclosed in the report');
 
+// Shared-device cleanup must fail closed; demo sessions also clear old participant data.
+check(/case 'KIOSK_CLEANUP_FAILED'/.test(contextSource) && /kioskCleanupFailed: true/.test(contextSource), 'failed kiosk cleanup is retained as a blocking session state');
+check(/kioskCleanupFailed/.test(appSource) && /\/kiosk\?clearError=1/.test(appSource), 'direct onboarding cannot bypass a failed kiosk cleanup');
+check(/kioskCleanupFailed/.test(landingSource) && /\/kiosk\?clearError=1/.test(landingSource), 'Landing routes failed shared-device cleanup into the retry screen');
+check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('await reset();', landingSource.indexOf('const handleDemo')) < landingSource.indexOf('startDemo(rameshPersona)', landingSource.indexOf('const handleDemo')), 'demo start clears the previous local session before replacing it');
+
 // Participant timeline and appointment preparation output.
 const timelinePageSource = read('src/pages/VisionTimeline.jsx');
 const timelineUtilitySource = read('src/utils/visionTimeline.js');
@@ -213,7 +220,12 @@ check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineU
 check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
 check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
 check(report.includes('My Vision Timeline') && report.includes('rpt__timeline-list'), 'detailed report includes participant-recorded timeline');
+const reportStaticIds = [...report.matchAll(/\\bid=["']([^"']+)["']/g)].map((match) => match[1]);
+check(new Set(reportStaticIds).size === reportStaticIds.length, 'report static HTML IDs are unique');
+check(report.indexOf('rpt__timeline-section') > report.indexOf('aria-labelledby="rpt-activities"') && report.indexOf('rpt__timeline-section') < report.indexOf('aria-labelledby="rpt-responses"'), 'timeline follows routine context and precedes the detailed response breakdown');
+check((report.match(/id="rpt-appointment-followup"/g) || []).length === 1 && report.indexOf('rpt__appointment-section') > report.indexOf('rpt-followup'), 'after-appointment notes appear once after pre-appointment discussion preparation');
 check(reportCssSource.includes('.rpt__timeline-list'), 'report includes timeline presentation styles');
+check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timeline inputs retain a mobile-friendly minimum text size');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
 console.log(`Results: ${passed} passed, ${failed} failed`);
