@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'sightsteps-logo.svg', 'sightsteps-icon.svg'],
+      includeAssets: ['favicon.svg', 'sightsteps_icon.png', 'sightsteps_logo.png'],
       manifest: {
         name: 'SightSteps — Vision Support Tool',
         short_name: 'SightSteps',
@@ -18,7 +18,7 @@ export default defineConfig({
         orientation: 'portrait',
         start_url: '/',
         icons: [
-          { src: '/sightsteps-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: '/sightsteps_icon.png', sizes: '320x320', type: 'image/png', purpose: 'any' },
         ],
       },
       workbox: {
