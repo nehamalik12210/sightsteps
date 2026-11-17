@@ -5,7 +5,7 @@ import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
-import { formatVisionTimelineDate, getLocalDateInputValue, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
+import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
 
 function localized(value, lang) {
