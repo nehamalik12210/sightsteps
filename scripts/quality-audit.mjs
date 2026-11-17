@@ -174,6 +174,9 @@ check(/RouteGuard/.test(appSource) && /getProtectedRouteRedirect/.test(appSource
 check(/path="\*"/.test(appSource) && /Navigate to="\/" replace/.test(appSource), 'unknown application routes return safely to Landing');
 check(/getBackNavigationAnswerIds/.test(read('src/utils/sessionRouting.js')) && /getBackNavigationAnswerIds\(visibleQuestions, currentQuestion.id, answers\)/.test(intake), 'questionnaire backtracking clears downstream answers without wiping earlier work');
 check(/clearAllSessions\(\)/.test(contextSource) && /if \(!cleared\) return false;/.test(contextSource), 'app reset preserves in-memory state when local deletion fails');
+check(/resettingRef = useRef\(false\)/.test(contextSource) && /!resettingRef\.current/.test(contextSource), 'autosaves are blocked while session deletion is in progress');
+check(/resetPromiseRef/.test(contextSource), 'concurrent reset requests share a single cleanup operation');
+check(/db\.onversionchange/.test(storageSource) && /dbPromise = null/.test(storageSource), 'IndexedDB can be reopened after a schema-version change');
 check(/--space-7:/.test(baseCss) && /\.btn--danger-outline/.test(baseCss), 'report spacing and destructive outline button styles are defined');
 check(/NewSessionGuard/.test(appSource) && /getNewSessionRedirect/.test(appSource) && /allowNewSession/.test(appSource), 'onboarding distinguishes an intentional fresh journey from direct visits with an existing session');
 check(/Navigate to=\{redirect\} replace/.test(appSource), 'route guard redirects replace invalid history entries instead of creating navigation loops');
