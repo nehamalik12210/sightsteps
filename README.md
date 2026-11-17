@@ -107,8 +107,8 @@ The latest verified production build on `main` completed with:
 - **1,783 passed, 0 failed** in the static quality audit.
 - **571 passed, 0 failed** in the regression test suite.
 - Vite transformed 78 modules and completed the production build.
-- The PWA service worker was generated with 11 precache entries (830.23 KiB).
-- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `0e0c8d7`.
+- The PWA service worker was generated with 11 precache entries (830.49 KiB).
+- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `58214a5`.
 
 These are automated source, data, routing, persistence, appointment-pack and accessibility-control checks. They are not proof of clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
