@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { getQuestionForActivities, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import { speakWhenReady, stopSpeaking } from '../utils/tts.js';
+import { getBackNavigationAnswerIds } from '../utils/sessionRouting.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import './Intake.css';
 
@@ -43,6 +44,7 @@ export default function Intake() {
   const [hasSpokenCurrent, setHasSpokenCurrent] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [multiSelection, setMultiSelection] = useState([]);
+  const [navigationError, setNavigationError] = useState('');
 
   const answerTimerRef = useRef(null);
   const questionHeadingRef = useRef(null);
@@ -205,12 +207,28 @@ export default function Intake() {
 
   const handleGoBack = useCallback(async () => {
     if (!currentQuestion) return;
-    stopSpeaking();
 
-    const index = visibleQuestions.findIndex((question) => question.id === currentQuestion.id);
-    if (index <= 0) {
+    // A pending answer animation must never commit after the participant has
+    // navigated backward. Otherwise the old answer can overwrite the edit.
+    if (answerTimerRef.current) {
+      window.clearTimeout(answerTimerRef.current);
+      answerTimerRef.current = null;
+    }
+    setAnimDir('in');
+    stopSpeaking();
+    setSpeaking(false);
+    setNavigationError('');
+
+    const idsToClear = getBackNavigationAnswerIds(visibleQuestions, currentQuestion.id);
+    if (idsToClear.length === 0) {
       if (isDemo) {
-        await reset();
+        const cleared = await reset();
+        if (!cleared) {
+          setNavigationError(lang === 'hi'
+            ? 'स्थानीय डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
+            : 'Local session data could not be cleared. Please try again.');
+          return;
+        }
         navigate('/', { replace: true });
       } else {
         navigate('/activities');
@@ -218,21 +236,12 @@ export default function Intake() {
       return;
     }
 
-    const previousQuestion = visibleQuestions[index - 1];
-    let idsToClear;
-
-    // The visible sequence includes conditional and generated per-activity questions.
-    // Clear the revisited question and downstream answers so stale branches cannot survive.
-    idsToClear = visibleQuestions.slice(index - 1).map((question) => question.id);
-    if (!isDemo) {
-      const dynamicIds = Object.keys(answers).filter((id) => id.startsWith('activity_impact_'));
-      idsToClear = [...new Set([...idsToClear, ...dynamicIds])];
-    }
-
+    // Clear the revisited question and visible downstream branch only. Do not
+    // erase unrelated earlier per-activity answers.
     clearAnswers(idsToClear);
     if (idsToClear.includes('participant_note')) setParticipantNote('');
     setNoteText('');
-  }, [currentQuestion, visibleQuestions, navigate, isDemo, answers, clearAnswers, setParticipantNote, reset]);
+  }, [currentQuestion, visibleQuestions, navigate, isDemo, clearAnswers, setParticipantNote, reset, lang]);
 
   const handleNoteSubmit = useCallback(() => {
     if (!currentQuestion) return;
@@ -261,6 +270,8 @@ export default function Intake() {
           <span>{t('demo.banner', lang)}</span>
         </div>
       )}
+
+      {navigationError && <p className="iq__conditional-note" role="alert">{navigationError}</p>}
 
       {storageAvailable === false && (
         <p className="iq__conditional-note" role="status">
