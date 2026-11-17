@@ -164,6 +164,7 @@ function appReducer(state, action) {
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const resettingRef = useRef(false);
+  const resetPromiseRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -260,21 +261,28 @@ export function AppProvider({ children }) {
   const setQuestionsToAsk = useCallback((questions) => dispatch({ type: 'SET_QUESTIONS_TO_ASK', payload: questions }), []);
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
 
-  const reset = useCallback(async () => {
-    // Prevent new autosaves from being queued while deletion is in progress.
-    // Existing writes finish before clearAllSessions because storage serializes
-    // all IndexedDB writes through one queue.
-    if (resettingRef.current) return false;
-    resettingRef.current = true;
-    try {
-      const cleared = await clearAllSessions();
-      if (!cleared) return false;
+  const reset = useCallback(() => {
+    // Concurrent callers share one deletion operation rather than reporting a
+    // false failure when two controls are activated close together.
+    if (resetPromiseRef.current) return resetPromiseRef.current;
 
-      dispatch({ type: 'RESET' });
-      return true;
-    } finally {
-      resettingRef.current = false;
-    }
+    resettingRef.current = true;
+    resetPromiseRef.current = (async () => {
+      try {
+        // Existing writes finish before clearAllSessions because storage
+        // serializes all IndexedDB writes through one queue.
+        const cleared = await clearAllSessions();
+        if (!cleared) return false;
+
+        dispatch({ type: 'RESET' });
+        return true;
+      } finally {
+        resettingRef.current = false;
+        resetPromiseRef.current = null;
+      }
+    })();
+
+    return resetPromiseRef.current;
   }, []);
 
   const value = {
