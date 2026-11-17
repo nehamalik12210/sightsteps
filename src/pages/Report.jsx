@@ -299,6 +299,46 @@ export default function Report() {
           </section>
         )}
 
+        <section className="rpt__section rpt__timeline-section" aria-labelledby="rpt-timeline-heading">
+          <div className="rpt__sec-head">
+            <div>
+              <p className="rpt__kicker">{lang === 'hi' ? 'समय के साथ आपके अनुभव' : 'YOUR EXPERIENCES OVER TIME'}</p>
+              <h2 id="rpt-timeline-heading" className="rpt__sec-title">{lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन' : 'My Vision Timeline'}</h2>
+            </div>
+            <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">timeline</span>
+          </div>
+          <p className="rpt__sec-intro">{lang === 'hi' ? 'आपके द्वारा तारीख के अनुसार दर्ज किए गए अनुभव। ये आपके अपने नोट्स हैं, कोई जाँच या चिकित्सकीय निष्कर्ष नहीं।' : 'Experiences you recorded by date. These are your own notes, not a test or clinical conclusion.'}</p>
+          {sortedTimelineEntries.length > 0 ? (
+            <ol className="rpt__timeline-list">
+              {sortedTimelineEntries.map((entry) => (
+                <li key={entry.id} className="rpt__timeline-entry">
+                  <div className="rpt__timeline-meta">
+                    <time dateTime={entry.date}>{formatVisionTimelineDate(entry.date, lang) + (entry.time ? ' · ' + entry.time : '')}</time>
+                    <span>{lang === 'hi' ? 'आपके द्वारा दर्ज' : 'Participant-reported'}</span>
+                  </div>
+                  <h3>{localized(entry.experienceLabel, lang)}</h3>
+                  {entry.context && <p><strong>{lang === 'hi' ? 'उस समय: ' : 'At the time: '}</strong>{entry.context}</p>}
+                  {entry.impact && <p><strong>{lang === 'hi' ? 'आपका नोट: ' : 'Your note: '}</strong>{entry.impact}</p>}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="rpt__timeline-empty">
+              <span className="material-symbols-outlined" aria-hidden="true">history</span>
+              <p>{lang === 'hi' ? 'अभी कोई टाइमलाइन एंट्री नहीं है। अलग-अलग दिनों में अनुभव दर्ज करने से बातचीत के लिए समय-क्रम तैयार हो सकता है।' : 'There are no timeline entries yet. Recording experiences on different days can help you organise a chronological account for your conversation.'}</p>
+            </div>
+          )}
+          <div className="rpt__timeline-actions">
+            <p>{lang === 'hi' ? 'आप कभी भी एंट्री जोड़, बदल या हटा सकते हैं।' : 'You can add, edit or delete entries at any time.'}</p>
+            <button type="button" className="btn btn--outline btn--full" onClick={() => navigate('/timeline')}>
+              <span className="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+              {sortedTimelineEntries.length > 0
+                ? (lang === 'hi' ? 'टाइमलाइन बदलें' : 'Add or edit timeline')
+                : (lang === 'hi' ? 'पहला अनुभव दर्ज करें' : 'Start your timeline')}
+            </button>
+          </div>
+        </section>
+
         <section className="rpt__section" aria-labelledby="rpt-responses">
           <div className="rpt__sec-head">
             <div>
@@ -347,45 +387,7 @@ export default function Report() {
           </div>
         </section>
 
-        <section className="rpt__section rpt__timeline-section" aria-labelledby="rpt-timeline-heading">
-          <div className="rpt__sec-head">
-            <div>
-              <p className="rpt__kicker">{lang === 'hi' ? 'समय के साथ आपके अनुभव' : 'YOUR EXPERIENCES OVER TIME'}</p>
-              <h2 id="rpt-timeline-heading" className="rpt__sec-title">{lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन' : 'My Vision Timeline'}</h2>
-            </div>
-            <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">timeline</span>
-          </div>
-          <p className="rpt__sec-intro">{lang === 'hi' ? 'आपके द्वारा तारीख के अनुसार दर्ज किए गए अनुभव। ये आपके अपने नोट्स हैं, कोई जाँच या चिकित्सकीय निष्कर्ष नहीं।' : 'Experiences you recorded by date. These are your own notes, not a test or clinical conclusion.'}</p>
-          {sortedTimelineEntries.length > 0 ? (
-            <ol className="rpt__timeline-list">
-              {sortedTimelineEntries.map((entry) => (
-                <li key={entry.id} className="rpt__timeline-entry">
-                  <div className="rpt__timeline-meta">
-                    <time dateTime={entry.date}>{formatVisionTimelineDate(entry.date, lang) + (entry.time ? ' · ' + entry.time : '')}</time>
-                    <span>{lang === 'hi' ? 'आपके द्वारा दर्ज' : 'Participant-reported'}</span>
-                  </div>
-                  <h3>{localized(entry.experienceLabel, lang)}</h3>
-                  {entry.context && <p><strong>{lang === 'hi' ? 'उस समय: ' : 'At the time: '}</strong>{entry.context}</p>}
-                  {entry.impact && <p><strong>{lang === 'hi' ? 'आपका नोट: ' : 'Your note: '}</strong>{entry.impact}</p>}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <div className="rpt__timeline-empty">
-              <span className="material-symbols-outlined" aria-hidden="true">history</span>
-              <p>{lang === 'hi' ? 'अभी कोई टाइमलाइन एंट्री नहीं है। अलग-अलग दिनों में अनुभव दर्ज करने से बातचीत के लिए समय-क्रम तैयार हो सकता है।' : 'There are no timeline entries yet. Recording experiences on different days can help you organise a chronological account for your conversation.'}</p>
-            </div>
-          )}
-          <div className="rpt__timeline-actions">
-            <p>{lang === 'hi' ? 'आप कभी भी एंट्री जोड़, बदल या हटा सकते हैं।' : 'You can add, edit or delete entries at any time.'}</p>
-            <button type="button" className="btn btn--outline btn--full" onClick={() => navigate('/timeline')}>
-              <span className="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
-              {sortedTimelineEntries.length > 0
-                ? (lang === 'hi' ? 'टाइमलाइन बदलें' : 'Add or edit timeline')
-                : (lang === 'hi' ? 'पहला अनुभव दर्ज करें' : 'Start your timeline')}
-            </button>
-          </div>
-        </section>
+
 
         <section className="rpt__section" aria-labelledby="rpt-discuss">
           <div className="rpt__sec-head">
@@ -543,21 +545,7 @@ export default function Report() {
           </section>
         )}
 
-        {hasAppointmentNotes && (
-          <section className="rpt__section" aria-labelledby="rpt-appointment-followup">
-            <div className="rpt__sec-head">
-              <div>
-                <p className="rpt__kicker">{lang === 'hi' ? 'अपॉइंटमेंट नोट्स' : 'APPOINTMENT NOTES'}</p>
-                <h2 id="rpt-appointment-followup" className="rpt__sec-title">{lang === 'hi' ? 'आपके दर्ज किए गए अगले कदम' : 'Your recorded follow-up'}</h2>
-              </div>
-              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">event_available</span>
-            </div>
-            {appointmentFollowUp.appointmentDate && <p className="rpt__sec-intro">{lang === 'hi' ? 'अपॉइंटमेंट की तारीख: ' : 'Appointment date: '}{appointmentFollowUp.appointmentDate}</p>}
-            {appointmentFollowUp.professionalNotes && <blockquote className="rpt__note-block"><p>{appointmentFollowUp.professionalNotes}</p></blockquote>}
-            {appointmentFollowUp.followUpPlan && <blockquote className="rpt__note-block"><p>{appointmentFollowUp.followUpPlan}</p></blockquote>}
-            {appointmentFollowUp.nextAppointmentDate && <p className="rpt__sec-intro">{lang === 'hi' ? 'अगली अपॉइंटमेंट: ' : 'Next appointment: '}{appointmentFollowUp.nextAppointmentDate}</p>}
-          </section>
-        )}
+
 
         <div className="rpt__disclaimer">
           <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
@@ -627,7 +615,7 @@ export default function Report() {
                 </p>
                 <div className="rpt__delete-actions">
                   <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowDeleteConfirm(false)}>{t('common.cancel', lang)}</button>
-                  <button type="button" className="btn btn--danger btn--sm" onClick={() => resetAndNavigate('/')}>
+                  <button type="button" className="btn btn--danger btn--sm" onClick={() => resetAndNavigate(kioskMode ? '/kiosk' : '/')}>
                     <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
                     {t('common.yesDelete', lang)}
                   </button>
