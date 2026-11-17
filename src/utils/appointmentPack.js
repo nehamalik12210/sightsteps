@@ -59,6 +59,7 @@ export function buildAppointmentPreparationPack({
     .slice(0, 5)
     .map((entry) => ({
       id: compactText(entry.id, 80),
+      dateValue: entry.date,
       date: formatVisionTimelineDate(entry.date, language),
       time: compactText(entry.time, 5),
       experience: compactText(localized(entry.experienceLabel, language), 72),
