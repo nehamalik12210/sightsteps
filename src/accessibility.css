@@ -1,4 +1,5 @@
-/* Keyboard focus, disabled-state affordances and reduced-motion support. */
+/* Keyboard focus, display scaling and reduced-motion support. */
+:root { --a11y-scale: 1; }
 :root {
   /* The previous muted text token was below WCAG AA contrast on the ivory surface. */
   --color-text-muted: #596575;
