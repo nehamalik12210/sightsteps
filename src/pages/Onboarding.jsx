@@ -39,7 +39,7 @@ export default function Onboarding() {
 
   if (step === 'language') {
     return (
-      <main className="onboarding">
+      <main className="onboarding" id="main-content" tabIndex="-1">
         <div className="onboarding__container animate-fade-in">
           <button className="onboarding__back" type="button" onClick={handleExitLanguageStep} aria-label={t('common.back', lang)}>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -84,7 +84,7 @@ export default function Onboarding() {
   }
 
   return (
-    <main className="onboarding">
+    <main className="onboarding" id="main-content" tabIndex="-1">
       <div className="onboarding__container animate-fade-in">
         <button className="onboarding__back" type="button" onClick={() => setStep('language')} aria-label={t('common.back', lang)}>
           <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
