@@ -101,16 +101,17 @@ The root `vercel.json` rewrite sends application routes back to `index.html`, al
 
 ## Validation status
 
-The last previously recorded local verification completed during project preparation reported:
+The latest verified production build completed on `main` with:
 
-- **423 passed, 0 failed** in the static quality audit.
-- **542 passed, 0 failed** in the regression test suite.
-- `npm run check` completed successfully.
-- `npm run build` completed and generated the Vite production bundle and PWA service-worker assets.
+- **1,721 passed, 0 failed** in the static quality audit.
+- **563 passed, 0 failed** in the regression test suite.
+- Vite transformed 73 modules and completed the production build.
+- The PWA service worker was generated with 11 precache entries.
+- Vercel reported the production deployment as **READY** with the `sightsteps.vercel.app` alias.
 
-**Verification note:** These historical counts and build results refer to an earlier revision. They are not validation of the timeline and appointment-pack changes. Run `npm run check` and `npm run build` on the current `main` revision before relying on this release.
+These are automated source, data, routing, persistence, and build checks. They are not proof of clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
-These are code-side and build checks, not proof of clinical suitability or full accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional have not been established by these automated checks. Complete the relevant reviews before any clinical-context use.
+The current dependency install also reports npm warnings, including four moderate audit findings, a deprecated `glob` dependency, an unknown `cache-dir` setting, and an `esbuild` install-script allowlist warning. These did not fail the production build and have not been force-upgraded as part of this UI/reliability pass. Review the dependency audit and upgrade path separately rather than applying a breaking `npm audit fix --force` blindly.
 
 ## Responsible use
 
