@@ -45,7 +45,12 @@ function openDB() {
 
     request.onsuccess = () => {
       const db = request.result;
-      db.onversionchange = () => db.close();
+      db.onversionchange = () => {
+        // Close stale connections and allow the next operation to reopen the
+        // database after another tab upgrades its schema.
+        db.close();
+        dbPromise = null;
+      };
       resolve(db);
     };
 

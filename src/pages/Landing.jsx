@@ -69,6 +69,7 @@ export default function Landing() {
   const lang = language || 'en';
   const [demoStartPending, setDemoStartPending] = useState(false);
   const [newJourneyPending, setNewJourneyPending] = useState(false);
+  const [sessionActionError, setSessionActionError] = useState('');
   const hasSavedSession = Boolean(isHydrated && sessionId && consentGiven);
 
   useEffect(() => { void initVoices(); }, []);
@@ -88,8 +89,15 @@ export default function Landing() {
 
   const handleStart = async () => {
     if (newJourneyPending) return;
+    setSessionActionError('');
     setNewJourneyPending(true);
-    await reset();
+    const cleared = await reset();
+    if (!cleared) {
+      setNewJourneyPending(false);
+      setSessionActionError(lang === 'hi'
+        ? 'पिछला सेशन डेटा साफ़ नहीं हो सका। कृपया दोबारा प्रयास करें।'
+        : 'The previous session could not be cleared. Please try again.');
+    }
   };
 
   const handleResume = () => {
@@ -103,7 +111,14 @@ export default function Landing() {
     }));
   };
 
-  const handleEndKiosk = async () => { await reset(); navigate('/kiosk', { replace: true }); };
+  const handleEndKiosk = async () => {
+    setSessionActionError('');
+    const cleared = await reset();
+    if (cleared) navigate('/kiosk', { replace: true });
+    else setSessionActionError(lang === 'hi'
+      ? 'सेशन डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
+      : 'Session data could not be cleared. Please try again.');
+  };
 
   const handleDemo = () => {
     if (demoStartPending) return;
@@ -132,6 +147,7 @@ export default function Landing() {
           <p className="landing__subheading">{t('landing.description', lang)}</p>
 
           <div className="landing__actions">
+            {sessionActionError && <p role="alert" className="landing__subheading">{sessionActionError}</p>}
             {kioskMode ? (
               <>
                 {sessionId ? (

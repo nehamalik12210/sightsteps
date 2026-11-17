@@ -1,4 +1,4 @@
-import { getNextQuestion, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import questionBank, { getNextQuestion, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 
 function isAnswered(entry) {
   if (!entry || entry.value === undefined || entry.value === null) return false;
@@ -40,6 +40,54 @@ export function getPendingSessionQuestion(session = {}) {
     visible = visible.filter((question) => allowed.has(question.id));
   }
   return visible.find((question) => !isAnswerComplete(answers[question.id])) || null;
+}
+
+/**
+ * Return the answers that must be revisited when moving one step backward.
+ * Includes hidden conditional answers from the downstream static branch and
+ * generated activity-impact answers, while retaining completed earlier work.
+ */
+export function getBackNavigationAnswerIds(visibleQuestions = [], currentQuestionId, answers = {}) {
+  if (!Array.isArray(visibleQuestions)) return [];
+
+  const currentIndex = visibleQuestions.findIndex((question) => question?.id === currentQuestionId);
+  if (currentIndex <= 0) return [];
+
+  const previousQuestion = visibleQuestions[currentIndex - 1];
+  const previousStaticIndex = questionBank.findIndex((question) => question.id === previousQuestion?.id);
+
+  if (previousStaticIndex >= 0) {
+    const downstreamStaticIds = questionBank.slice(previousStaticIndex).map((question) => question.id);
+    const participantNoteIndex = questionBank.findIndex((question) => question.id === 'participant_note');
+    const downstreamActivityIds = previousStaticIndex < participantNoteIndex
+      ? Object.keys(answers).filter((id) => id.startsWith('activity_impact_'))
+      : [];
+    return [...new Set([...downstreamStaticIds, ...downstreamActivityIds])];
+  }
+
+  // Dynamic activity-impact questions are ordered by the participant's
+  // affected_activities selection. Clear the current and later activities,
+  // including a conditionally hidden frequency answer, but preserve earlier
+  // activity details already completed.
+  const affectedActivities = Array.isArray(answers.affected_activities?.value)
+    ? answers.affected_activities.value
+    : [];
+  const previousActivityIndex = affectedActivities.indexOf(previousQuestion?.dynamicActivityId);
+  const downstreamActivities = previousActivityIndex >= 0
+    ? affectedActivities.slice(previousActivityIndex)
+    : [];
+  const downstreamActivityIds = Object.keys(answers).filter((id) => (
+    id.startsWith('activity_impact_')
+    && downstreamActivities.some((activityId) => (
+      id === `activity_impact_${activityId}`
+      || id === `activity_impact_frequency_${activityId}`
+    ))
+  ));
+
+  return [...new Set([
+    ...visibleQuestions.slice(currentIndex - 1).map((question) => question.id),
+    ...downstreamActivityIds,
+  ])];
 }
 
 /** Route guard policy for directly opened or refreshed application URLs. */

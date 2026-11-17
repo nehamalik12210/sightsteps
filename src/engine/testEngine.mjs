@@ -5,7 +5,7 @@
  */
 
 import { evaluateAnswers } from './ruleEngine.js';
-import { getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
+import { getBackNavigationAnswerIds, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
 import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
@@ -203,6 +203,41 @@ const demoProtectedSession = { sessionId: 'demo', consentGiven: true, isDemo: tr
 assert(getPendingSessionQuestion(demoProtectedSession) === null, 'demo route guard ignores hidden scripted questions and checks only visible demo steps');
 assert(getProtectedRouteRedirect(demoProtectedSession, { requireProfile: true, requireIntake: true, requireVision: true }) === null, 'demo can reach its report while its explicitly skipped vision activity is being recorded');
 
+
+// Back-navigation invalidation must not lose completed work before the edit point.
+const branchEditAnswers = {
+  blurred_vision: { value: 'yes' },
+  headaches: { value: 'sometimes' },
+  primary_concern: { value: 'headaches' },
+  which_eye: { value: 'left' }, // stale conditional answer: headaches do not show which_eye
+  experience_onset: { value: 'recent_weeks' },
+  activity_impact_reading: { value: ['discomfort'] },
+  activity_impact_frequency_reading: { value: 'often' },
+};
+const branchEditQuestions = getVisibleQuestions(branchEditAnswers, ['reading']);
+const clearAfterPrimary = getBackNavigationAnswerIds(branchEditQuestions, 'experience_onset', branchEditAnswers);
+assert(clearAfterPrimary.includes('which_eye'), 'backtracking clears hidden answers from a changed conditional branch');
+assert(clearAfterPrimary.includes('activity_impact_reading'), 'backtracking before activity details clears downstream dynamic answers');
+assert(!clearAfterPrimary.includes('blurred_vision'), 'backtracking preserves answers before the edit point');
+
+const multiActivityAnswers = {
+  affected_activities: { value: ['reading', 'fine_detail'] },
+  activity_impact_reading: { value: ['discomfort'] },
+  activity_impact_frequency_reading: { value: 'often' },
+  activity_impact_fine_detail: { value: ['takes_longer'] },
+  activity_impact_frequency_fine_detail: { value: 'sometimes' },
+};
+const multiActivityQuestions = getVisibleQuestions(multiActivityAnswers, ['reading', 'fine_detail']);
+const clearFineDetail = getBackNavigationAnswerIds(
+  multiActivityQuestions,
+  'activity_impact_frequency_fine_detail',
+  multiActivityAnswers,
+);
+assert(clearFineDetail.includes('activity_impact_fine_detail'), 'backtracking revisits the selected activity impact answer');
+assert(clearFineDetail.includes('activity_impact_frequency_fine_detail'), 'backtracking clears the affected activity frequency');
+assert(!clearFineDetail.includes('activity_impact_reading'), 'backtracking preserves earlier activity-impact responses');
+assert(!clearFineDetail.includes('activity_impact_frequency_reading'), 'backtracking preserves earlier activity frequency');
+assert(getBackNavigationAnswerIds([{ id: 'only-question' }], 'only-question').length === 0, 'backtracking from the first question does not clear answers');
 
 console.log('\n=== Full questionnaire branch matrix ===');
 for (const value of ['yes', 'sometimes']) {

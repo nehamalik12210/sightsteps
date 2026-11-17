@@ -50,6 +50,7 @@ export default function App() {
           <Route path="/report" element={<RouteGuard requireProfile requireIntake requireVision><Report /></RouteGuard>} />
           <Route path="/follow-up" element={<RouteGuard requireProfile requireIntake requireVision><AppointmentFollowUp /></RouteGuard>} />
           <Route path="/kiosk" element={<KioskSetup />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </AppProvider>

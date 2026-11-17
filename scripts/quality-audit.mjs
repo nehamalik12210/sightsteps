@@ -84,6 +84,14 @@ const baseCss = read('src/index.css');
 const accessCss = read('src/accessibility.css');
 const vite = read('vite.config.js');
 const effectiveCss = `${baseCss}\n${accessCss}`;
+const stylesheetFiles = collect('src').filter((path) => path.endsWith('.css'));
+const allStylesheets = stylesheetFiles.map(read).join('\n');
+const declaredCssProperties = new Set(
+  [...allStylesheets.matchAll(/--([a-zA-Z0-9_-]+)\s*:/g)].map((match) => match[1]),
+);
+for (const match of allStylesheets.matchAll(/var\(--([a-zA-Z0-9_-]+)/g)) {
+  check(declaredCssProperties.has(match[1]), `CSS custom property --${match[1]} is defined`);
+}
 const themeMeta = html.match(/name=["']theme-color["']\s+content=["']([^"']+)["']/i)?.[1];
 const manifestTheme = vite.match(/theme_color:\s*["']([^"']+)["']/)?.[1];
 const manifestBackground = vite.match(/background_color:\s*["']([^"']+)["']/)?.[1];
@@ -91,6 +99,8 @@ check(themeMeta === '#1769D2' && manifestTheme === themeMeta, 'browser chrome an
 check(manifestBackground === '#F4F2EC', 'PWA background uses the approved warm ivory');
 check(vite.includes('fonts\\.googleapis\\.com') && vite.includes('fonts\\.gstatic\\.com'), 'Google Fonts stylesheet and font-file hosts have runtime caching');
 check(/registerType:\s*["']autoUpdate["']/.test(vite), 'PWA uses automatic service-worker update registration');
+check(vite.includes('sightsteps_icon.png') && !/sightsteps-(?:logo|icon)\.svg/.test(vite), 'PWA manifest references the existing app icon asset');
+check(existsSync(join(root, 'public/sightsteps_icon.png')) && existsSync(join(root, 'public/sightsteps_logo.png')), 'PWA and landing-page image assets exist');
 check(/html:lang\(hi\)/.test(accessCss), 'Hindi language selects Devanagari-capable font family');
 check(/:focus-visible/.test(accessCss) && /prefers-reduced-motion/.test(accessCss), 'global keyboard focus and reduced-motion support are present');
 
@@ -161,6 +171,13 @@ check(/valueRef\.current/.test(voiceSource), 'voice dictation appends to the lat
 check(/speechSynthesis/.test(intake) && /currentOptions\.map/.test(intake), 'question text and answer options can be read aloud');
 check(/\/follow-up/.test(appSource) && /\/kiosk/.test(appSource), 'appointment follow-up and kiosk routes are registered');
 check(/RouteGuard/.test(appSource) && /getProtectedRouteRedirect/.test(appSource) && /requireIntake/.test(appSource), 'deep links require a valid session and completed journey stages');
+check(/path="\*"/.test(appSource) && /Navigate to="\/" replace/.test(appSource), 'unknown application routes return safely to Landing');
+check(/getBackNavigationAnswerIds/.test(read('src/utils/sessionRouting.js')) && /getBackNavigationAnswerIds\(visibleQuestions, currentQuestion.id, answers\)/.test(intake), 'questionnaire backtracking clears downstream answers without wiping earlier work');
+check(/clearAllSessions\(\)/.test(contextSource) && /if \(!cleared\) return false;/.test(contextSource), 'app reset preserves in-memory state when local deletion fails');
+check(/resettingRef = useRef\(false\)/.test(contextSource) && /!resettingRef\.current/.test(contextSource), 'autosaves are blocked while session deletion is in progress');
+check(/resetPromiseRef/.test(contextSource), 'concurrent reset requests share a single cleanup operation');
+check(/db\.onversionchange/.test(storageSource) && /dbPromise = null/.test(storageSource), 'IndexedDB can be reopened after a schema-version change');
+check(/--space-7:/.test(baseCss) && /\.btn--danger-outline/.test(baseCss), 'report spacing and destructive outline button styles are defined');
 check(/NewSessionGuard/.test(appSource) && /getNewSessionRedirect/.test(appSource) && /allowNewSession/.test(appSource), 'onboarding distinguishes an intentional fresh journey from direct visits with an existing session');
 check(/Navigate to=\{redirect\} replace/.test(appSource), 'route guard redirects replace invalid history entries instead of creating navigation loops');
 check(/startPending/.test(onboarding) && /startSession\(selectedLang/.test(onboarding), 'consent navigation waits until the newly-created English or Hindi session is committed');

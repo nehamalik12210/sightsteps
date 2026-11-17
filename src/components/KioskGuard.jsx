@@ -22,8 +22,8 @@ export default function KioskGuard() {
       }
       if (clearing) return;
       clearing = true;
-      await reset();
-      navigate('/kiosk?timeout=1', { replace: true });
+      const cleared = await reset();
+      navigate(cleared ? '/kiosk?timeout=1' : '/kiosk?timeout=1&clearError=1', { replace: true });
     };
 
     const markActive = () => {
