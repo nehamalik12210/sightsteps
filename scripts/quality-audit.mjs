@@ -220,7 +220,7 @@ check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineU
 check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
 check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
 check(report.includes('My Vision Timeline') && report.includes('rpt__timeline-list'), 'detailed report includes participant-recorded timeline');
-const reportStaticIds = [...report.matchAll(/\\bid=["']([^"']+)["']/g)].map((match) => match[1]);
+const reportStaticIds = [...report.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
 check(new Set(reportStaticIds).size === reportStaticIds.length, 'report static HTML IDs are unique');
 check(report.indexOf('rpt__timeline-section') > report.indexOf('aria-labelledby="rpt-activities"') && report.indexOf('rpt__timeline-section') < report.indexOf('aria-labelledby="rpt-responses"'), 'timeline follows routine context and precedes the detailed response breakdown');
 check((report.match(/id="rpt-appointment-followup"/g) || []).length === 1 && report.indexOf('rpt__appointment-section') > report.indexOf('rpt-followup'), 'after-appointment notes appear once after pre-appointment discussion preparation');
