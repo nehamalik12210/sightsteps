@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext.jsx';
 import Landing from './pages/Landing.jsx';
@@ -10,15 +11,32 @@ import AppointmentFollowUp from './pages/AppointmentFollowUp.jsx';
 import VisionTimeline from './pages/VisionTimeline.jsx';
 import KioskSetup from './pages/KioskSetup.jsx';
 import KioskGuard from './components/KioskGuard.jsx';
+import AccessibilityControls from './components/AccessibilityControls.jsx';
 import { useApp } from './context/AppContext.jsx';
 import { getNewSessionRedirect, getProtectedRouteRedirect } from './utils/sessionRouting.js';
+
+function RouteFocusManager() {
+  const location = useLocation();
+  const previousLocationKey = useRef(location.key);
+
+  useEffect(() => {
+    if (previousLocationKey.current === location.key) return undefined;
+    previousLocationKey.current = location.key;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('main-content')?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.key]);
+
+  return null;
+}
 
 function NewSessionGuard({ children }) {
   const session = useApp();
   const location = useLocation();
 
   if (!session.isHydrated) {
-    return <main className="app-main" aria-live="polite"><p>Loading session…</p></main>;
+    return <main className="app-main" id="main-content" tabIndex="-1" aria-live="polite"><p>Loading session…</p></main>;
   }
 
   // A shared-device cleanup failure must be resolved before a new participant
@@ -45,6 +63,8 @@ export default function App() {
   return (
     <AppProvider>
       <div className="app">
+        <AccessibilityControls />
+        <RouteFocusManager />
         <KioskGuard />
         <Routes>
           <Route path="/" element={<Landing />} />
