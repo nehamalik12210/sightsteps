@@ -243,8 +243,6 @@ export default function Report() {
           </div>
         </section>
 
-
-
         {report.activitiesContext && (
           <section className="rpt__section" aria-labelledby="rpt-activities">
             <div className="rpt__sec-head">
@@ -387,8 +385,6 @@ export default function Report() {
           </div>
         </section>
 
-
-
         <section className="rpt__section" aria-labelledby="rpt-discuss">
           <div className="rpt__sec-head">
             <div>
@@ -436,6 +432,29 @@ export default function Report() {
           )}
         </section>
 
+        {hasFollowUp && (
+          <section className="rpt__section" aria-labelledby="rpt-followup">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'साझा करने योग्य बातें' : 'POINTS TO SHARE'}</p>
+                <h2 id="rpt-followup" className="rpt__sec-title">
+                  {lang === 'hi' ? 'पेशेवर से चर्चा करें' : 'Discuss with a professional'}
+                </h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">medical_services</span>
+            </div>
+            <div className="rpt__followup-list">
+              {report.followUpNotes.map((note) => (
+                <article key={note.id} className="rpt__followup-item">
+                  <h3>{localized(note.title, lang)}</h3>
+                  <p>{localized(note.detail, lang)}</p>
+                  {note.sources?.length > 0 && <p className="rpt__discuss-ctx"><strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(note.sources)}</p>}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="rpt__section rpt__appointment-section" aria-labelledby="rpt-appointment-followup">
           <div className="rpt__sec-head">
             <div>
@@ -467,29 +486,6 @@ export default function Report() {
             </button>
           </div>
         </section>
-
-        {hasFollowUp && (
-          <section className="rpt__section" aria-labelledby="rpt-followup">
-            <div className="rpt__sec-head">
-              <div>
-                <p className="rpt__kicker">{lang === 'hi' ? 'साझा करने योग्य बातें' : 'POINTS TO SHARE'}</p>
-                <h2 id="rpt-followup" className="rpt__sec-title">
-                  {lang === 'hi' ? 'पेशेवर से चर्चा करें' : 'Discuss with a professional'}
-                </h2>
-              </div>
-              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">medical_services</span>
-            </div>
-            <div className="rpt__followup-list">
-              {report.followUpNotes.map((note) => (
-                <article key={note.id} className="rpt__followup-item">
-                  <h3>{localized(note.title, lang)}</h3>
-                  <p>{localized(note.detail, lang)}</p>
-                  {note.sources?.length > 0 && <p className="rpt__discuss-ctx"><strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(note.sources)}</p>}
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
 
         {hasVisionData && (
           <section className="rpt__section" aria-labelledby="rpt-activity">
@@ -544,8 +540,6 @@ export default function Report() {
             <blockquote className="rpt__note-block"><p>{report.participantNote}</p></blockquote>
           </section>
         )}
-
-
 
         <div className="rpt__disclaimer">
           <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
