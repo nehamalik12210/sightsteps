@@ -21,6 +21,10 @@ function NewSessionGuard({ children }) {
     return <main className="app-main" aria-live="polite"><p>Loading session…</p></main>;
   }
 
+  // A shared-device cleanup failure must be resolved before a new participant
+  // can enter onboarding, including through a manually opened URL.
+  if (session.kioskCleanupFailed) return <Navigate to="/kiosk?clearError=1" replace />;
+
   // New-journey navigation is explicitly marked by Landing/KioskSetup after
   // reset has completed. This avoids confusing the newly-created session with
   // an old session that should not be overwritten by a direct /onboarding visit.
