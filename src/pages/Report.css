@@ -33,7 +33,7 @@
   .rpt--brief-print .rpt__topbar,
   .rpt--brief-print .rpt__demo-banner,
   .rpt--brief-print .rpt__kiosk-banner,
-  .rpt--brief-print .rpt__body > :not(.rpt__print-summary) { display: none !important; }
+  .rpt--brief-print .rpt__body > :not(.appointment-pack) { display: none !important; }
   .rpt--brief-print .rpt__body { display: block; max-width: 100%; padding: 0; }
   .rpt--brief-print .rpt__print-summary { display: block !important; border: 0; border-radius: 0; padding: 0; background: #fff; }
   .rpt--brief-print .voice-field__toolbar,
@@ -252,3 +252,21 @@
   margin-top: var(--space-3);
 }
 .rpt__priority-context > .rpt__sec-intro { margin-bottom: 0; }
+
+.rpt__pack-includes {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container-low);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-relaxed);
+}
+@media (max-width: 520px) {
+  .rpt__pack-includes { font-size: var(--fs-sm); }
+}
+@media print {
+  .rpt--brief-print .rpt__body > .appointment-pack {
+    display: block !important;
+    margin: 0;
+  }
+}
