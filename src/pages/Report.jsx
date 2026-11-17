@@ -39,6 +39,7 @@ export default function Report() {
   const [expandedGroups, setExpandedGroups] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [printMode, setPrintMode] = useState('detail');
+  const [sessionActionError, setSessionActionError] = useState('');
 
   const report = useMemo(() => evaluateAnswers(answers, {
     activities,
@@ -55,16 +56,23 @@ export default function Report() {
   }, [isHydrated, answers, navigate]);
 
   const toggleGroup = (id) => setExpandedGroups((previous) => ({ ...previous, [id]: !previous[id] }));
-  const handleNew = async () => { await reset(); navigate(kioskMode ? '/kiosk' : '/', { replace: true }); };
-  const finishKiosk = async () => { await reset(); navigate('/kiosk', { replace: true }); };
+  const resetAndNavigate = async (path) => {
+    setSessionActionError('');
+    const cleared = await reset();
+    if (cleared) navigate(path, { replace: true });
+    else setSessionActionError(lang === 'hi'
+      ? 'स्थानीय डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
+      : 'Local session data could not be cleared. Please try again.');
+  };
+  const handleNew = () => resetAndNavigate(kioskMode ? '/kiosk' : '/');
+  const finishKiosk = () => resetAndNavigate('/kiosk');
   // A demo's language is seeded from its persona (Ramesh uses Hindi).
   // Clear demo state before returning home so it does not change the landing page language.
   const handleGoHome = async () => {
-    if (kioskMode) {
-      await finishKiosk();
+    if (kioskMode || isDemo) {
+      await resetAndNavigate(kioskMode ? '/kiosk' : '/');
       return;
     }
-    if (isDemo) await reset();
     navigate('/', { replace: true });
   };
   const handlePriorityToggle = (id) => {
@@ -131,6 +139,7 @@ export default function Report() {
       </header>
 
       <main className="rpt__body">
+        {sessionActionError && <p className="rpt__notice" role="alert">{sessionActionError}</p>}
         <section className="rpt__intro">
           <p className="rpt__kicker">{lang === 'hi' ? 'सत्र सारांश' : 'SESSION SUMMARY'}</p>
           <h1 className="rpt__headline">
@@ -526,7 +535,7 @@ export default function Report() {
               </p>
               <div className="rpt__delete-actions">
                 <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowDeleteConfirm(false)}>{t('common.cancel', lang)}</button>
-                <button type="button" className="btn btn--danger btn--sm" onClick={async () => { await reset(); navigate('/', { replace: true }); }}>
+                <button type="button" className="btn btn--danger btn--sm" onClick={() => resetAndNavigate('/')}>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
                   {t('common.yesDelete', lang)}
                 </button>
