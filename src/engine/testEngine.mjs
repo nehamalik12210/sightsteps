@@ -12,6 +12,7 @@ import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
 import { normalizeVisionTimelineEntries, sortVisionTimelineEntries, validateVisionTimelineDraft, MAX_VISION_TIMELINE_ENTRIES } from '../utils/visionTimeline.js';
 import rameshPersona from '../data/demoPersona.js';
+import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 
 let passed = 0;
 let failed = 0;
@@ -186,6 +187,42 @@ const overflowTimeline = Array.from({ length: MAX_VISION_TIMELINE_ENTRIES + 5 },
   experienceLabel: 'Participant note',
 }));
 assert(normalizeVisionTimelineEntries(overflowTimeline).length === MAX_VISION_TIMELINE_ENTRIES, 'persisted timeline is capped at its configured entry limit');
+
+const packTimeline = Array.from({ length: 7 }, (_, index) => ({
+  id: 'pack-entry-' + (index + 1),
+  date: `2026-11-${String(index + 1).padStart(2, '0')}`,
+  time: '09:30',
+  experienceLabel: { en: 'Blurred vision', hi: 'धुंधला दिखाई देना' },
+  context: 'Reading',
+  impact: 'Needed to pause.',
+}));
+const preparationPack = buildAppointmentPreparationPack({
+  language: 'en',
+  priorities: [
+    { id: 'blurred_vision', label: { en: 'Blurred vision', hi: 'धुंधला दिखाई देना' } },
+    { id: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+    { id: 'squinting', label: { en: 'Squinting', hi: 'आँखें सिकोड़ना' } },
+  ],
+  activities: ['Reading', 'Screen work', 'Driving', 'Outdoor', 'Other', 'Extra'],
+  discussionPoints: Array.from({ length: 4 }, (_, index) => ({
+    id: 'topic-' + index,
+    title: { en: 'Topic ' + index, hi: 'विषय ' + index },
+    context: { en: 'Context ' + index, hi: 'संदर्भ ' + index },
+    prompt: { en: 'Prompt ' + index, hi: 'सवाल ' + index },
+  })),
+  questionsToAsk: 'Q'.repeat(520),
+  timelineEntries: packTimeline,
+  now: new Date('2026-11-18T10:00:00.000Z'),
+});
+assert(preparationPack.priorities.length === 2, 'appointment pack keeps no more than two participant priorities');
+assert(preparationPack.activities.length === 5, 'appointment pack keeps the compact activity context within five items');
+assert(preparationPack.discussionPoints.length === 3, 'appointment pack keeps the three most relevant discussion prompts');
+assert(preparationPack.questionsToAsk.length <= 480, 'appointment pack bounds the personal question text');
+assert(preparationPack.timelineEntries.length === 5 && preparationPack.timelineEntries[0].id === 'pack-entry-7', 'appointment pack includes only the five newest timeline entries');
+assert(preparationPack.timelineEntries[0].dateValue === '2026-11-07', 'appointment pack timeline dates remain machine-readable');
+assert(preparationPack.language === 'en' && Boolean(preparationPack.preparedDate), 'appointment pack retains language and preparation date');
+const hindiPack = buildAppointmentPreparationPack({ language: 'hi', priorities: [{ id: 'x', label: { en: 'Blurred vision', hi: 'धुंधला दिखाई देना' } }], now: new Date('2026-11-18T10:00:00.000Z') });
+assert(hindiPack.priorities[0].label === 'धुंधला दिखाई देना', 'appointment pack uses Hindi labels when Hindi is selected');
 
 console.log('\n=== Saved session record completeness ===');
 const savedRecord = createSessionRecord({
