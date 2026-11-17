@@ -4,6 +4,8 @@
  * No network request is made by this module.
  */
 
+import { normalizeVisionTimelineEntries } from './visionTimeline.js';
+
 const DB_NAME = 'SightSteps';
 const DB_VERSION = 1;
 const STORE_SESSIONS = 'sessions';
@@ -75,7 +77,7 @@ function openDB() {
 /** Pure, testable shape of the record persisted for the active participant. */
 export function createSessionRecord(state) {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     sessionId: state.sessionId,
     startedAt: state.startedAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -91,6 +93,7 @@ export function createSessionRecord(state) {
     visionResults: state.visionResults || null,
     report: state.report || null,
     appointmentFollowUp: state.appointmentFollowUp || { appointmentDate: '', professionalNotes: '', followUpPlan: '', nextAppointmentDate: '' },
+    visionTimelineEntries: normalizeVisionTimelineEntries(state.visionTimelineEntries),
     discussionPriorities: Array.isArray(state.discussionPriorities) ? state.discussionPriorities.slice(0, 2) : [],
     questionsToAsk: typeof state.questionsToAsk === 'string' ? state.questionsToAsk : '',
     assistedCompletion: Boolean(state.assistedCompletion),
