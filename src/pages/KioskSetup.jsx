@@ -39,7 +39,7 @@ export default function KioskSetup() {
   };
 
   return (
-    <main className="kiosk-setup">
+    <main className="kiosk-setup" id="main-content" tabIndex="-1">
       <div className="kiosk-setup__container animate-fade-in">
         <button className="btn btn--ghost kiosk-setup__back" type="button" onClick={() => navigate('/')}>
           <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
