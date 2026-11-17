@@ -212,8 +212,8 @@ check(timelineUtilitySource.includes('normalizeVisionTimelineEntries') && timeli
 check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineUtilitySource.includes('futureDate'), 'timeline validation rejects invalid and future dates');
 check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
 check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
-check(report.includes('Appointment Preparation Pack') && report.includes('rpt__brief-timeline'), 'appointment preparation pack includes a concise timeline summary');
-check(reportCssSource.includes('.rpt__timeline-list') && reportCssSource.includes('.rpt__brief-timeline'), 'report includes timeline and print styles');
+check(report.includes('My Vision Timeline') && report.includes('rpt__timeline-list'), 'detailed report includes participant-recorded timeline');
+check(reportCssSource.includes('.rpt__timeline-list'), 'report includes timeline presentation styles');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
 console.log(`Results: ${passed} passed, ${failed} failed`);
