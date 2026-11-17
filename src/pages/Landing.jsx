@@ -60,6 +60,7 @@ export default function Landing() {
     primaryActivity,
     visionResults,
     kioskMode,
+    kioskCleanupFailed,
     isDemo,
     demoPersona,
     startDemo,
@@ -73,6 +74,12 @@ export default function Landing() {
   const hasSavedSession = Boolean(isHydrated && sessionId && consentGiven);
 
   useEffect(() => { void initVoices(); }, []);
+
+  useEffect(() => {
+    if (isHydrated && kioskCleanupFailed) {
+      navigate('/kiosk?clearError=1', { replace: true });
+    }
+  }, [isHydrated, kioskCleanupFailed, navigate]);
 
   useEffect(() => {
     if (demoStartPending && isDemo && sessionId && consentGiven) {
@@ -120,9 +127,18 @@ export default function Landing() {
       : 'Session data could not be cleared. Please try again.');
   };
 
-  const handleDemo = () => {
+  const handleDemo = async () => {
     if (demoStartPending) return;
+    setSessionActionError('');
     setDemoStartPending(true);
+    const cleared = await reset();
+    if (!cleared) {
+      setDemoStartPending(false);
+      setSessionActionError(lang === 'hi'
+        ? 'पिछला सेशन डेटा साफ़ नहीं हो सका। कृपया दोबारा प्रयास करें।'
+        : 'The previous session could not be cleared. Please try again.');
+      return;
+    }
     startDemo(rameshPersona);
   };
 
