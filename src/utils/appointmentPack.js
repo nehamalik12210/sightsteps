@@ -6,7 +6,7 @@ function localized(value, language = 'en') {
 }
 
 function compactText(value, limit) {
-  const text = String(value || '').trim().replace(/\\s+/g, ' ');
+  const text = String(value || '').trim().replace(/\s+/g, ' ');
   if (text.length <= limit) return text;
   return text.slice(0, Math.max(0, limit - 1)).trimEnd() + '…';
 }
