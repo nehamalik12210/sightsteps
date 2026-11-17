@@ -218,6 +218,8 @@ assert(preparationPack.priorities.length === 2, 'appointment pack keeps no more 
 assert(preparationPack.activities.length === 5, 'appointment pack keeps the compact activity context within five items');
 assert(preparationPack.discussionPoints.length === 3, 'appointment pack keeps the three most relevant discussion prompts');
 assert(preparationPack.questionsToAsk.length <= 480, 'appointment pack bounds the personal question text');
+const compactQuestionPack = buildAppointmentPreparationPack({ language: 'en', questionsToAsk: '  Can   we\n review  this?  ' });
+assert(compactQuestionPack.questionsToAsk === 'Can we review this?', 'appointment pack collapses repeated whitespace in personal questions');
 assert(preparationPack.timelineEntries.length === 5 && preparationPack.timelineEntries[0].id === 'pack-entry-7', 'appointment pack includes only the five newest timeline entries');
 assert(preparationPack.timelineEntries[0].dateValue === '2026-11-07', 'appointment pack timeline dates remain machine-readable');
 assert(preparationPack.language === 'en' && Boolean(preparationPack.preparedDate), 'appointment pack retains language and preparation date');
