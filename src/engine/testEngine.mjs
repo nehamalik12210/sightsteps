@@ -10,6 +10,7 @@ import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuesti
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
+import { normalizeVisionTimelineEntries, sortVisionTimelineEntries, validateVisionTimelineDraft, MAX_VISION_TIMELINE_ENTRIES } from '../utils/visionTimeline.js';
 import rameshPersona from '../data/demoPersona.js';
 
 let passed = 0;
@@ -151,6 +152,41 @@ for (const note of rameshResult.followUpNotes) {
   assert(Boolean(note.title.hi && note.detail.hi), `${note.id} follow-up has Hindi content`);
 }
 
+console.log('\n=== Vision timeline validation and ordering ===');
+const validTimelineDraft = {
+  date: '2026-11-16',
+  time: '09:30',
+  experienceId: 'blurred_vision',
+  experienceLabel: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+  context: 'Reading',
+  impact: 'Needed to pause and adjust the page position.',
+};
+assert(validateVisionTimelineDraft(validTimelineDraft, { today: '2026-11-17' }) === null, 'valid participant timeline entry passes validation');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, date: '2026-11-18' }, { today: '2026-11-17' }) === 'futureDate', 'future timeline dates are rejected');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, date: '2026-02-30' }, { today: '2026-11-17' }) === 'date', 'impossible calendar dates are rejected');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, time: '25:70' }, { today: '2026-11-17' }) === 'time', 'invalid approximate times are rejected');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, experienceLabel: '' }, { today: '2026-11-17' }) === 'experience', 'timeline entries require a described experience');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, context: 'x'.repeat(161) }, { today: '2026-11-17' }) === 'contextTooLong', 'timeline context length is bounded');
+assert(validateVisionTimelineDraft({ ...validTimelineDraft, impact: 'x'.repeat(601) }, { today: '2026-11-17' }) === 'impactTooLong', 'timeline note length is bounded');
+
+const unsortedTimeline = [
+  { id: 'older', date: '2026-11-12', time: '', experienceId: 'blurred_vision', experienceLabel: 'Blurred vision' },
+  { id: 'newer', date: '2026-11-16', time: '09:30', experienceId: 'headaches', experienceLabel: 'Headaches' },
+];
+assert(sortVisionTimelineEntries(unsortedTimeline)[0].id === 'newer', 'timeline entries sort newest first');
+const normalizedTimeline = normalizeVisionTimelineEntries(unsortedTimeline.concat([
+  { id: 'invalid', date: '2026-02-30', experienceId: 'other', experienceLabel: 'Invalid' },
+]));
+assert(normalizedTimeline.length === 2, 'malformed timeline entries are excluded from persisted data');
+const overflowTimeline = Array.from({ length: MAX_VISION_TIMELINE_ENTRIES + 5 }, (_, index) => ({
+  id: 'entry-' + index,
+  date: '2026-11-16',
+  time: '',
+  experienceId: 'other',
+  experienceLabel: 'Participant note',
+}));
+assert(normalizeVisionTimelineEntries(overflowTimeline).length === MAX_VISION_TIMELINE_ENTRIES, 'persisted timeline is capped at its configured entry limit');
+
 console.log('\n=== Saved session record completeness ===');
 const savedRecord = createSessionRecord({
   sessionId: 'test-session',
@@ -164,6 +200,7 @@ assert(savedRecord.activities.length === 2, 'saved record includes selected dail
 assert(savedRecord.primaryActivity === 'fine_detail', 'saved record includes primary activity');
 assert(savedRecord.participantNote === 'Strain after sewing', 'saved record includes participant note');
 assert(savedRecord.answers === rameshAnswers, 'saved record includes questionnaire answers');
+assert(Array.isArray(savedRecord.visionTimelineEntries) && savedRecord.visionTimelineEntries.length === 0, 'saved record safely defaults to an empty vision timeline');
 
 console.log('\n=== Questionnaire branching and answer validity ===');
 assert(!isAnswerComplete({ value: undefined }), 'legacy undefined answer is treated as unanswered');
@@ -355,7 +392,8 @@ assert(!Object.hasOwn(rameshResult, 'urgency'), 'report engine exposes no urgenc
 
 console.log('\n=== Storage failure contract ===');
 const minimalSavedRecord = createSessionRecord({ sessionId: 'empty-test' });
-assert(minimalSavedRecord.schemaVersion === 3, 'saved record has the current schema version');
+assert(minimalSavedRecord.schemaVersion === 4, 'saved record has the current schema version');
+assert(Array.isArray(minimalSavedRecord.visionTimelineEntries), 'legacy sessions safely hydrate with an empty timeline list');
 assert(minimalSavedRecord.activities.length === 0, 'missing activities restore to a safe empty list');
 assert(minimalSavedRecord.answers && typeof minimalSavedRecord.answers === 'object', 'missing answers restore to a safe object');
 assert(minimalSavedRecord.participantNote === '', 'missing participant note restores to an empty string');
@@ -363,11 +401,12 @@ assert(Array.isArray(minimalSavedRecord.discussionPriorities), 'saved record inc
 assert(minimalSavedRecord.appointmentFollowUp && typeof minimalSavedRecord.appointmentFollowUp === 'object', 'saved record includes appointment follow-up fields');
 assert(minimalSavedRecord.kioskMode === false, 'saved record defaults to non-kiosk mode');
 assert(minimalSavedRecord.questionsToAsk === '', 'saved record defaults to an empty list of participant questions');
-const extendedRecord = createSessionRecord({ sessionId: 'extended', kioskMode: true, assistedCompletion: true, discussionPriorities: ['blurred_vision', 'headaches', 'squinting'], questionsToAsk: 'What should I ask?', appointmentFollowUp: { appointmentDate: '2026-11-15' } });
+const extendedRecord = createSessionRecord({ sessionId: 'extended', kioskMode: true, assistedCompletion: true, visionTimelineEntries: unsortedTimeline, discussionPriorities: ['blurred_vision', 'headaches', 'squinting'], questionsToAsk: 'What should I ask?', appointmentFollowUp: { appointmentDate: '2026-11-15' } });
 assert(extendedRecord.kioskMode && extendedRecord.assistedCompletion, 'shared-device and assisted-completion flags persist');
 assert(extendedRecord.discussionPriorities.length === 2, 'only two discussion priorities are persisted');
 assert(extendedRecord.appointmentFollowUp.appointmentDate === '2026-11-15', 'appointment follow-up data persists');
 assert(extendedRecord.questionsToAsk === 'What should I ask?', 'participant questions persist');
+assert(extendedRecord.visionTimelineEntries.length === 2 && extendedRecord.visionTimelineEntries[0].id === 'newer', 'timeline entries are normalized and persisted newest first');
 assert(shouldDiscardKioskSessionOnRestore(extendedRecord), 'kiosk session is discarded after reload rather than restored');
 assert(!shouldDiscardKioskSessionOnRestore(minimalSavedRecord), 'ordinary sessions remain eligible for resume');
 assert(hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS), 'kiosk idle policy expires at its configured limit');
