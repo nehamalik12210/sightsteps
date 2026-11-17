@@ -219,7 +219,7 @@ export default function Intake() {
     setSpeaking(false);
     setNavigationError('');
 
-    const idsToClear = getBackNavigationAnswerIds(visibleQuestions, currentQuestion.id);
+    const idsToClear = getBackNavigationAnswerIds(visibleQuestions, currentQuestion.id, answers);
     if (idsToClear.length === 0) {
       if (isDemo) {
         const cleared = await reset();
