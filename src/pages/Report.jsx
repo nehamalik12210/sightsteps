@@ -193,11 +193,6 @@ export default function Report() {
         )}
 
         <section className="rpt__section rpt__print-summary" aria-labelledby="rpt-summary-priorities">
-          <div className="rpt__pack-heading">
-            <p className="rpt__kicker">SIGHTSTEPS · {lang === 'hi' ? 'अपॉइंटमेंट की तैयारी' : 'APPOINTMENT PREPARATION'}</p>
-            <h2>{lang === 'hi' ? 'अपॉइंटमेंट तैयारी पैक' : 'Appointment Preparation Pack'}</h2>
-            <p>{lang === 'hi' ? 'तैयार किया गया: ' : 'Prepared: '}{formatVisionTimelineDate(getLocalDateInputValue(), lang)}</p>
-          </div>
           <div className="rpt__sec-head">
             <div>
               <p className="rpt__kicker">{lang === 'hi' ? 'आपकी प्राथमिकताएँ' : 'YOUR PRIORITIES'}</p>
@@ -228,25 +223,6 @@ export default function Report() {
               <p>{localized(orderedDiscussionPoints.find((point) => ['main_experience_timeline', 'activity_impact_detail'].includes(point.id))?.prompt, lang)}</p>
             </div>
           )}
-          <div className="rpt__brief-timeline">
-            <h3>{lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन' : 'My Vision Timeline'}</h3>
-            {sortedTimelineEntries.length > 0 ? (
-              <ol>
-                {sortedTimelineEntries.slice(0, 5).map((entry) => (
-                  <li key={entry.id}>
-                    <strong>{formatVisionTimelineDate(entry.date, lang) + (entry.time ? ' · ' + entry.time : '')}</strong>
-                    <span>{localized(entry.experienceLabel, lang)}</span>
-                    {entry.context && <span>{lang === 'hi' ? 'गतिविधि: ' : 'Activity: '}{entry.context}</span>}
-                    {entry.impact && <span>{entry.impact}</span>}
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p>{lang === 'hi' ? 'कोई टाइमलाइन एंट्री नहीं जोड़ी गई।' : 'No timeline entries were added.'}</p>
-            )}
-            {sortedTimelineEntries.length > 5 && <p className="rpt__brief-timeline-more">{lang === 'hi' ? 'कुल ' + sortedTimelineEntries.length + ' एंट्री में से हाल की 5 दिखाई गई हैं। पूरी टाइमलाइन विस्तृत रिपोर्ट में है।' : 'Showing the 5 most recent of ' + sortedTimelineEntries.length + ' entries; the detailed report contains the full timeline.'}</p>}
-            <p className="rpt__brief-timeline-scope">{lang === 'hi' ? 'ये केवल प्रतिभागी द्वारा दर्ज नोट्स हैं; इनकी चिकित्सकीय व्याख्या नहीं की गई है।' : 'These are participant-recorded notes and have not been clinically interpreted.'}</p>
-          </div>
           {questionsToAsk && <p className="rpt__print-questions"><strong>{lang === 'hi' ? 'मेरे सवाल: ' : 'My questions: '}</strong>{questionsToAsk}</p>}
           <p className="rpt__print-scope">
             {lang === 'hi'
@@ -572,7 +548,7 @@ export default function Report() {
         <div className="rpt__actions">
           <button type="button" className="btn btn--primary btn--full btn--lg rpt__print-btn" onClick={() => printBrief('brief')}>
             <span className="material-symbols-outlined" aria-hidden="true">summarize</span>
-            {lang === 'hi' ? 'अपॉइंटमेंट तैयारी पैक प्रिंट करें' : 'Print appointment preparation pack'}
+            {lang === 'hi' ? 'एक-पृष्ठ प्राथमिकता सारांश प्रिंट करें' : 'Print one-page priority brief'}
           </button>
           <button type="button" className="btn btn--secondary btn--full" onClick={() => printBrief('detail')}>
             <span className="material-symbols-outlined" aria-hidden="true">print</span>
