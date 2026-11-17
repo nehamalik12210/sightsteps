@@ -35,3 +35,10 @@
 @media print {
   .rpt--brief-print .appointment-pack { display: block !important; }
 }
+
+.appointment-pack__priorities { list-style: decimal; }
+.appointment-pack__discussion-list { list-style: decimal; }
+.appointment-pack__timeline-list { list-style: disc; }
+.appointment-pack__priorities li,
+.appointment-pack__discussion-list li,
+.appointment-pack__timeline-list li { padding-left: 2px; }
