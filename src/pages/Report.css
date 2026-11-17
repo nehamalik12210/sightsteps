@@ -93,3 +93,152 @@
   .rpt__timeline-entry, .rpt__timeline-empty { background: #fff; }
   .rpt__timeline-section { break-inside: auto !important; }
 }
+
+
+/* Report actions are grouped by their place in the participant journey. */
+.rpt__appointment-section {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-container-lowest);
+}
+.rpt__appointment-section .rpt__sec-head { margin-bottom: var(--space-3); }
+.rpt__appointment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container-low);
+}
+.rpt__appointment-summary p {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rpt__appointment-summary strong { color: var(--color-secondary); }
+.rpt__appointment-action { margin-top: var(--space-2); }
+.rpt__inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.rpt__inline-action:hover { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.rpt__inline-action .material-symbols-outlined { flex-shrink: 0; font-size: 19px; }
+.rpt__inline-action-arrow { margin-left: 2px; }
+
+.rpt__export-section { margin: var(--space-6) 0 var(--space-5); }
+.rpt__export-card {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-container-lowest);
+}
+.rpt__export-copy h2 {
+  color: var(--color-secondary);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+.rpt__export-copy>p:last-child {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+.rpt__export-card .rpt__print-btn { width: 100%; }
+.rpt__export-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 10px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+.rpt__text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+.rpt__text-action .material-symbols-outlined { font-size: 17px; }
+.rpt__text-action:hover { text-decoration: underline; }
+
+.rpt__session-tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+}
+.rpt__session-copy h2 {
+  color: var(--color-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+.rpt__session-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); }
+.rpt__session-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 7px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+.rpt__session-link .material-symbols-outlined { font-size: 19px; }
+.rpt__session-link:hover { text-decoration: underline; }
+.rpt__session-link--danger { color: var(--color-danger,#dc2626); }
+.rpt__session-actions .rpt__delete-confirm { flex-basis: 100%; }
+
+@media(min-width:600px) {
+  .rpt__export-card { grid-template-columns: minmax(0,1fr) auto; column-gap: var(--space-5); }
+  .rpt__export-card .rpt__print-btn { width: auto; min-width: 238px; }
+  .rpt__export-secondary { grid-column: 1 / -1; }
+}
+@media(max-width:420px) {
+  .rpt__appointment-section { padding: var(--space-3); }
+  .rpt__inline-action { width: 100%; justify-content: flex-start; }
+  .rpt__export-card { padding: var(--space-4); }
+}
+@media print {
+  .rpt__export-section,
+  .rpt__session-tools,
+  .rpt__appointment-action { display: none !important; }
+}
