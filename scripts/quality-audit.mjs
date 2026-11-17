@@ -231,5 +231,32 @@ check(reportCssSource.includes('.rpt__priority-context') && reportCssSource.incl
 check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timeline inputs retain a mobile-friendly minimum text size');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
+const appointmentPackSource = read('src/utils/appointmentPack.js');
+const appointmentPackComponentSource = read('src/components/AppointmentPreparationPack.jsx');
+const appointmentPackCssSource = read('src/components/AppointmentPreparationPack.css');
+const accessibilityControlsSource = read('src/components/AccessibilityControls.jsx');
+const accessibilityControlsCssSource = read('src/components/AccessibilityControls.css');
+check(report.includes('AppointmentPreparationPack') && report.includes("printBrief('brief')") && report.includes('Print appointment preparation pack'), 'report offers the appointment preparation pack as its primary print action');
+check(report.includes('buildAppointmentPreparationPack') && report.includes('setAppointmentPack'), 'appointment pack content is built from the current participant report state before printing');
+check(appointmentPackSource.includes('slice(0, 2)') && appointmentPackSource.includes('slice(0, 3)') && appointmentPackSource.includes('slice(0, 5)'), 'appointment pack enforces two priorities, three discussion prompts and five recent timeline entries');
+check(appointmentPackSource.includes('questionsToAsk') && appointmentPackSource.includes('preparedDate'), 'appointment pack includes participant questions and its preparation date');
+check(appointmentPackComponentSource.includes('Appointment Preparation Pack') && appointmentPackComponentSource.includes('dateTime={entry.dateValue}'), 'print pack has a clear title and semantic timeline dates');
+check(appointmentPackComponentSource.includes('not an eye examination') && appointmentPackCssSource.includes('@media print'), 'print pack states its non-clinical scope and uses print-specific styling');
+check(reportCssSource.includes(':not(.appointment-pack)') && reportCssSource.includes('rpt--brief-print'), 'brief printing isolates the pack rather than shrinking the detailed report');
+
+check(accessibilityControlsSource.includes('href="#main-content"') && accessibilityControlsSource.includes('Skip to main content'), 'keyboard users can skip directly to the page main content');
+check(accessibilityControlsSource.includes('sightsteps.display-preferences.v1') && accessibilityControlsSource.includes('localStorage'), 'display preferences persist locally and fail safely when storage is unavailable');
+check(accessibilityControlsSource.includes('aria-pressed') && accessibilityControlsSource.includes('aria-labelledby'), 'display settings expose their state and labelled control group');
+check(accessibilityControlsCssSource.includes('data-a11y-contrast') && accessibilityControlsCssSource.includes('data-a11y-targets') && accessibilityControlsCssSource.includes('data-a11y-motion'), 'display settings provide contrast, larger targets and reduced-motion modes');
+check(baseCss.includes('var(--a11y-scale') && accessCss.includes('data-a11y-scale'), 'global typography can scale while preserving responsive rem sizing');
+check(appSource.includes('RouteFocusManager') && appSource.includes("getElementById('main-content')?.focus"), 'route changes move keyboard focus to the new page main landmark');
+for (const pagePath of [
+  'src/pages/Landing.jsx', 'src/pages/Onboarding.jsx', 'src/pages/ActivityProfile.jsx',
+  'src/pages/Intake.jsx', 'src/pages/VisionActivity.jsx', 'src/pages/Report.jsx',
+  'src/pages/AppointmentFollowUp.jsx', 'src/pages/VisionTimeline.jsx', 'src/pages/KioskSetup.jsx',
+]) {
+  check(/id="main-content"/.test(read(pagePath)), `${pagePath} has a skip-navigation main landmark`);
+}
+
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed) process.exitCode = 1;
