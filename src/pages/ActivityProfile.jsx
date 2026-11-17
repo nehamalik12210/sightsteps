@@ -126,7 +126,7 @@ export default function ActivityProfile() {
   const progressValue = step === 'select' ? 1 : 2;
 
   return (
-    <main className="ap">
+    <main className="ap" id="main-content" tabIndex="-1">
       <header className="ap__topbar">
         <button className="ap__back-btn" type="button" onClick={handleBack} disabled={Boolean(pendingProfile)} aria-label={t('common.back', lang)}>
           <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
