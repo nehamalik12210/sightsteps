@@ -122,7 +122,7 @@ export default function VisionActivity() {
 
   if (phase === 'intro') {
     return (
-      <main className="va">
+      <main className="va" id="main-content" tabIndex="-1">
         <header className="va__topbar">
           <button className="va__back-btn" type="button" onClick={() => navigate(-1)} aria-label={t('common.back', lang)}>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -156,7 +156,7 @@ export default function VisionActivity() {
     const overallTrial = currentEye === 'left' ? trialIndex + 1 : TRIALS_PER_EYE + trialIndex + 1;
     const progressPct = ((overallTrial - 1) / TOTAL_TRIALS) * 100;
     return (
-      <main className="va va--testing">
+      <main className="va va--testing" id="main-content" tabIndex="-1">
         <header className="va__topbar"><span className="va__topbar-spacer" /><span className="va__topbar-title">{roundLabel}</span><span className="va__topbar-counter">{overallTrial}/{TOTAL_TRIALS}</span></header>
         <div className="va__progress-bar-wrap"><div className="va__progress-track" role="progressbar" aria-label={lang === 'hi' ? 'गतिविधि प्रगति' : 'Activity progress'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progressPct)}><div className="va__progress-fill" style={{ width: `${progressPct}%` }} /></div></div>
         <section className="va__test" aria-labelledby="va-test-q">
@@ -179,7 +179,7 @@ export default function VisionActivity() {
   const leftCorrect = results.left.filter((t) => t.correct).length;
   const rightCorrect = results.right.filter((t) => t.correct).length;
   return (
-    <main className="va">
+    <main className="va" id="main-content" tabIndex="-1">
       <header className="va__topbar"><span className="va__topbar-spacer" /><span className="va__topbar-title">{lang === 'hi' ? 'गतिविधि परिणाम' : 'Activity Results'}</span><span className="va__topbar-spacer" /></header>
       <section className="va__results animate-fade-in" aria-labelledby="va-results-heading">
         <div className="va__results-header"><span className="material-symbols-outlined va__results-check" aria-hidden="true">check_circle</span><h1 id="va-results-heading" className="va__results-title">{lang === 'hi' ? 'गतिविधि पूरी हुई' : 'Activity Complete'}</h1><p className="va__results-sub">{lang === 'hi' ? 'ये संख्याएँ केवल इस गतिविधि में चुनी गई दिशाओं की गिनती हैं।' : 'These numbers count direction selections in this interaction only.'}</p></div>
