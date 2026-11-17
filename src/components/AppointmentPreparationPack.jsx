@@ -72,7 +72,7 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
           <ol className="appointment-pack__timeline-list">
             {pack.timelineEntries.map((entry) => (
               <li key={entry.id}>
-                <time>{entry.date}{entry.time ? ` · ${entry.time}` : ''}</time>
+                <time dateTime={entry.dateValue}>{entry.date}{entry.time ? ` · ${entry.time}` : ''}</time>
                 <strong>{entry.experience}</strong>
                 {(entry.context || entry.note) && (
                   <p>{[entry.context, entry.note].filter(Boolean).join(' · ')}</p>
