@@ -5,6 +5,7 @@ import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
+import { formatVisionTimelineDate, getLocalDateInputValue, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
 
 function localized(value, lang) {
@@ -27,6 +28,7 @@ export default function Report() {
     demoPersona,
     reset,
     appointmentFollowUp,
+    visionTimelineEntries,
     discussionPriorities,
     questionsToAsk,
     assistedCompletion,
@@ -47,6 +49,10 @@ export default function Report() {
     participantNote,
     countableQuestionIds: isDemo ? demoPersona?.demoQuestionIds : undefined,
   }), [answers, activities, primaryActivity, participantNote, isDemo, demoPersona]);
+  const sortedTimelineEntries = useMemo(
+    () => sortVisionTimelineEntries(visionTimelineEntries || []),
+    [visionTimelineEntries],
+  );
 
   // Do not redirect while IndexedDB is still restoring the saved session.
   useEffect(() => {
@@ -187,6 +193,11 @@ export default function Report() {
         )}
 
         <section className="rpt__section rpt__print-summary" aria-labelledby="rpt-summary-priorities">
+          <div className="rpt__pack-heading">
+            <p className="rpt__kicker">SIGHTSTEPS · {lang === 'hi' ? 'अपॉइंटमेंट की तैयारी' : 'APPOINTMENT PREPARATION'}</p>
+            <h2>{lang === 'hi' ? 'अपॉइंटमेंट तैयारी पैक' : 'Appointment Preparation Pack'}</h2>
+            <p>{lang === 'hi' ? 'तैयार किया गया: ' : 'Prepared: '}{formatVisionTimelineDate(getLocalDateInputValue(), lang)}</p>
+          </div>
           <div className="rpt__sec-head">
             <div>
               <p className="rpt__kicker">{lang === 'hi' ? 'आपकी प्राथमिकताएँ' : 'YOUR PRIORITIES'}</p>
@@ -217,6 +228,25 @@ export default function Report() {
               <p>{localized(orderedDiscussionPoints.find((point) => ['main_experience_timeline', 'activity_impact_detail'].includes(point.id))?.prompt, lang)}</p>
             </div>
           )}
+          <div className="rpt__brief-timeline">
+            <h3>{lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन' : 'My Vision Timeline'}</h3>
+            {sortedTimelineEntries.length > 0 ? (
+              <ol>
+                {sortedTimelineEntries.slice(0, 5).map((entry) => (
+                  <li key={entry.id}>
+                    <strong>{formatVisionTimelineDate(entry.date, lang) + (entry.time ? ' · ' + entry.time : '')}</strong>
+                    <span>{localized(entry.experienceLabel, lang)}</span>
+                    {entry.context && <span>{lang === 'hi' ? 'गतिविधि: ' : 'Activity: '}{entry.context}</span>}
+                    {entry.impact && <span>{entry.impact}</span>}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p>{lang === 'hi' ? 'कोई टाइमलाइन एंट्री नहीं जोड़ी गई।' : 'No timeline entries were added.'}</p>
+            )}
+            {sortedTimelineEntries.length > 5 && <p className="rpt__brief-timeline-more">{lang === 'hi' ? 'कुल ' + sortedTimelineEntries.length + ' एंट्री में से हाल की 5 दिखाई गई हैं। पूरी टाइमलाइन विस्तृत रिपोर्ट में है।' : 'Showing the 5 most recent of ' + sortedTimelineEntries.length + ' entries; the detailed report contains the full timeline.'}</p>}
+            <p className="rpt__brief-timeline-scope">{lang === 'hi' ? 'ये केवल प्रतिभागी द्वारा दर्ज नोट्स हैं; इनकी चिकित्सकीय व्याख्या नहीं की गई है।' : 'These are participant-recorded notes and have not been clinically interpreted.'}</p>
+          </div>
           {questionsToAsk && <p className="rpt__print-questions"><strong>{lang === 'hi' ? 'मेरे सवाल: ' : 'My questions: '}</strong>{questionsToAsk}</p>}
           <p className="rpt__print-scope">
             {lang === 'hi'
@@ -234,6 +264,46 @@ export default function Report() {
               maxLength={1200}
               language={lang}
             />
+          </div>
+        </section>
+
+        <section className="rpt__section rpt__timeline-section" aria-labelledby="rpt-timeline-heading">
+          <div className="rpt__sec-head">
+            <div>
+              <p className="rpt__kicker">{lang === 'hi' ? 'समय के साथ आपके अनुभव' : 'YOUR EXPERIENCES OVER TIME'}</p>
+              <h2 id="rpt-timeline-heading" className="rpt__sec-title">{lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन' : 'My Vision Timeline'}</h2>
+            </div>
+            <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">timeline</span>
+          </div>
+          <p className="rpt__sec-intro">{lang === 'hi' ? 'आपके द्वारा तारीख के अनुसार दर्ज किए गए अनुभव। ये आपके अपने नोट्स हैं, कोई जाँच या चिकित्सकीय निष्कर्ष नहीं।' : 'Experiences you recorded by date. These are your own notes, not a test or clinical conclusion.'}</p>
+          {sortedTimelineEntries.length > 0 ? (
+            <ol className="rpt__timeline-list">
+              {sortedTimelineEntries.map((entry) => (
+                <li key={entry.id} className="rpt__timeline-entry">
+                  <div className="rpt__timeline-meta">
+                    <time dateTime={entry.date}>{formatVisionTimelineDate(entry.date, lang) + (entry.time ? ' · ' + entry.time : '')}</time>
+                    <span>{lang === 'hi' ? 'आपके द्वारा दर्ज' : 'Participant-reported'}</span>
+                  </div>
+                  <h3>{localized(entry.experienceLabel, lang)}</h3>
+                  {entry.context && <p><strong>{lang === 'hi' ? 'उस समय: ' : 'At the time: '}</strong>{entry.context}</p>}
+                  {entry.impact && <p><strong>{lang === 'hi' ? 'आपका नोट: ' : 'Your note: '}</strong>{entry.impact}</p>}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="rpt__timeline-empty">
+              <span className="material-symbols-outlined" aria-hidden="true">history</span>
+              <p>{lang === 'hi' ? 'अभी कोई टाइमलाइन एंट्री नहीं है। अलग-अलग दिनों में अनुभव दर्ज करने से बातचीत के लिए समय-क्रम तैयार हो सकता है।' : 'There are no timeline entries yet. Recording experiences on different days can help you organise a chronological account for your conversation.'}</p>
+            </div>
+          )}
+          <div className="rpt__timeline-actions">
+            <p>{lang === 'hi' ? 'आप कभी भी एंट्री जोड़, बदल या हटा सकते हैं।' : 'You can add, edit or delete entries at any time.'}</p>
+            <button type="button" className="btn btn--outline btn--full" onClick={() => navigate('/timeline')}>
+              <span className="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+              {sortedTimelineEntries.length > 0
+                ? (lang === 'hi' ? 'टाइमलाइन बदलें' : 'Add or edit timeline')
+                : (lang === 'hi' ? 'पहला अनुभव दर्ज करें' : 'Start your timeline')}
+            </button>
           </div>
         </section>
 
@@ -502,11 +572,15 @@ export default function Report() {
         <div className="rpt__actions">
           <button type="button" className="btn btn--primary btn--full btn--lg rpt__print-btn" onClick={() => printBrief('brief')}>
             <span className="material-symbols-outlined" aria-hidden="true">summarize</span>
-            {lang === 'hi' ? 'एक-पृष्ठ प्राथमिकता सारांश प्रिंट करें' : 'Print one-page priority brief'}
+            {lang === 'hi' ? 'अपॉइंटमेंट तैयारी पैक प्रिंट करें' : 'Print appointment preparation pack'}
           </button>
           <button type="button" className="btn btn--secondary btn--full" onClick={() => printBrief('detail')}>
             <span className="material-symbols-outlined" aria-hidden="true">print</span>
             {lang === 'hi' ? 'विस्तृत रिपोर्ट प्रिंट करें' : 'Print detailed report'}
+          </button>
+          <button type="button" className="btn btn--outline btn--full" onClick={() => navigate('/timeline')}>
+            <span className="material-symbols-outlined" aria-hidden="true">timeline</span>
+            {lang === 'hi' ? 'मेरी दृष्टि टाइमलाइन देखें' : 'View my vision timeline'}
           </button>
           <button type="button" className="btn btn--outline btn--full" onClick={() => navigate('/follow-up')}>
             <span className="material-symbols-outlined" aria-hidden="true">event_note</span>
