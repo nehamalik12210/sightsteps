@@ -48,3 +48,22 @@ select {
 :focus-visible {
   scroll-margin-block: 1rem;
 }
+
+
+/* The global accessibility control occupies the reserved right edge of page headers. */
+html .iq__progress-area,
+html .ap__progress-wrap,
+html .va__topbar-counter {
+  margin-right: 52px;
+}
+html[data-a11y-scale="115"] .btn,
+html[data-a11y-scale="130"] .btn {
+  white-space: normal;
+  text-align: center;
+}
+html[data-a11y-contrast="high"] :where(button, input, select, textarea, [role="button"]) {
+  border-color: #344054;
+}
+html[data-a11y-contrast="high"] :where(p, li, label, small) {
+  color: #26364b;
+}
