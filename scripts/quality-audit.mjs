@@ -84,6 +84,14 @@ const baseCss = read('src/index.css');
 const accessCss = read('src/accessibility.css');
 const vite = read('vite.config.js');
 const effectiveCss = `${baseCss}\n${accessCss}`;
+const stylesheetFiles = collect('src').filter((path) => path.endsWith('.css'));
+const allStylesheets = stylesheetFiles.map(read).join('\n');
+const declaredCssProperties = new Set(
+  [...allStylesheets.matchAll(/--([a-zA-Z0-9_-]+)\s*:/g)].map((match) => match[1]),
+);
+for (const match of allStylesheets.matchAll(/var\(--([a-zA-Z0-9_-]+)/g)) {
+  check(declaredCssProperties.has(match[1]), `CSS custom property --${match[1]} is defined`);
+}
 const themeMeta = html.match(/name=["']theme-color["']\s+content=["']([^"']+)["']/i)?.[1];
 const manifestTheme = vite.match(/theme_color:\s*["']([^"']+)["']/)?.[1];
 const manifestBackground = vite.match(/background_color:\s*["']([^"']+)["']/)?.[1];
