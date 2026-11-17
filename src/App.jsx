@@ -7,6 +7,7 @@ import Intake from './pages/Intake.jsx';
 import VisionActivity from './pages/VisionActivity.jsx';
 import Report from './pages/Report.jsx';
 import AppointmentFollowUp from './pages/AppointmentFollowUp.jsx';
+import VisionTimeline from './pages/VisionTimeline.jsx';
 import KioskSetup from './pages/KioskSetup.jsx';
 import KioskGuard from './components/KioskGuard.jsx';
 import { useApp } from './context/AppContext.jsx';
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/vision" element={<RouteGuard requireProfile requireIntake><VisionActivity /></RouteGuard>} />
           <Route path="/report" element={<RouteGuard requireProfile requireIntake requireVision><Report /></RouteGuard>} />
           <Route path="/follow-up" element={<RouteGuard requireProfile requireIntake requireVision><AppointmentFollowUp /></RouteGuard>} />
+          <Route path="/timeline" element={<RouteGuard requireProfile requireIntake requireVision><VisionTimeline /></RouteGuard>} />
           <Route path="/kiosk" element={<KioskSetup />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
