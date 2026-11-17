@@ -32,6 +32,7 @@ const initialState = {
   questionsToAsk: '',
   assistedCompletion: false,
   kioskMode: false,
+  kioskCleanupFailed: false,
   sessionId: null,
   startedAt: null,
 };
@@ -60,6 +61,9 @@ function appReducer(state, action) {
 
     case 'HYDRATION_DONE':
       return { ...state, isHydrated: true };
+
+    case 'KIOSK_CLEANUP_FAILED':
+      return { ...initialState, isHydrated: true, storageAvailable: false, kioskCleanupFailed: true };
 
     case 'SET_STORAGE_STATUS':
       return state.storageAvailable === action.payload
@@ -181,8 +185,11 @@ export function AppProvider({ children }) {
 
         if (record?.sessionId && shouldDiscardKioskSessionOnRestore(record)) {
           // A shared-device session is intentionally not restored after a reload or browser restart.
-          await clearAllSessions();
-          dispatch({ type: 'HYDRATION_DONE' });
+          // Do not silently continue if the local deletion fails: new sessions must
+          // pass through KioskSetup and successfully retry cleanup first.
+          const cleared = await clearAllSessions();
+          if (!active) return;
+          dispatch({ type: cleared ? 'HYDRATION_DONE' : 'KIOSK_CLEANUP_FAILED' });
         } else if (record?.sessionId) {
           dispatch({
             type: 'HYDRATE',
