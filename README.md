@@ -17,10 +17,11 @@ SightSteps helps people organise visual experiences they have noticed, understan
 - **My Vision Timeline:** Participants can optionally record dated experiences, approximate times, activity context and personal notes. Entries can be edited or deleted and are stored with the local session.
 - **Everyday activity impact:** Participants identify which selected activities feel affected and describe the kind and frequency of the impact. Follow-up questions depend on their answers.
 - **Explainable conversation brief:** A deterministic rules engine groups self-reported information and creates discussion prompts with references to the source answers. Participants can bring up to two priorities to the front; this is a personal preference, not a clinical ranking.
-- **Two report formats:** A concise, printable priority brief and a detailed report with observations, the participant-recorded timeline and source references.
+- **Two report formats:** A one-page Appointment Preparation Pack with personal priorities, questions, up to three discussion prompts and the five most recent timeline entries, plus a detailed report with observations, the complete participant-recorded timeline and source references.
 - **Appointment continuity:** Optional participant-written appointment notes, next steps and follow-up date.
 - **Shared-device kiosk mode:** A dedicated participant flow with a five-minute inactivity timeout and session clearing on reload/reopen.
 - **Assisted and voice interaction:** Optional assisted-completion disclosure, question read-aloud and browser speech-to-text where supported. Typed input is always available.
+- **Accessibility settings:** Keyboard skip navigation, route focus management, adjustable text size, high contrast, larger touch targets and a reduced-motion option. Display preferences are saved locally on the device.
 - **Installable PWA:** App manifest and service worker support installation and asset caching.
 
 ## How the experience works
@@ -31,7 +32,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 4. Complete the guided questions and describe the visual experiences they have noticed.
 5. Identify activities that feel affected and describe the impact.
 6. Optionally try the direction-awareness interaction. It is uncalibrated and does not measure visual acuity.
-7. Review the Vision Conversation Map, choose conversation priorities and print a brief or detailed report.
+7. Review the Vision Conversation Map, choose conversation priorities, add personal questions and print an Appointment Preparation Pack or the detailed report.
 8. Optionally add dated entries to My Vision Timeline, including the experience noticed, activity context and a personal note.
 9. Optionally record what was discussed at the appointment and any follow-up steps in the participant's own words.
 
@@ -101,7 +102,7 @@ The root `vercel.json` rewrite sends application routes back to `index.html`, al
 
 ## Validation status
 
-The latest verified production build completed on `main` with:
+The latest verified production build completed on `main` before the appointment-pack and accessibility work with:
 
 - **1,721 passed, 0 failed** in the static quality audit.
 - **563 passed, 0 failed** in the regression test suite.
