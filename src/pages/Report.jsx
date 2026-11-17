@@ -5,6 +5,8 @@ import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
+import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
+import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
 
@@ -41,6 +43,7 @@ export default function Report() {
   const [expandedGroups, setExpandedGroups] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [printMode, setPrintMode] = useState('detail');
+  const [appointmentPack, setAppointmentPack] = useState(null);
   const [sessionActionError, setSessionActionError] = useState('');
 
   const report = useMemo(() => evaluateAnswers(answers, {
@@ -87,17 +90,42 @@ export default function Report() {
     else if (current.length < 2) setDiscussionPriorities([...current, id]);
   };
   const printBrief = (mode) => {
+    if (mode === 'brief') {
+      const priorities = selectedPriorities.map((id) => ({
+        id,
+        label: reportedConcerns.find((item) => item.value === id)?.label || '',
+      }));
+      setAppointmentPack(buildAppointmentPreparationPack({
+        language: lang,
+        priorities,
+        activities: report.activitiesContext?.affected?.map((item) => item.label) || [],
+        discussionPoints: orderedDiscussionPoints.slice(0, 3),
+        questionsToAsk,
+        timelineEntries: sortedTimelineEntries,
+        now: new Date(),
+      }));
+    } else {
+      setAppointmentPack(null);
+    }
     setPrintMode(mode);
-    window.setTimeout(() => window.print(), 120);
+    const openPrintDialog = () => window.print();
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(openPrintDialog));
+    } else {
+      window.setTimeout(openPrintDialog, 180);
+    }
   };
   useEffect(() => {
-    const restorePrintMode = () => setPrintMode('detail');
+    const restorePrintMode = () => {
+      setPrintMode('detail');
+      setAppointmentPack(null);
+    };
     window.addEventListener('afterprint', restorePrintMode);
     return () => window.removeEventListener('afterprint', restorePrintMode);
   }, []);
 
   if (!isHydrated) {
-    return <main className="rpt rpt__body" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
+    return <main className="rpt rpt__body" id="main-content" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
   }
   if (Object.keys(answers).length === 0) return null;
 
@@ -144,7 +172,7 @@ export default function Report() {
         <span className="rpt__topbar-spacer" />
       </header>
 
-      <main className="rpt__body">
+      <main className="rpt__body" id="main-content" tabIndex="-1">
         {sessionActionError && <p className="rpt__notice" role="alert">{sessionActionError}</p>}
         <section className="rpt__intro">
           <p className="rpt__kicker">{lang === 'hi' ? 'सत्र सारांश' : 'SESSION SUMMARY'}</p>
@@ -561,18 +589,25 @@ export default function Report() {
           </div>
         </div>
 
+        {appointmentPack && <AppointmentPreparationPack pack={appointmentPack} language={lang} />}
+
         <section className="rpt__export-section" aria-labelledby="rpt-export-heading">
           <div className="rpt__export-card">
             <div className="rpt__export-copy">
-              <p className="rpt__kicker">{lang === 'hi' ? 'अपनी बातचीत के लिए तैयार' : 'READY FOR YOUR CONVERSATION'}</p>
-              <h2 id="rpt-export-heading">{lang === 'hi' ? 'अपना सारांश साथ ले जाएँ' : 'Take your summary with you'}</h2>
+              <p className="rpt__kicker">{lang === 'hi' ? 'अपॉइंटमेंट की तैयारी' : 'APPOINTMENT PREPARATION'}</p>
+              <h2 id="rpt-export-heading">{lang === 'hi' ? 'अपना तैयारी पैक साथ ले जाएँ' : 'Take your preparation pack with you'}</h2>
               <p>{lang === 'hi'
-                ? 'अपनी चुनी हुई प्राथमिकताओं और सवालों का एक-पृष्ठ सारांश प्रिंट करें।'
-                : 'Print a one-page brief with your chosen priorities and questions.'}</p>
+                ? 'आपकी प्राथमिकताएँ, सवाल, चर्चा के विषय और हाल के पाँच टाइमलाइन अनुभव एक पृष्ठ पर।'
+                : 'Your priorities, personal questions, discussion prompts and up to five recent timeline entries on one page.'}</p>
             </div>
+            <p className="rpt__pack-includes">
+              {lang === 'hi'
+                ? `${selectedPriorities.length} प्राथमिकताएँ · ${questionsToAsk.trim() ? 'व्यक्तिगत सवाल' : 'सवाल जोड़ें'} · ${Math.min(3, orderedDiscussionPoints.length)} चर्चा विषय · ${Math.min(5, sortedTimelineEntries.length)} हाल के टाइमलाइन अनुभव`
+                : `${selectedPriorities.length} priorities · ${questionsToAsk.trim() ? 'personal questions' : 'no personal questions yet'} · ${Math.min(3, orderedDiscussionPoints.length)} discussion prompts · ${Math.min(5, sortedTimelineEntries.length)} recent timeline entries`}
+            </p>
             <button type="button" className="btn btn--primary btn--full btn--lg rpt__print-btn" onClick={() => printBrief('brief')}>
               <span className="material-symbols-outlined" aria-hidden="true">summarize</span>
-              {lang === 'hi' ? 'एक-पृष्ठ सारांश प्रिंट करें' : 'Print one-page priority brief'}
+              {lang === 'hi' ? 'अपॉइंटमेंट पैक प्रिंट करें' : 'Print appointment preparation pack'}
             </button>
             <div className="rpt__export-secondary">
               <span>{lang === 'hi' ? 'जवाबों सहित पूरी रिपोर्ट चाहिए?' : 'Need the complete report with all responses?'}</span>
