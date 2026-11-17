@@ -125,7 +125,7 @@ export default function Report() {
   }, []);
 
   if (!isHydrated) {
-    return <main className="rpt rpt__body" id="main-content" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
+    return <main className="rpt rpt__body" id="report-loading" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
   }
   if (Object.keys(answers).length === 0) return null;
 
