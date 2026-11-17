@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useReducer,
+  useRef,
 } from 'react';
 import { clearAllSessions, loadLatestSession, saveSession } from '../utils/storage.js';
 import { shouldDiscardKioskSessionOnRestore } from '../utils/kioskPolicy.js';
@@ -162,6 +163,7 @@ function appReducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const resettingRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -215,7 +217,7 @@ export function AppProvider({ children }) {
   // Persist the complete participant journey, including the activity profile.
   // Storage status is deliberately excluded from the dependency list to avoid a save loop.
   useEffect(() => {
-    if (!state.isHydrated || !state.sessionId) return undefined;
+    if (!state.isHydrated || !state.sessionId || resettingRef.current) return undefined;
     let active = true;
     saveSession(state).then((success) => {
       if (active) dispatch({ type: 'SET_STORAGE_STATUS', payload: success });
@@ -259,13 +261,20 @@ export function AppProvider({ children }) {
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
 
   const reset = useCallback(async () => {
-    // Do not discard the in-memory session until IndexedDB confirms deletion.
-    // clearAllSessions is serialized with pending saves by the storage module.
-    const cleared = await clearAllSessions();
-    if (!cleared) return false;
+    // Prevent new autosaves from being queued while deletion is in progress.
+    // Existing writes finish before clearAllSessions because storage serializes
+    // all IndexedDB writes through one queue.
+    if (resettingRef.current) return false;
+    resettingRef.current = true;
+    try {
+      const cleared = await clearAllSessions();
+      if (!cleared) return false;
 
-    dispatch({ type: 'RESET' });
-    return true;
+      dispatch({ type: 'RESET' });
+      return true;
+    } finally {
+      resettingRef.current = false;
+    }
   }, []);
 
   const value = {
