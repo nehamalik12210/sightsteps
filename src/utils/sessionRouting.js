@@ -42,6 +42,14 @@ export function getPendingSessionQuestion(session = {}) {
   return visible.find((question) => !isAnswerComplete(answers[question.id])) || null;
 }
 
+/** Return only the current and downstream answers that must be revisited on Back. */
+export function getBackNavigationAnswerIds(visibleQuestions = [], currentQuestionId) {
+  if (!Array.isArray(visibleQuestions)) return [];
+  const currentIndex = visibleQuestions.findIndex((question) => question?.id === currentQuestionId);
+  if (currentIndex <= 0) return [];
+  return visibleQuestions.slice(currentIndex - 1).map((question) => question.id);
+}
+
 /** Route guard policy for directly opened or refreshed application URLs. */
 export function getProtectedRouteRedirect(session = {}, requirements = {}) {
   if (!session.sessionId || !session.consentGiven) return '/';
