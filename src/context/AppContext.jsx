@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { clearAllSessions, loadLatestSession, saveSession } from '../utils/storage.js';
 import { shouldDiscardKioskSessionOnRestore } from '../utils/kioskPolicy.js';
+import { normalizeVisionTimelineEntries } from '../utils/visionTimeline.js';
 
 const AppContext = createContext(null);
 
@@ -26,6 +27,7 @@ const initialState = {
   visionResults: null,
   report: null,
   appointmentFollowUp: { appointmentDate: '', professionalNotes: '', followUpPlan: '', nextAppointmentDate: '' },
+  visionTimelineEntries: [],
   discussionPriorities: [],
   questionsToAsk: '',
   assistedCompletion: false,
@@ -48,6 +50,7 @@ function appReducer(state, action) {
         activities: Array.isArray(action.payload?.activities) ? action.payload.activities : [],
         answers: action.payload?.answers || {},
         appointmentFollowUp: { ...initialState.appointmentFollowUp, ...(action.payload?.appointmentFollowUp || {}) },
+        visionTimelineEntries: normalizeVisionTimelineEntries(action.payload?.visionTimelineEntries),
         discussionPriorities: Array.isArray(action.payload?.discussionPriorities) ? action.payload.discussionPriorities : [],
         questionsToAsk: action.payload?.questionsToAsk || '',
         assistedCompletion: Boolean(action.payload?.assistedCompletion),
@@ -153,6 +156,9 @@ function appReducer(state, action) {
     case 'SET_APPOINTMENT_FOLLOW_UP':
       return { ...state, appointmentFollowUp: { ...state.appointmentFollowUp, ...(action.payload || {}) } };
 
+    case 'SET_VISION_TIMELINE_ENTRIES':
+      return { ...state, visionTimelineEntries: normalizeVisionTimelineEntries(action.payload) };
+
     case 'RESET':
       return { ...initialState, isHydrated: true };
 
@@ -196,6 +202,7 @@ export function AppProvider({ children }) {
               // Rebuild report content from current rules instead of trusting saved output.
               report: null,
               appointmentFollowUp: { ...initialState.appointmentFollowUp, ...(record.appointmentFollowUp || {}) },
+              visionTimelineEntries: normalizeVisionTimelineEntries(record.visionTimelineEntries),
               discussionPriorities: record.discussionPriorities || [],
               questionsToAsk: record.questionsToAsk || '',
               assistedCompletion: Boolean(record.assistedCompletion),
@@ -228,7 +235,7 @@ export function AppProvider({ children }) {
     state.isHydrated, state.sessionId, state.startedAt, state.language,
     state.consentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
     state.activities, state.primaryActivity, state.participantNote, state.answers,
-    state.visionResults, state.report, state.appointmentFollowUp,
+    state.visionResults, state.report, state.appointmentFollowUp, state.visionTimelineEntries,
     state.discussionPriorities, state.questionsToAsk, state.assistedCompletion, state.kioskMode,
   ]);
 
@@ -260,6 +267,7 @@ export function AppProvider({ children }) {
   const setDiscussionPriorities = useCallback((priorities) => dispatch({ type: 'SET_DISCUSSION_PRIORITIES', payload: priorities }), []);
   const setQuestionsToAsk = useCallback((questions) => dispatch({ type: 'SET_QUESTIONS_TO_ASK', payload: questions }), []);
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
+  const setVisionTimelineEntries = useCallback((entries) => dispatch({ type: 'SET_VISION_TIMELINE_ENTRIES', payload: entries }), []);
 
   const reset = useCallback(() => {
     // Concurrent callers share one deletion operation rather than reporting a
@@ -305,6 +313,7 @@ export function AppProvider({ children }) {
     setDiscussionPriorities,
     setQuestionsToAsk,
     setAppointmentFollowUp,
+    setVisionTimelineEntries,
     reset,
   };
 
