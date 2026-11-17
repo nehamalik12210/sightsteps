@@ -74,7 +74,7 @@
 }
 
 
-/* Participant-owned timeline and printable appointment-preparation pack. */
+/* Participant-owned timeline report. */
 .rpt__timeline-list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .rpt__timeline-entry { padding: var(--space-4); border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary); border-radius: var(--radius-lg); background: var(--color-surface-container-lowest); break-inside: avoid; }
 .rpt__timeline-meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
@@ -88,21 +88,8 @@
 .rpt__timeline-empty p, .rpt__timeline-actions p { font-size: var(--fs-sm); line-height: var(--lh-relaxed); }
 .rpt__timeline-actions { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
 .rpt__timeline-actions p { color: var(--color-text-muted); }
-.rpt__pack-heading, .rpt__brief-timeline { display: none; }
-.rpt__brief-timeline h3 { margin: var(--space-3) 0 var(--space-2); color: var(--color-secondary); font-size: var(--fs-sm); font-weight: var(--fw-bold); }
-.rpt__brief-timeline ol { display: flex; flex-direction: column; gap: 5px; margin: 0; padding-left: 20px; }
-.rpt__brief-timeline li { padding-left: 2px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.35; break-inside: avoid; }
-.rpt__brief-timeline li strong { margin-right: 5px; color: var(--color-text); }
-.rpt__brief-timeline li span { display: block; }
-.rpt__brief-timeline-more, .rpt__brief-timeline-scope { margin-top: 5px; color: var(--color-text-muted); font-size: 10px; line-height: 1.35; }
 @media print {
   .rpt__timeline-actions { display: none !important; }
   .rpt__timeline-entry, .rpt__timeline-empty { background: #fff; }
-  .rpt__pack-heading { display: block; margin-bottom: 12px; padding-bottom: 9px; border-bottom: 2px solid #1769D2; }
-  .rpt__pack-heading h2 { color: #18324F; font-size: 20px; font-weight: 800; }
-  .rpt__pack-heading p:last-child { margin-top: 4px; color: #4B5563; font-size: 10px; }
-  .rpt--brief-print .rpt__brief-timeline { display: block !important; margin-top: 10px; padding-top: 8px; border-top: 1px solid #D7DEE8; }
-  .rpt--brief-print .rpt__brief-timeline h3 { margin-top: 0; }
-  .rpt--brief-print .rpt__brief-timeline li { font-size: 10px; }
   .rpt__timeline-section { break-inside: auto !important; }
 }
