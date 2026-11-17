@@ -8,6 +8,7 @@ export default function KioskSetup() {
   const [searchParams] = useSearchParams();
   const { setKioskMode, language, isHydrated, sessionId, kioskMode, reset } = useApp();
   const [startPending, setStartPending] = useState(false);
+  const [clearError, setClearError] = useState(searchParams.get('clearError') === '1');
   const lang = language || 'en';
   const timedOut = searchParams.get('timeout') === '1';
 
@@ -20,8 +21,14 @@ export default function KioskSetup() {
 
   const startKiosk = async () => {
     if (startPending) return;
+    setClearError(false);
     setStartPending(true);
-    await reset();
+    const cleared = await reset();
+    if (!cleared) {
+      setStartPending(false);
+      setClearError(true);
+      return;
+    }
     // Each kiosk participant chooses their own language; never inherit the
     // previous participant's preference on a shared device.
     setKioskMode(true);
@@ -39,7 +46,8 @@ export default function KioskSetup() {
         <p>{lang === 'hi'
           ? 'किसी ऑप्टिकल शॉप या साझा डिवाइस पर एक समय में एक व्यक्ति के लिए सेशन शुरू करें।'
           : 'Start a single participant session on a tablet or device shared in an optical shop.'}</p>
-        {timedOut && <p className="kiosk-setup__timeout" role="status">{lang === 'hi' ? 'निष्क्रियता के कारण पिछला सेशन साफ़ कर दिया गया।' : 'The previous kiosk session was cleared after inactivity.'}</p>}
+        {timedOut && !clearError && <p className="kiosk-setup__timeout" role="status">{lang === 'hi' ? 'निष्क्रियता के कारण पिछला सेशन साफ़ कर दिया गया।' : 'The previous kiosk session was cleared after inactivity.'}</p>}
+        {clearError && <p className="kiosk-setup__warning" role="alert">{lang === 'hi' ? 'पिछला सेशन डेटा साफ़ नहीं हो सका। कोई नया प्रतिभागी शुरू करने से पहले फिर से प्रयास करें।' : 'The previous session data could not be cleared. Retry before starting another participant.'}</p>}
         <ul>
           <li>{lang === 'hi' ? '5 मिनट की निष्क्रियता के बाद सेशन डेटा साफ़ होगा।' : 'Session data is cleared after 5 minutes without interaction.'}</li>
           <li>{lang === 'hi' ? 'पेज रीफ़्रेश या दोबारा खोलने पर पिछला साझा-डिवाइस सेशन पुनर्स्थापित नहीं होगा।' : 'A shared-device session is not restored after a reload or reopening the app.'}</li>
