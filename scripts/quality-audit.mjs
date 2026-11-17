@@ -152,6 +152,7 @@ const appointmentSource = read('src/pages/AppointmentFollowUp.jsx');
 const voiceSource = read('src/components/VoiceNoteField.jsx');
 const kioskGuardSource = read('src/components/KioskGuard.jsx');
 const kioskPolicySource = read('src/utils/kioskPolicy.js');
+const kioskSetupSource = read('src/pages/KioskSetup.jsx');
 const appSource = read('src/App.jsx');
 const contextSource = read('src/context/AppContext.jsx');
 const storageSource = read('src/utils/storage.js');
@@ -205,6 +206,7 @@ check(/assistedCompletion/.test(report) && /setAssistedCompletion/.test(onboardi
 check(/case 'KIOSK_CLEANUP_FAILED'/.test(contextSource) && /kioskCleanupFailed: true/.test(contextSource), 'failed kiosk cleanup is retained as a blocking session state');
 check(/kioskCleanupFailed/.test(appSource) && /\/kiosk\?clearError=1/.test(appSource), 'direct onboarding cannot bypass a failed kiosk cleanup');
 check(/kioskCleanupFailed/.test(landingSource) && /\/kiosk\?clearError=1/.test(landingSource), 'Landing routes failed shared-device cleanup into the retry screen');
+check(/kioskCleanupFailed/.test(kioskSetupSource) && /setClearError\(true\)/.test(kioskSetupSource), 'kiosk retry screen explains a failed cleanup even when opened directly');
 check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('await reset();', landingSource.indexOf('const handleDemo')) < landingSource.indexOf('startDemo(rameshPersona)', landingSource.indexOf('const handleDemo')), 'demo start clears the previous local session before replacing it');
 
 // Participant timeline and appointment preparation output.
@@ -225,6 +227,7 @@ check(new Set(reportStaticIds).size === reportStaticIds.length, 'report static H
 check(report.indexOf('rpt__timeline-section') > report.indexOf('aria-labelledby="rpt-activities"') && report.indexOf('rpt__timeline-section') < report.indexOf('aria-labelledby="rpt-responses"'), 'timeline follows routine context and precedes the detailed response breakdown');
 check((report.match(/id="rpt-appointment-followup"/g) || []).length === 1 && report.indexOf('rpt__appointment-section') > report.indexOf('rpt-followup'), 'after-appointment notes appear once after pre-appointment discussion preparation');
 check(reportCssSource.includes('.rpt__timeline-list'), 'report includes timeline presentation styles');
+check(reportCssSource.includes('.rpt__priority-context') && reportCssSource.includes('.rpt__priority-context > .rpt__sec-intro'), 'priority context is grouped with consistent spacing');
 check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timeline inputs retain a mobile-friendly minimum text size');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
