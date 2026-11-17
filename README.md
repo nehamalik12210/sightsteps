@@ -105,6 +105,8 @@ The latest local verification completed during project preparation reported:
 - `npm run check` completed successfully.
 - `npm run build` completed and generated the Vite production bundle and PWA service-worker assets.
 
+**Verification note:** These counts and build results refer to the last locally verified revision before the reliability changes in the current review branch. Re-run the commands above on the review branch before merging; do not treat the earlier counts as validation of those changes.
+
 These are code-side and build checks, not proof of clinical suitability or full accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional have not been established by these automated checks. Complete the relevant reviews before any clinical-context use.
 
 ## Responsible use
