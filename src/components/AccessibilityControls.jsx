@@ -39,6 +39,7 @@ export default function AccessibilityControls() {
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty('--a11y-scale', String(preferences.textScale / 100));
+    root.dataset.a11yScale = String(preferences.textScale);
     root.dataset.a11yContrast = preferences.highContrast ? 'high' : 'normal';
     root.dataset.a11yTargets = preferences.largeTargets ? 'large' : 'normal';
     root.dataset.a11yMotion = preferences.reducedMotion ? 'reduce' : 'normal';
