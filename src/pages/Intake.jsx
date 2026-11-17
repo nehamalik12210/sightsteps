@@ -253,7 +253,7 @@ export default function Intake() {
   }, [currentQuestion, handleAnswer, noteText, setParticipantNote]);
 
   if (!currentQuestion) {
-    return <main className="iq iq--loading" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
+    return <main className="iq iq--loading" id="main-content" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
   }
 
   const questionIndex = Math.max(0, visibleQuestions.findIndex((question) => question.id === currentQuestion.id));
@@ -263,7 +263,7 @@ export default function Intake() {
   const isConditional = Boolean(currentQuestion.showIf);
 
   return (
-    <main className="iq">
+    <main className="iq" id="main-content" tabIndex="-1">
       {isDemo && (
         <div className="iq__demo-banner" role="status">
           <span className="material-symbols-outlined" aria-hidden="true">target</span>
