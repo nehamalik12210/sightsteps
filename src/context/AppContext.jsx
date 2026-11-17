@@ -259,8 +259,13 @@ export function AppProvider({ children }) {
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
 
   const reset = useCallback(async () => {
+    // Do not discard the in-memory session until IndexedDB confirms deletion.
+    // clearAllSessions is serialized with pending saves by the storage module.
+    const cleared = await clearAllSessions();
+    if (!cleared) return false;
+
     dispatch({ type: 'RESET' });
-    await clearAllSessions();
+    return true;
   }, []);
 
   const value = {
