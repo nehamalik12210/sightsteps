@@ -26,6 +26,7 @@ const initialState = {
   participantNote: '',
   answers: {},
   visionResults: null,
+  amslerResults: null,
   report: null,
   appointmentFollowUp: { appointmentDate: '', professionalNotes: '', followUpPlan: '', nextAppointmentDate: '' },
   visionTimelineEntries: [],
@@ -150,6 +151,9 @@ function appReducer(state, action) {
     case 'SET_VISION_RESULTS':
       return { ...state, visionResults: action.payload };
 
+    case 'SET_AMSLER_RESULTS':
+      return { ...state, amslerResults: action.payload };
+
     case 'SKIP_VISION':
       return { ...state, visionResults: { completed: false, skipped: true, data: null } };
 
@@ -217,6 +221,7 @@ export function AppProvider({ children }) {
               visionResults: (record.visionResults?.skipped || record.visionResults?.data?.activityType === 'direction-awareness')
                 ? record.visionResults
                 : null,
+              amslerResults: record.amslerResults || null,
               // Rebuild report content from current rules instead of trusting saved output.
               report: null,
               appointmentFollowUp: { ...initialState.appointmentFollowUp, ...(record.appointmentFollowUp || {}) },
@@ -254,7 +259,7 @@ export function AppProvider({ children }) {
     state.isHydrated, state.sessionId, state.startedAt, state.language,
     state.consentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
     state.activities, state.primaryActivity, state.participantNote, state.answers,
-    state.visionResults, state.report, state.appointmentFollowUp, state.visionTimelineEntries,
+    state.visionResults, state.amslerResults, state.report, state.appointmentFollowUp, state.visionTimelineEntries,
     state.discussionPriorities, state.questionsToAsk, state.assistedCompletion, state.kioskMode,
   ]);
 
@@ -279,6 +284,7 @@ export function AppProvider({ children }) {
   const setPrimaryActivity = useCallback((activity) => dispatch({ type: 'SET_PRIMARY_ACTIVITY', payload: activity }), []);
   const setParticipantNote = useCallback((note) => dispatch({ type: 'SET_PARTICIPANT_NOTE', payload: note }), []);
   const setVisionResults = useCallback((results) => dispatch({ type: 'SET_VISION_RESULTS', payload: results }), []);
+  const setAmslerResults = useCallback((results) => dispatch({ type: 'SET_AMSLER_RESULTS', payload: results }), []);
   const skipVision = useCallback(() => dispatch({ type: 'SKIP_VISION' }), []);
   const setReport = useCallback((report) => dispatch({ type: 'SET_REPORT', payload: report }), []);
   const setKioskMode = useCallback((enabled) => dispatch({ type: 'SET_KIOSK_MODE', payload: enabled }), []);
@@ -325,6 +331,7 @@ export function AppProvider({ children }) {
     setPrimaryActivity,
     setParticipantNote,
     setVisionResults,
+    setAmslerResults,
     skipVision,
     setReport,
     setKioskMode,
