@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { getActivityDependentAnswerIds } from '../data/questions.js';
+import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import './ActivityProfile.css';
 
 const ACTIVITY_OPTIONS = [
@@ -18,7 +19,7 @@ export default function ActivityProfile() {
   const navigate = useNavigate();
   const {
     isHydrated,
-    storageAvailable,
+    saveStatus,
     language,
     activities: savedActivities,
     primaryActivity: savedPrimary,
@@ -140,12 +141,7 @@ export default function ActivityProfile() {
       </header>
 
       <div className="ap__body">
-        {storageAvailable === false && (
-          <p className="ap__context-note" role="status">
-            <span className="material-symbols-outlined" aria-hidden="true">warning</span>
-            {lang === 'hi' ? 'इस ब्राउज़र में सेशन सेव नहीं हो पा रहा है। पेज रीफ़्रेश करने पर जवाब खो सकते हैं।' : 'This browser cannot save the session. Your responses may be lost if you refresh this page.'}
-          </p>
-        )}
+        <LocalSaveStatus status={saveStatus} language={lang} />
         {step === 'select' && (
           <div className="ap__section animate-fade-in">
             <div className="ap__heading-group">
