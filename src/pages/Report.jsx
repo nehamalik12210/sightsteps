@@ -336,7 +336,7 @@ export default function Report() {
           <section className="rpt__section rpt__amsler-section" aria-labelledby="rpt-amsler-heading">
             <div className="rpt__sec-head">
               <div>
-                <p className="rpt__kicker">{lang === 'hi' ? 'होम स्क्रीनिंग' : 'HOME SCREENING'}</p>
+                <p className="rpt__kicker">{lang === 'hi' ? 'स्व-निगरानी गतिविधि' : 'SELF-MONITORING'}</p>
                 <h2 id="rpt-amsler-heading" className="rpt__sec-title">{lang === 'hi' ? 'एम्सलर ग्रिड गतिविधि का रिकॉर्ड' : 'Amsler Grid Activity Record'}</h2>
               </div>
               <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">grid_on</span>
