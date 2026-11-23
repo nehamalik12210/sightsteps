@@ -8,6 +8,7 @@
  * Run: node scripts/clinical-language-audit.mjs
  */
 
+import { readFileSync } from 'node:fs';
 import { evaluateAnswers } from '../src/engine/ruleEngine.js';
 import { evaluatePatterns } from '../src/engine/patternEngine.js';
 import patterns from '../src/data/patterns.js';
@@ -69,6 +70,8 @@ const ALLOWLIST = [
   // Allowed negating uses of "you have"
   'you have not had',
   'you have never had',
+  'do you have',
+  'whether you have',
   'that you have not',
   'that you have never',
   // Allowed uses of "damage" / "consistent with" in negating/non-clinical context
@@ -78,31 +81,40 @@ const ALLOWLIST = [
   'is not consistent',
 ];
 
-function isAllowed(text, phrase) {
+function isAllowed(text, phrase, matchIndex) {
   const lower = text.toLowerCase();
-  const phrasePos = lower.indexOf(phrase);
-  if (phrasePos < 0) return true;
-  // Check if the phrase occurs in an allowed context
-  for (const allowed of ALLOWLIST) {
-    if (lower.includes(allowed.toLowerCase())) {
-      // If the allowed context contains the forbidden phrase, it's ok
-      if (allowed.toLowerCase().includes(phrase)) return true;
+  return ALLOWLIST.some((allowed) => {
+    const allowedText = allowed.toLowerCase();
+    if (!allowedText.includes(phrase)) return false;
+    const allowedIndex = lower.indexOf(allowedText);
+    return allowedIndex >= 0
+      && matchIndex >= allowedIndex
+      && matchIndex + phrase.length <= allowedIndex + allowedText.length;
+  });
+}
+
+function findClinicalViolations(label, text) {
+  if (!text || typeof text !== 'string') return [];
+  const lower = text.toLowerCase();
+  const found = [];
+  for (const phrase of FORBIDDEN_PHRASES) {
+    let matchIndex = lower.indexOf(phrase);
+    while (matchIndex >= 0) {
+      if (!isAllowed(text, phrase, matchIndex)) found.push({ label, phrase, matchIndex });
+      matchIndex = lower.indexOf(phrase, matchIndex + phrase.length);
     }
   }
-  return false;
+  return found;
 }
 
 let violations = 0;
 
 function scanText(label, text) {
-  if (!text || typeof text !== 'string') return;
-  const lower = text.toLowerCase();
-  for (const phrase of FORBIDDEN_PHRASES) {
-    if (lower.includes(phrase) && !isAllowed(text, phrase)) {
-      console.error(`  VIOLATION in ${label}: contains "${phrase}"`);
-      console.error(`    Text: "${text.slice(0, 200)}..."`);
-      violations += 1;
-    }
+  const found = findClinicalViolations(label, text);
+  for (const match of found) {
+    console.error(`  VIOLATION in ${label}: contains "${match.phrase}"`);
+    console.error(`    Text: "${String(text).slice(0, 200)}..."`);
+    violations += 1;
   }
 }
 
@@ -161,17 +173,39 @@ for (const note of rameshReport.followUpNotes) {
   scanBilingual(`followUp/${note.id}/detail`, note.detail);
 }
 
-// 5. Test that inserting a forbidden phrase is caught
-console.log('\nRunning fail-safe test...');
-let failSafeWorked = false;
-const badText = 'You have astigmatism and need treatment immediately.';
-const lower = badText.toLowerCase();
-for (const phrase of FORBIDDEN_PHRASES) {
-  if (lower.includes(phrase)) { failSafeWorked = true; break; }
-}
-if (!failSafeWorked) {
-  console.error('  FAIL: Forbidden-phrase detection did not catch test string');
+// 5. Exercise the detector itself, including mixed safe/unsafe wording.
+console.log('\nRunning fail-safe tests...');
+const unsafeExample = 'You have astigmatism and need treatment immediately.';
+const mixedExample = 'SightSteps does not diagnose. You have glaucoma.';
+const safeExample = 'SightSteps does not diagnose or replace a professional eye examination.';
+if (findClinicalViolations('unsafe-example', unsafeExample).length === 0) {
+  console.error('  FAIL: Detector accepted an unsafe diagnostic statement');
   violations += 1;
+}
+if (!findClinicalViolations('mixed-example', mixedExample).some((item) => item.phrase === 'you have')) {
+  console.error('  FAIL: A safe disclaimer elsewhere in the same text masked unsafe wording');
+  violations += 1;
+}
+if (findClinicalViolations('safe-example', safeExample).length !== 0) {
+  console.error('  FAIL: Detector rejected a safe disclaimer');
+  violations += 1;
+}
+
+// Scan quoted UI copy in JSX files that is not stored in the translation dictionary.
+const STATIC_COPY_FILES = [
+  '../src/pages/AmslerGrid.jsx',
+  '../src/pages/Report.jsx',
+  '../src/pages/VisionActivity.jsx',
+  '../src/components/ClinicianBrief.jsx',
+  '../src/components/AppointmentPreparationPack.jsx',
+];
+for (const file of STATIC_COPY_FILES) {
+  const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+  const literalPattern = /([\"'])(?:\\\\.|(?!\\1)[\\s\\S])*?\\1/g;
+  for (const match of source.matchAll(literalPattern)) {
+    const literal = match[0].slice(1, -1);
+    scanText(`${file} UI string`, literal);
+  }
 }
 
 console.log(`\n${'='.repeat(44)}`);
