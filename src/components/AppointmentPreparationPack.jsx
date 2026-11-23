@@ -87,7 +87,7 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
 
       {pack.amsler && (
         <section className="appointment-pack__section" aria-labelledby="appointment-pack-amsler">
-          <h2 id="appointment-pack-amsler">{hi ? 'एम्सलर ग्रिड होम स्क्रीनिंग' : 'Amsler Grid Home Screening'}</h2>
+          <h2 id="appointment-pack-amsler">{hi ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' : 'Amsler Grid Self-Monitoring Activity'}</h2>
           <div className="appointment-pack__amsler-grid">
             <p><strong>{hi ? 'दाईं आँख:' : 'Right eye:'}</strong> {pack.amsler.right} {hi ? 'क्षेत्र चिह्नित' : 'regions flagged'}</p>
             <p><strong>{hi ? 'बाईं आँख:' : 'Left eye:'}</strong> {pack.amsler.left} {hi ? 'क्षेत्र चिह्नित' : 'regions flagged'}</p>
@@ -100,7 +100,7 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
               <p className="appointment-pack__spatial-disclaimer">{pack.amslerSpatial.disclaimer}</p>
             </div>
           )}
-          <p className="appointment-pack__context">{hi ? 'होम स्क्रीनिंग परिणाम — निदान नहीं। ये परिणाम अपने ऑप्टोमेट्रिस्ट को दिखाएँ।' : 'Home screening result — not a diagnosis. Show these results to your optometrist.'}</p>
+          <p className="appointment-pack__context">{hi ? 'यह केवल आपके द्वारा चिह्नित क्षेत्रों का रिकॉर्ड है। कोई क्षेत्र चिह्नित न होना दृष्टि की समस्या को खारिज नहीं करता। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो शीघ्र नेत्र-देखभाल पेशेवर से संपर्क करें।' : 'This records only the areas you chose to flag. No areas flagged does not rule out a vision problem. If you notice new distortion, blurred or missing areas, contact an eye-care professional promptly.'}</p>
         </section>
       )}
 
