@@ -40,6 +40,20 @@ const strings = {
   'vision.title': { en: 'Vision Awareness Activity', hi: 'दृष्टि जागरूकता गतिविधि' },
   'vision.skip': { en: 'Skip this activity', hi: 'यह गतिविधि छोड़ें' },
 
+  'amsler.title': { en: 'Amsler Grid Home Screening', hi: 'एम्सलर ग्रिड होम स्क्रीनिंग' },
+  'amsler.skip': { en: 'Skip this screening', hi: 'यह स्क्रीनिंग छोड़ें' },
+
+  'patterns.title': { en: 'Patterns Worth Discussing', hi: 'चर्चा के लिए अनुमानित पैटर्न' },
+  'patterns.subtitle': { en: 'These patterns are inferred from combinations of your responses. They surface observations you may not have stated directly — framed as discussion points, never conclusions.', hi: 'ये पैटर्न आपके जवाबों के संयोजन से अनुमानित हैं। ये ऐसे अवलोकन सामने लाते हैं जो आपने सीधे नहीं बताए होंगे — चर्चा बिंदुओं के रूप में, कभी निष्कर्ष नहीं।' },
+  'patterns.whySuggesting': { en: 'Why we are suggesting this', hi: 'हम यह क्यों सुझा रहे हैं' },
+  'patterns.noneMatched.title': { en: 'What our pattern engine looks for', hi: 'हमारा पैटर्न इंजन क्या देखता है' },
+  'patterns.noneMatched.subtitle': { en: 'Your responses did not trigger any inferred patterns — which is a good sign. Here is what the engine checks for, so you know the kinds of combinations it evaluates:', hi: 'आपके जवाबों से कोई अनुमानित पैटर्न नहीं मिला — जो एक अच्छा संकेत है। यहाँ बताया गया है कि इंजन किन संयोजनों की जाँच करता है:' },
+
+  'clinicianBrief.title': { en: 'Clinician Brief', hi: 'क्लिनिशियन सारांश' },
+  'clinicianBrief.open': { en: 'View clinician brief', hi: 'क्लिनिशियन सारांश देखें' },
+
+  'disclaimer.full': { en: 'SightSteps is not a diagnostic tool. The observations, patterns and screening results below are participant-reported and are intended only to support a conversation with an eye-care professional.', hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्क्रीनिंग परिणाम प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।' },
+
   'report.title': { en: 'Your Vision Insights', hi: 'आपकी दृष्टि संबंधी जानकारी' },
   'report.seeWhy': { en: 'See why', hi: 'कारण देखें' },
   'report.recommendations': { en: 'Topics to Discuss', hi: 'चर्चा के विषय' },
@@ -66,6 +80,24 @@ const strings = {
   'common.loading': { en: 'Loading…', hi: 'लोड हो रहा है…' },
   'common.cancel': { en: 'Cancel', hi: 'रद्द करें' },
   'common.yesDelete': { en: 'Yes, delete', hi: 'हाँ, हटाएँ' },
+
+  'amsler.spatial.title': { en: 'Spatial Analysis', hi: 'स्थानिक विश्लेषण' },
+  'amsler.spatial.subtitle': {
+    en: 'Where you flagged regions on the grid',
+    hi: 'आपने ग्रिड पर कहाँ क्षेत्र चिह्नित किए',
+  },
+  'amsler.spatial.disclaimer': {
+    en: 'This shows where you flagged regions on the grid — not a map of your retina.',
+    hi: 'यह दर्शाता है कि आपने ग्रिड पर कहाँ क्षेत्र चिह्नित किए — यह आपकी रेटिना का मानचित्र नहीं है।',
+  },
+  'amsler.spatial.noFlags': {
+    en: 'No regions flagged.',
+    hi: 'कोई क्षेत्र चिह्नित नहीं किया गया।',
+  },
+  'amsler.spatial.centralZone': {
+    en: 'central zone',
+    hi: 'केंद्रीय ज़ोन',
+  },
 };
 
 /** Return a translated string and replace any {placeholder} values. */
