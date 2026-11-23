@@ -1,5 +1,6 @@
 import { formatVisionTimelineDate, normalizeVisionTimelineEntries } from './visionTimeline.js';
 import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
+import { buildCompactExperienceSummary } from '../engine/visionExperienceProfile.js';
 
 function localized(value, language = 'en') {
   if (value && typeof value === 'object') return value[language] || value.en || '';
@@ -78,25 +79,11 @@ export function buildAppointmentPreparationPack({
       }
     : null;
 
-  const safeExperienceProfile = experienceProfile && typeof experienceProfile === 'object'
-    ? {
-        mainExperience: experienceProfile.mainExperience
-          ? {
-              label: compactText(localized(experienceProfile.mainExperience.label, language), 72),
-              summary: compactText(localized(experienceProfile.mainExperience.narrative, language), 260),
-            }
-          : null,
-        additionalExperiences: (experienceProfile.additionalExperiences || [])
-          .slice(0, 3)
-          .map((item) => compactText(localized(item.label, language), 64))
-          .filter(Boolean),
-        activityImpacts: (experienceProfile.activityImpacts || [])
-          .slice(0, 2)
-          .map((item) => ({
-            activity: compactText(localized(item.label, language), 48),
-            summary: compactText(localized(item.summary, language), 130),
-          })),
-      }
+  const compactExperienceSummary = experienceProfile
+    ? buildCompactExperienceSummary(experienceProfile, language, 260, 2)
+    : '';
+  const safeExperienceProfile = compactExperienceSummary
+    ? { summary: compactExperienceSummary }
     : null;
 
   // Spatial analysis for the prep pack
