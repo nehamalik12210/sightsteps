@@ -57,8 +57,16 @@ export default function AccessibilityControls() {
       detailsRef.current.open = false;
       detailsRef.current.querySelector('summary')?.focus();
     };
+    const handleOutsidePointer = (event) => {
+      if (!detailsRef.current?.open || detailsRef.current.contains(event.target)) return;
+      detailsRef.current.open = false;
+    };
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener('pointerdown', handleOutsidePointer);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('pointerdown', handleOutsidePointer);
+    };
   }, []);
 
   const update = (changes) => setPreferences((current) => ({ ...current, ...changes }));
