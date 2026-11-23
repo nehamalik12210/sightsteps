@@ -278,4 +278,87 @@ export function buildVisionExperienceProfile(answers = {}, timelineEntries = [])
   };
 }
 
+
+function profileValue(value, language) {
+  if (value && typeof value === 'object') return value[language] || value.en || value.hi || '';
+  return typeof value === 'string' ? value : '';
+}
+
+function truncateSummary(value, limit) {
+  const text = String(value || '').replace(/\\s+/g, ' ').trim();
+  if (text.length <= limit) return text;
+  const clipped = text.slice(0, Math.max(0, limit - 1));
+  const lastSpace = clipped.lastIndexOf(' ');
+  return (lastSpace > Math.floor(limit * 0.7) ? clipped.slice(0, lastSpace) : clipped).trimEnd() + '…';
+}
+
+/**
+ * Build a short, factual headline from the same participant-reported profile.
+ * The brief and appointment pack use this formatter to avoid separate summaries.
+ */
+export function buildCompactExperienceSummary(profile, language = 'en', maxLength = 360, maxActivities = 3) {
+  if (!profile || typeof profile !== 'object') return '';
+  const hi = language === 'hi';
+  const parts = [];
+  const main = profile.mainExperience;
+
+  if (main) {
+    const label = profileValue(main.label, language);
+    if (label) {
+      const details = [];
+      const onset = profileValue(main.onset, language);
+      const change = profileValue(main.change, language);
+      const frequency = profileValue(main.frequency, language);
+      const eye = profileValue(main.eye, language);
+      if (onset) details.push(hi ? `पहली बार: ${onset}` : `first noticed ${onset}`);
+      if (change) details.push(hi ? `समय के साथ बदलाव: ${change}` : `change over time: ${change}`);
+      if (frequency) details.push(hi ? `आवृत्ति: ${frequency}` : `frequency: ${frequency}`);
+      if (eye) details.push(hi ? `आँख: ${eye}` : `eye: ${eye}`);
+      parts.push(hi
+        ? `मुख्य बताया गया अनुभव: ${label}${details.length ? `; ${details.join('; ')}` : ''}।`
+        : `Main reported experience: ${label}${details.length ? `; ${details.join('; ')}` : ''}.`);
+
+      const contexts = (main.contexts || [])
+        .map((item) => profileValue(item.label, language))
+        .filter(Boolean);
+      if (contexts.length) {
+        parts.push(hi
+          ? `बताई गई परिस्थितियाँ: ${contexts.join(', ')}।`
+          : `Reported situations: ${contexts.join(', ')}.`);
+      }
+    }
+  }
+
+  const activityItems = (Array.isArray(profile.activityImpacts) ? profile.activityImpacts : [])
+    .slice(0, Math.max(0, maxActivities))
+    .map((item) => {
+      const activity = profileValue(item.label, language);
+      const impacts = (item.impacts || [])
+        .map((impact) => profileValue(impact.label, language))
+        .filter(Boolean);
+      const frequency = profileValue(item.frequency, language);
+      const impactText = item.impactStatus === 'reported'
+        ? impacts.join(', ')
+        : item.impactStatus === 'no_impact_reported'
+          ? (hi ? 'कोई प्रभाव नहीं बताया' : 'no impact reported')
+          : item.impactStatus === 'unsure'
+            ? (hi ? 'प्रभाव के बारे में अनिश्चित' : 'impact described as uncertain')
+            : (hi ? 'प्रभाव का विवरण दर्ज नहीं' : 'impact details not recorded');
+      if (!activity) return '';
+      return `${activity}: ${impactText}${frequency ? ` (${frequency})` : ''}`;
+    })
+    .filter(Boolean);
+
+  if (activityItems.length) {
+    parts.push(hi
+      ? `दैनिक गतिविधियों पर बताया गया प्रभाव: ${activityItems.join('; ')}।`
+      : `Reported daily-activity impact: ${activityItems.join('; ')}.`);
+  }
+
+  if (!parts.length) {
+    return hi ? 'कोई मुख्य अनुभव या गतिविधि-प्रभाव विवरण दर्ज नहीं है।' : 'No main experience or activity-impact details were recorded.';
+  }
+  return truncateSummary(parts.join(' '), maxLength);
+}
+
 export default buildVisionExperienceProfile;
