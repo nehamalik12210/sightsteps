@@ -46,12 +46,12 @@ const clusters = [
     memberIds: ['night-vision', 'low-light-contrast', 'overdue-exam'],
     minMatch: 2,
     title: {
-      en: 'Low-light and contrast indicators',
-      hi: 'कम रोशनी और कंट्रास्ट संकेतक',
+      en: 'Low-light vision experiences',
+      hi: 'कम रोशनी में दृष्टि के अनुभव',
     },
     summary: {
-      en: 'Multiple patterns in your responses relate to difficulty in low-light conditions and contrast sensitivity. These experiences may share common age-related or optical factors worth discussing together with an eye-care professional.',
-      hi: 'आपके जवाबों में कई पैटर्न कम रोशनी में कठिनाई और कंट्रास्ट संवेदनशीलता से संबंधित हैं। ये अनुभव सामान्य उम्र-संबंधी या ऑप्टिकल कारक साझा कर सकते हैं जो नेत्र देखभाल पेशेवर से मिलकर चर्चा करने योग्य हैं।',
+      en: 'More than one response pattern relates to low-light difficulty or your eye-examination history. These are participant-reported experiences and background details; an eye-care professional can decide whether further assessment is appropriate.',
+      hi: 'एक से अधिक उत्तर-पैटर्न कम रोशनी में कठिनाई या आपकी पिछली नेत्र-जाँच के इतिहास से संबंधित हैं। ये प्रतिभागी द्वारा बताए गए अनुभव और पृष्ठभूमि विवरण हैं; आगे की जाँच उपयुक्त है या नहीं, यह नेत्र-देखभाल पेशेवर तय कर सकते हैं।',
     },
     icon: 'link',
   },
