@@ -104,15 +104,15 @@ The root `vercel.json` rewrite sends application routes back to `index.html`, al
 
 The latest verified production build on `main` completed with:
 
-- **1,795 passed, 0 failed** in the static quality audit.
-- **576 passed, 0 failed** in the regression test suite.
-- Vite transformed 79 modules and completed the production build.
-- The PWA service worker was generated with 11 precache entries (831.76 KiB).
-- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `0d06f43`.
+- **1,821 passed, 0 failed** in the static quality audit.
+- **581 passed, 0 failed** in the regression test suite.
+- Vite transformed 84 modules and completed the production build.
+- The PWA service worker was generated with 11 precache entries (834.29 KiB).
+- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `3405286`.
 
-These are automated source, data, routing, persistence, responsive-layout, appointment-pack and accessibility-control checks. They are not proof of clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
+These checks cover source structure, data validation, routing, persistence, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do not prove clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
-The dependency install still reports npm warnings, including four moderate audit findings, a deprecated `glob` dependency, an unknown `cache-dir` setting, and an `esbuild` install-script allowlist warning. These did not fail the production build and have not been force-upgraded as part of this fix. Review the dependency audit and upgrade path separately rather than applying a breaking `npm audit fix --force` blindly.
+The production install still reports four moderate npm audit findings, a deprecated transitive `glob@11.1.0` package, an unknown `cache-dir` npm setting, and an `esbuild@0.25.12` install-script allowlist warning. These warnings did not fail this build. No forced dependency override was applied because `glob` is in the Workbox/PWA build dependency tree; a major-version override could affect service-worker precache generation. Review a compatible upstream dependency update before changing that chain.
 
 ## Responsible use
 
