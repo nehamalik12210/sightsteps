@@ -26,7 +26,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 ## Key Features
 
 ### 🧠 Pattern Detection Engine
-A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of participant answers to infer clinically meaningful observations the participant did not explicitly state — such as screen-related strain, presbyopia-related changes, or asymmetric symptoms. When multiple patterns co-fire, cluster narratives surface relationships between them. Every inference is framed as a discussion prompt with source links, never a conclusion.
+A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of participant answers to infer clinically meaningful observations the participant did not explicitly state — such as screen-related strain, presbyopia-related changes, or asymmetric symptoms. When multiple patterns co-fire, cluster narratives surface relationships between them. Every inference is framed as a discussion prompt with traceable participant-answer inputs, never a conclusion.
 
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
@@ -245,8 +245,8 @@ The latest verified build completed with:
 
 | Check | Result |
 |---|---|
-| Static quality audit | **2,230 passed**, 0 failed |
-| Regression test suite | **745 passed**, 0 failed (incl. pattern engine + Amsler spatial + cluster narratives) |
+| Static quality audit | **2,240 passed**, 0 failed |
+| Regression test suite | **747 passed**, 0 failed (incl. pattern engine + calibration viewport + Amsler spatial tests) |
 | Clinical language audit | **PASSED** — 0 violations |
 | Vite production build | 92 modules transformed |
 | PWA service worker | 11 precache entries generated |
