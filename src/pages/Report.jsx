@@ -225,12 +225,12 @@ export default function Report() {
 
         <LocalSaveStatus status={saveStatus} language={lang} />
 
-        <div className="rpt__notice">
+        <div className="rpt__notice rpt__notice--compact" role="note">
           <span className="material-symbols-outlined" aria-hidden="true">info</span>
           <p>
             {lang === 'hi'
-              ? 'यह रिपोर्ट केवल आपके बताए गए जवाबों को व्यवस्थित करती है। यह आँखों की जाँच, निदान, दृष्टि मापन या प्रिस्क्रिप्शन नहीं है।'
-              : 'This report organises self-reported responses only. It is not an eye examination, diagnosis, visual acuity measurement or prescription.'}
+              ? 'प्रतिभागी द्वारा बताए गए अनुभवों का सारांश — यह निदान या आँखों की जाँच नहीं है।'
+              : 'Participant-reported summary — not a diagnosis or an eye examination.'}
           </p>
         </div>
 
@@ -240,11 +240,6 @@ export default function Report() {
             <p>{lang === 'hi' ? 'इस प्रश्नावली को पूरा करने में किसी सहायक ने प्रतिभागी की मदद की। जवाब प्रतिभागी के बताए अनुसार दर्ज किए गए।' : 'Someone assisted the participant in completing this questionnaire. Responses were recorded as provided by the participant.'}</p>
           </div>
         )}
-
-        <div className="rpt__notice rpt__notice--disclaimer">
-          <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
-          <p>{t('disclaimer.full', lang)}</p>
-        </div>
 
         {(experienceProfile.hasReportedExperience || experienceProfile.hasActivityImpact || experienceProfile.hasTimelineEntries) && (
           <VisionExperienceProfile
@@ -727,16 +722,6 @@ export default function Report() {
           </section>
         )}
 
-        <div className="rpt__disclaimer">
-          <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
-          <div>
-            <h3>{lang === 'hi' ? 'महत्वपूर्ण सूचना' : 'Important reminder'}</h3>
-            <p>{lang === 'hi'
-              ? 'SightSteps एक जागरूकता और बातचीत सहायता टूल है। यह चिकित्सा निदान, पेशेवर जाँच या प्रिस्क्रिप्शन का विकल्प नहीं है।'
-              : 'SightSteps is an awareness and conversation-support tool. It does not replace a medical diagnosis, professional eye examination or prescribed vision correction.'}</p>
-          </div>
-        </div>
-
         <div className="rpt__privacy">
           <span className="material-symbols-outlined" aria-hidden="true">shield</span>
           <div>
@@ -746,6 +731,14 @@ export default function Report() {
               : 'Responses are saved in this device’s browser when local storage is available. Your answers are not sent to an application server.'}</p>
           </div>
         </div>
+
+        <section className="rpt__disclaimer" aria-labelledby="rpt-full-disclaimer">
+          <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
+          <div>
+            <h3 id="rpt-full-disclaimer">{lang === 'hi' ? 'महत्वपूर्ण सूचना और सीमाएँ' : 'Important information and limitations'}</h3>
+            <p>{t('disclaimer.reportFull', lang)}</p>
+          </div>
+        </section>
 
         {appointmentPack && <AppointmentPreparationPack pack={appointmentPack} language={lang} />}
 
