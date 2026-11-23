@@ -14,6 +14,7 @@ import { normalizeVisionTimelineEntries, sortVisionTimelineEntries, validateVisi
 import rameshPersona from '../data/demoPersona.js';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
+import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 
 let passed = 0;
 let failed = 0;
@@ -249,6 +250,12 @@ assert(
 );
 
 console.log('\n=== Saved session record completeness ===');
+assert(getLocalSaveStatusCopy('saving', 'en')?.text === 'Saving on this device…', 'save status exposes an English saving state');
+assert(getLocalSaveStatusCopy('saved', 'hi')?.text === 'इसी डिवाइस पर सहेजा गया', 'save status exposes a Hindi saved state');
+assert(getLocalSaveStatusCopy('error', 'en')?.tone === 'error', 'save failure is distinguishable from a successful save');
+assert(getLocalSaveStatusCopy('idle', 'en') === null, 'idle sessions do not display a redundant save message');
+assert(getLocalSaveStatusCopy('saved', 'fr')?.text === 'Saved on this device', 'save status safely falls back to English for unsupported languages');
+
 const savedRecord = createSessionRecord({
   sessionId: 'test-session',
   activities: ['fine_detail', 'reading'],
