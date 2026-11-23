@@ -207,7 +207,7 @@ function AmslerGrid() {
 
           <div className="amsler__calibration">
             <h2>{lang === 'hi' ? 'स्क्रीन कैलिब्रेशन' : 'Screen Calibration'}</h2>
-            <p>{lang === 'hi' ? 'एक मानक क्रेडिट कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और स्लाइडर को कार्ड की पूरी चौड़ाई से बिल्कुल मिलाएँ। फ़ोन पर पहले लैंडस्केप मोड अपनाएँ। अनुमान न लगाएँ। पूरा 10 cm ग्रिड स्क्रीन पर फिट होना चाहिए; ऐसा न हो तो बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें।' : 'Place a standard credit card (85.6 mm wide) against the screen and match the slider to its full width exactly. On a phone, rotate to landscape first. Do not estimate. The complete 10 cm grid must fit on screen; otherwise use a larger display or skip this activity.'}</p>
+            <p>{lang === 'hi' ? 'एक मानक क्रेडिट कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और स्लाइडर को कार्ड की पूरी चौड़ाई से बिल्कुल मिलाएँ। फ़ोन लैंडस्केप में होने पर भी पूरा 10 cm वर्ग स्क्रीन की चौड़ाई और ऊँचाई दोनों में, नियंत्रणों के लिए जगह छोड़कर, फिट होना चाहिए। ऐसा न हो तो टैबलेट या बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें। अनुमान न लगाएँ और ग्रिड को छोटा न करें।' : 'Place a standard credit card (85.6 mm wide) against the screen and match the slider to its full width exactly. The complete 10 cm square must fit within both the visible screen width and height, with room for the controls. A phone may still be too small in landscape; use a tablet or larger display, or skip this activity. Do not estimate or shrink the grid.'}</p>
             <div className="amsler__calibration-ruler">
               <div
                 ref={sliderRef}
