@@ -28,6 +28,11 @@
 .appointment-pack__timeline-list strong { color: #14263c; }
 .appointment-pack__timeline-list p { margin-top: 2px; }
 .appointment-pack__footer { margin-top: 10px; padding-top: 7px; border-top: 1px solid #cbd5e1; color: #35465b; font-size: 7.5pt; line-height: 1.3; }
+
+.appointment-pack__amsler-spatial { margin-top: 6px; }
+.appointment-pack__amsler-spatial p { color: #35465b; font-size: 8pt; line-height: 1.3; margin: 2px 0; }
+.appointment-pack__spatial-highlight { color: #1769d2 !important; font-weight: 700; }
+.appointment-pack__spatial-disclaimer { color: #64748b !important; font-size: 7.5pt !important; font-style: italic; margin-top: 4px !important; }
 @media (max-width: 520px) {
   .appointment-pack__header,
   .appointment-pack__top-grid,
