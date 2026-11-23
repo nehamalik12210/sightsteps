@@ -190,7 +190,7 @@ export default function VisionActivity() {
         <p className="va__notice" role="note"><span className="material-symbols-outlined" aria-hidden="true">info</span>{lang === 'hi' ? 'यह गतिविधि दृष्टि की तीक्ष्णता, दोनों आँखों के बीच अंतर, चश्मे के नंबर या नेत्र रोग का आकलन नहीं करती। किसी चिंता के लिए नेत्र-देखभाल पेशेवर से संपर्क करें।' : 'This interaction does not assess visual acuity, differences between your eyes, prescription or eye disease. Contact an eye-care professional for any concern.'}</p>
         <button className="btn btn--primary btn--full btn--lg va__finish-btn" type="button" onClick={handleFinish} disabled={reportPending}>{lang === 'hi' ? 'रिपोर्ट देखें' : 'View your report'}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
         <div className="va__amsler-cta">
-          <p className="va__amsler-cta-label">{lang === 'hi' ? 'एक और वैकल्पिक स्क्रीनिंग गतिविधि आज़माएँ:' : 'Try another optional screening activity:'}</p>
+          <p className="va__amsler-cta-label">{lang === 'hi' ? 'एक और वैकल्पिक स्व-निगरानी गतिविधि आज़माएँ:' : 'Try another optional self-monitoring activity:'}</p>
           <button className="btn btn--outline btn--full" type="button" onClick={() => navigate('/amsler')}>
             <span className="material-symbols-outlined" aria-hidden="true">grid_on</span>
             {lang === 'hi' ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' : 'Amsler Grid Self-Monitoring Activity'}
