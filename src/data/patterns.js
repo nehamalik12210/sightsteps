@@ -158,21 +158,22 @@ const patterns = [
       hi: 'कंट्रास्ट संवेदनशीलता में बदलाव',
     },
     description: {
-      en: 'Your responses suggest difficulty in low-light conditions, outdoor activity exposure and squinting to see clearly. Together, these may suggest changes in contrast sensitivity that are worth discussing with an eye-care professional.',
-      hi: 'आपके जवाब कम रोशनी में कठिनाई, बाहरी गतिविधि और स्पष्ट देखने के लिए आँखें सिकोड़ने का संयोजन सुझाते हैं। ये मिलकर कंट्रास्ट संवेदनशीलता में बदलाव सुझा सकते हैं जो नेत्र देखभाल पेशेवर से चर्चा के योग्य हैं।',
+      en: 'You reported difficulty in low-light situations and squinting to see clearly in those situations. You may wish to describe these specific experiences to an eye-care professional.',
+      hi: 'आपने कम रोशनी की स्थितियों में कठिनाई और उन स्थितियों में स्पष्ट देखने के लिए आँखें सिकोड़ने की बात बताई। आप इन विशेष अनुभवों के बारे में नेत्र-देखभाल पेशेवर को बता सकते हैं।',
     },
     discussionPrompt: {
-      en: 'You may want to describe the lighting conditions in which you notice difficulty and ask whether a contrast sensitivity assessment would be appropriate.',
-      hi: 'आप उन रोशनी की स्थितियों का वर्णन करना चाह सकते हैं जिनमें आपको कठिनाई महसूस होती है और पूछ सकते हैं कि क्या कंट्रास्ट संवेदनशीलता का मूल्यांकन उचित होगा।',
+      en: 'You may want to describe when the low-light difficulty and squinting occur, and ask what kind of eye examination is appropriate.',
+      hi: 'आप बता सकते हैं कि कम रोशनी में कठिनाई और आँखें सिकोड़ना कब होता है, और पूछ सकते हैं कि कौन-सी नेत्र जाँच उपयुक्त होगी।',
     },
     icon: 'contrast',
     triggers: (answers) => {
       const nightIssue = ['yes', 'sometimes'].includes(answers.night_vision?.value);
-      const outdoorTime = ['moderate', 'high'].includes(answers.outdoor_time?.value);
       const squinting = ['yes', 'sometimes'].includes(answers.squinting?.value);
-      return nightIssue && outdoorTime && squinting;
+      const contexts = Array.isArray(answers.experience_context?.value) ? answers.experience_context.value : [];
+      const explicitlyLowLight = contexts.includes('low_light');
+      return nightIssue && explicitlyLowLight && squinting;
     },
-    sourceKeys: ['night_vision', 'outdoor_time', 'squinting'],
+    sourceKeys: ['night_vision', 'experience_context', 'squinting'],
   },
   {
     id: 'overdue-exam',
