@@ -16,7 +16,7 @@ import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 import { evaluatePatterns } from './patternEngine.js';
-import { buildVisionExperienceProfile } from './visionExperienceProfile.js';
+import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
 import {
   calculateGridSizePx,
   canCalibrateAmsler,
@@ -106,6 +106,14 @@ assert(demoCount.answeredCount === 7, `guided demo count should be 7, got ${demo
 const visibleDemoIds = getVisibleQuestions(rameshAnswers).filter((question) => rameshPersona.demoQuestionIds.includes(question.id)).map((question) => question.id);
 assert(visibleDemoIds.length === 7, `guided demo should display 7 questions, got ${visibleDemoIds.length}`);
 assert(visibleDemoIds.includes('affected_activities'), 'guided demo includes affected-activities context');
+assert(rameshPersona.timelineEntries?.length >= 2, 'guided demo seeds multiple participant-entered timeline records');
+const demoExperienceProfile = buildVisionExperienceProfile(rameshPersona.answers, rameshPersona.timelineEntries);
+assert(demoExperienceProfile.mainExperience?.id === 'blurred_vision', 'guided demo profile has a main reported experience');
+assert(demoExperienceProfile.additionalExperiences.length > 0, 'guided demo profile has additional reported experiences');
+assert(demoExperienceProfile.mainExperience?.contexts.length > 0, 'guided demo profile has reported situations');
+assert(demoExperienceProfile.activityImpacts.length > 0, 'guided demo profile has activity-impact detail');
+assert(demoExperienceProfile.timeline.totalEntries >= 2, 'guided demo profile includes participant-entered timeline examples');
+assert(demoExperienceProfile.timeline.mainExperienceEntryCount >= 1, 'guided demo timeline links at least one entry to the main experience');
 
 console.log('\n=== Healthy/minimal profile ===');
 const healthyAnswers = {
@@ -678,10 +686,10 @@ const amslerPack = buildAppointmentPreparationPack({
 assert(amslerPack.amsler !== null, 'appointment pack includes Amsler results when completed');
 assert(amslerPack.amsler.right === 2, 'appointment pack Amsler right eye count matches');
 assert(amslerPack.amsler.left === 0, 'appointment pack Amsler left eye count matches');
-assert(amslerPack.experienceProfile !== null, 'appointment pack includes compact experience profile when supplied');
-assert(amslerPack.experienceProfile.mainExperience?.label === 'Blurred or unclear vision', 'appointment pack profile retains main experience label');
-assert(amslerPack.experienceProfile.activityImpacts.length === 1, 'appointment pack profile retains activity impact summary');
-assert(amslerPack.experienceProfile.activityImpacts[0].summary.length <= 130, 'appointment pack profile activity summaries are length-limited');
+assert(amslerPack.experienceProfile !== null, 'appointment pack includes a compact experience headline when supplied');
+assert(typeof amslerPack.experienceProfile.summary === 'string', 'appointment pack stores one compact profile summary');
+assert(amslerPack.experienceProfile.summary.includes('Blurred or unclear vision'), 'appointment pack summary retains the main reported experience');
+assert(amslerPack.experienceProfile.summary.length <= 260, 'appointment pack profile summary is length-limited');
 
 const noAmslerPack = buildAppointmentPreparationPack({ language: 'en', amslerResults: null });
 assert(noAmslerPack.amsler === null, 'appointment pack has null Amsler when not completed');
@@ -925,6 +933,14 @@ assert(experienceProfile.timeline.mainExperienceEntryCount === 1, 'profile links
 assert(experienceProfile.limitations.participantReportedOnly === true, 'profile explicitly remains participant-reported');
 assert(experienceProfile.limitations.usesClinicalScoring === false, 'profile does not introduce clinical scoring');
 assert(experienceProfile.limitations.measuresVisualPerformance === false, 'profile does not claim visual-performance measurement');
+const compactProfileSummary = buildCompactExperienceSummary(experienceProfile, 'en', 360, 3);
+assert(compactProfileSummary.includes('Main reported experience: Blurred or unclear vision'), 'compact summary leads with the participant selected main experience');
+assert(compactProfileSummary.includes('Reported situations:'), 'compact summary preserves participant reported contexts');
+assert(compactProfileSummary.includes('Reported daily-activity impact:'), 'compact summary connects the selected daily-activity impact');
+assert(compactProfileSummary.length <= 360, 'compact summary respects its configured character limit');
+const compactHindiSummary = buildCompactExperienceSummary(experienceProfile, 'hi', 360, 3);
+assert(compactHindiSummary.includes('मुख्य बताया गया अनुभव'), 'compact summary has a Hindi version');
+assert(buildCompactExperienceSummary({}, 'en') === '', 'compact summary omits a profile with no reportable content');
 
 const staleMainProfile = buildVisionExperienceProfile({
   ...rameshPersona.answers,
