@@ -145,7 +145,7 @@ check(/cannot determine (their )?cause or urgency/.test(engine), 'reported exper
 check(/not an eye examination/.test(vision), 'direction activity explicitly states it is not an eye examination');
 check(/Keep both eyes comfortably open/.test(vision) && !/Cover your (left|right) eye/.test(vision), 'direction interaction does not instruct users to cover an eye');
 check(/Round 1/.test(vision) && /Round 2/.test(vision), 'direction interaction labels two non-eye-specific rounds');
-check(/not an eye examination, diagnosis, visual acuity measurement or prescription/.test(report), 'report explicitly states its non-clinical scope');
+check(/rpt__notice--compact/.test(report) && /rpt-full-disclaimer/.test(report) && /does not diagnose eye conditions/.test(translations['disclaimer.reportFull']?.en || '') && /निदान/.test(translations['disclaimer.reportFull']?.hi || ''), 'report presents its non-clinical scope in a short banner and full bilingual limitations statement');
 
 // Product functionality: contextual questionnaire, impact detail, follow-up and kiosk controls.
 const questionSource = read('src/data/questions.js');
