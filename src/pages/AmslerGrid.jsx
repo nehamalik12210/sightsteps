@@ -6,7 +6,6 @@ import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
 import {
   CREDIT_CARD_WIDTH_MM,
   GRID_PHYSICAL_MM,
-  calculateGridSizePx,
   canCalibrateAmsler,
   doesCalibratedGridFit,
   getMaxCalibrationSliderWidth,
