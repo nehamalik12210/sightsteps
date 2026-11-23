@@ -6,6 +6,7 @@ import { getQuestionForActivities, getVisibleQuestions, isAnswerComplete } from 
 import { speakWhenReady, stopSpeaking } from '../utils/tts.js';
 import { getBackNavigationAnswerIds } from '../utils/sessionRouting.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
+import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import './Intake.css';
 
 const STAGE_META = {
@@ -23,7 +24,7 @@ export default function Intake() {
   const navigate = useNavigate();
   const {
     language,
-    storageAvailable,
+    saveStatus,
     answers,
     activities,
     setAnswer,
@@ -273,12 +274,7 @@ export default function Intake() {
 
       {navigationError && <p className="iq__conditional-note" role="alert">{navigationError}</p>}
 
-      {storageAvailable === false && (
-        <p className="iq__conditional-note" role="status">
-          <span className="material-symbols-outlined" aria-hidden="true">warning</span>
-          {lang === 'hi' ? 'सेशन सेव नहीं हो पा रहा है। रीफ़्रेश करने पर आपके जवाब खो सकते हैं।' : 'Session saving is unavailable. Your answers may be lost if you refresh.'}
-        </p>
-      )}
+      <LocalSaveStatus status={saveStatus} language={lang} />
 
       <header className="iq__topbar">
         <button className="iq__back-btn" type="button" onClick={handleGoBack} aria-label={t('common.back', lang)}>
