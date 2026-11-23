@@ -5,6 +5,15 @@
  * explicitly identified as scripted demo context in the report.
  */
 
+
+function localDateDaysAgo(days, now = new Date()) {
+  const date = new Date(now);
+  date.setDate(date.getDate() - days);
+  const year = String(date.getFullYear()).padStart(4, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
 const rameshPersona = {
   name: 'Ramesh',
   nameHi: 'रमेश',
@@ -45,6 +54,30 @@ const rameshPersona = {
       label: { en: 'Often', hi: 'अक्सर' },
     },
   },
+  timelineEntries: [
+    {
+      id: 'demo-ramesh-blur-1',
+      date: localDateDaysAgo(6),
+      time: '09:15',
+      experienceId: 'blurred_vision',
+      experienceLabel: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+      context: 'During detailed stitching work',
+      impact: 'Needed to adjust working distance',
+      createdAt: localDateDaysAgo(6) + 'T09:15:00.000Z',
+      updatedAt: localDateDaysAgo(6) + 'T09:15:00.000Z',
+    },
+    {
+      id: 'demo-ramesh-blur-2',
+      date: localDateDaysAgo(2),
+      time: '19:00',
+      experienceId: 'blurred_vision',
+      experienceLabel: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+      context: 'While using a phone after work',
+      impact: 'Took a short break before continuing',
+      createdAt: localDateDaysAgo(2) + 'T19:00:00.000Z',
+      updatedAt: localDateDaysAgo(2) + 'T19:00:00.000Z',
+    },
+  ],
   demoQuestionIds: [
     'blurred_vision',
     'blur_distance',
