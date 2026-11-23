@@ -669,13 +669,19 @@ assert(
 // === Appointment Pack — Amsler Integration ===
 console.log('\n=== Appointment pack Amsler integration ===');
 
+const packExperienceProfile = buildVisionExperienceProfile(rameshPersona.answers, []);
 const amslerPack = buildAppointmentPreparationPack({
   language: 'en',
   amslerResults: mockAmslerResult,
+  experienceProfile: packExperienceProfile,
 });
 assert(amslerPack.amsler !== null, 'appointment pack includes Amsler results when completed');
 assert(amslerPack.amsler.right === 2, 'appointment pack Amsler right eye count matches');
 assert(amslerPack.amsler.left === 0, 'appointment pack Amsler left eye count matches');
+assert(amslerPack.experienceProfile !== null, 'appointment pack includes compact experience profile when supplied');
+assert(amslerPack.experienceProfile.mainExperience?.label === 'Blurred or unclear vision', 'appointment pack profile retains main experience label');
+assert(amslerPack.experienceProfile.activityImpacts.length === 1, 'appointment pack profile retains activity impact summary');
+assert(amslerPack.experienceProfile.activityImpacts[0].summary.length <= 130, 'appointment pack profile activity summaries are length-limited');
 
 const noAmslerPack = buildAppointmentPreparationPack({ language: 'en', amslerResults: null });
 assert(noAmslerPack.amsler === null, 'appointment pack has null Amsler when not completed');
