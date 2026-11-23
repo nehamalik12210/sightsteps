@@ -16,6 +16,7 @@ import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 import { evaluatePatterns } from './patternEngine.js';
+import { buildVisionExperienceProfile } from './visionExperienceProfile.js';
 import {
   calculateGridSizePx,
   canCalibrateAmsler,
@@ -857,7 +858,77 @@ assert(emptyDesc.left[0].includes('no regions flagged'), 'empty left eye says no
 const concentratedSpatial = analyzeSpatial({ right: ulCells, left: [] });
 const concentratedDesc = describeSpatial(concentratedSpatial, 'en');
 assert(concentratedDesc.right[0].includes('upper-left'), 'quadrant-concentration description mentions quadrant name');
+
 assert(!concentratedDesc.right[0].toLowerCase().includes('cluster'), 'spatial description does not claim physical clustering');
+
+// === Everyday Vision Experience Profile ===
+console.log('\\n=== Everyday vision experience profile ===');
+
+const profileTimelineFixtures = [
+  {
+    id: 'profile-main-entry',
+    date: '2026-10-12',
+    time: '09:30',
+    experienceId: 'blurred_vision',
+    experienceLabel: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+    context: 'During screen work',
+    impact: 'Needed to adjust distance',
+    createdAt: '2026-10-12T09:30:00.000Z',
+    updatedAt: '2026-10-12T09:30:00.000Z',
+  },
+  {
+    id: 'profile-other-entry',
+    date: '2026-10-10',
+    time: '',
+    experienceId: 'headaches',
+    experienceLabel: { en: 'Headaches around visual activities', hi: 'दृष्टि गतिविधियों के दौरान सिरदर्द' },
+    context: 'After reading',
+    impact: 'Took a break',
+    createdAt: '2026-10-10T12:00:00.000Z',
+    updatedAt: '2026-10-10T12:00:00.000Z',
+  },
+];
+const experienceProfile = buildVisionExperienceProfile(rameshPersona.answers, profileTimelineFixtures);
+assert(experienceProfile.mainExperience?.id === 'blurred_vision', 'profile uses the current main reported experience');
+assert(experienceProfile.mainExperience?.contexts.length === 2, 'profile retains both reported experience contexts');
+assert(experienceProfile.mainExperience?.sourceIds.includes('experience_onset'), 'main experience links to onset source answer');
+assert(experienceProfile.mainExperience?.sourceIds.includes('which_eye'), 'main experience links to reported eye-side answer');
+assert(experienceProfile.mainExperience?.narrative.en.includes('main experience'), 'profile creates an English main-experience narrative');
+assert(experienceProfile.mainExperience?.narrative.hi.includes('आपने'), 'profile creates a Hindi main-experience narrative');
+assert(experienceProfile.additionalExperiences.length === 3, 'profile keeps other reported experiences separate from the main experience');
+assert(experienceProfile.activityImpacts.length === 1, 'profile includes the participant-selected affected activity');
+assert(experienceProfile.activityImpacts[0].impactStatus === 'reported', 'profile distinguishes a reported activity impact');
+assert(experienceProfile.activityImpacts[0].frequency.en === 'Often', 'profile retains activity-specific impact frequency');
+assert(experienceProfile.activityImpacts[0].sourceIds.includes('activity_impact_fine_detail'), 'activity impact links to its source answer');
+assert(experienceProfile.activityImpacts[0].sourceIds.includes('activity_impact_frequency_fine_detail'), 'activity impact frequency links to its source answer');
+assert(experienceProfile.connections?.narrative.en.includes('feel affected'), 'profile connects reported contexts and affected activities without diagnosing');
+assert(experienceProfile.timeline.totalEntries === 2, 'profile preserves normalized timeline entries');
+assert(experienceProfile.timeline.mainExperienceEntryCount === 1, 'profile links only matching participant-selected timeline experience IDs');
+assert(experienceProfile.limitations.participantReportedOnly === true, 'profile explicitly remains participant-reported');
+assert(experienceProfile.limitations.usesClinicalScoring === false, 'profile does not introduce clinical scoring');
+assert(experienceProfile.limitations.measuresVisualPerformance === false, 'profile does not claim visual-performance measurement');
+
+const staleMainProfile = buildVisionExperienceProfile({
+  ...rameshPersona.answers,
+  blurred_vision: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+}, profileTimelineFixtures);
+assert(staleMainProfile.mainExperience === null, 'stale main selection is not shown when the experience is no longer reported');
+assert(staleMainProfile.additionalExperiences.some((item) => item.id === 'blurred_vision') === false, 'a no-longer-reported experience is not included as additional experience');
+assert(staleMainProfile.timeline.mainExperienceEntryCount === 0, 'stale main selection does not create a false timeline link');
+
+const emptyExperienceProfile = buildVisionExperienceProfile({}, []);
+assert(emptyExperienceProfile.mainExperience === null, 'empty answers produce no main experience');
+assert(emptyExperienceProfile.activityImpacts.length === 0, 'empty answers produce no activity-impact rows');
+assert(emptyExperienceProfile.timeline.totalEntries === 0, 'empty timeline produces zero entries');
+assert(emptyExperienceProfile.connections === null, 'profile does not invent a connection without data');
+
+const noImpactProfile = buildVisionExperienceProfile({
+  affected_activities: { value: ['reading'], label: { en: 'Reading & study', hi: 'पढ़ाई और अध्ययन' } },
+  activity_impact_reading: { value: ['none'], label: { en: 'No impact', hi: 'कोई प्रभाव नहीं' } },
+});
+assert(noImpactProfile.activityImpacts[0].impactStatus === 'no_impact_reported', 'profile preserves explicit no-impact answers without converting them into missing data');
+
+
 
 console.log(`\n${'='.repeat(44)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
