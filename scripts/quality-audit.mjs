@@ -231,6 +231,15 @@ check(report.indexOf('rpt__timeline-section') > report.indexOf('aria-labelledby=
 check((report.match(/id="rpt-appointment-followup"/g) || []).length === 1 && report.indexOf('rpt__appointment-section') > report.indexOf('rpt-followup'), 'after-appointment notes appear once after pre-appointment discussion preparation');
 check(reportCssSource.includes('.rpt__timeline-list'), 'report includes timeline presentation styles');
 check(reportCssSource.includes('.rpt__priority-context') && reportCssSource.includes('.rpt__priority-context > .rpt__sec-intro'), 'priority context is grouped with consistent spacing');
+check(
+  reportCssSource.includes('grid-template-areas:') &&
+  reportCssSource.includes('"copy print"') &&
+  reportCssSource.includes('"includes print"') &&
+  reportCssSource.includes('grid-area: includes') &&
+  reportCssSource.includes('min-width: 0') &&
+  !/@media\(min-width:600px\)\s*\{\s*\.rpt__export-card\s*\{\s*grid-template-columns: minmax\(0,1fr\) auto/.test(reportCssSource),
+  'appointment export card assigns every content block to an explicit responsive grid area without intrinsic-width overflow',
+);
 check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timeline inputs retain a mobile-friendly minimum text size');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
