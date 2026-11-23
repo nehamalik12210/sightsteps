@@ -50,3 +50,40 @@
 .appointment-pack__priorities li,
 .appointment-pack__discussion-list li,
 .appointment-pack__timeline-list li { padding-left: 2px; }
+
+.appointment-pack__profile-main {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container-lowest);
+}
+.appointment-pack__profile-main strong {
+  display: block;
+  color: var(--color-secondary);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-1);
+}
+.appointment-pack__profile-main p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-relaxed);
+}
+.appointment-pack__profile-activities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.appointment-pack__profile-activities li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-xs);
+}
+.appointment-pack__profile-activities strong { color: var(--color-secondary); }
+.appointment-pack__profile-activities span { color: var(--color-text); line-height: var(--lh-relaxed); }
