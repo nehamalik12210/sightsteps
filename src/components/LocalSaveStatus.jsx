@@ -8,8 +8,8 @@ export default function LocalSaveStatus({ status, language = 'en' }) {
   return (
     <p
       className={`local-save-status local-save-status--${copy.tone}`}
-      role="status"
-      aria-live={status === 'saving' ? 'off' : 'polite'}
+      role={status === 'error' ? 'alert' : 'status'}
+      aria-live={status === 'error' ? 'assertive' : status === 'saving' ? 'off' : 'polite'}
       aria-atomic="true"
     >
       <span className="material-symbols-outlined" aria-hidden="true">{copy.icon}</span>
