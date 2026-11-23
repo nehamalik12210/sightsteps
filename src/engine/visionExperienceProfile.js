@@ -97,14 +97,26 @@ function buildMainExperience(answers, reportedExperiences) {
   const buildNarrative = (language) => {
     const label = mainLabel?.[language];
     if (!label) return '';
-    const parts = [`You selected ${label.toLowerCase()} as the main experience you would like to discuss.`];
-    if (onset?.[language]) parts.push(`You first noticed it ${onset[language].toLowerCase()}.`);
-    if (change?.[language]) parts.push(`You reported that it ${change[language].toLowerCase()}.`);
-    if (frequency?.[language]) parts.push(`You notice it ${frequency[language].toLowerCase()}.`);
-    if (contexts.length) {
-      parts.push(`You selected these situations: ${contexts.map((item) => item.label[language]).join(', ')}.`);
+    if (language === 'hi') {
+      const parts = [`आपने ${label} को उस मुख्य अनुभव के रूप में चुना जिस पर आप चर्चा करना चाहते हैं।`];
+      if (onset?.hi) parts.push(`आपने इसे पहली बार ${onset.hi.toLowerCase()} महसूस किया।`);
+      if (change?.hi) parts.push(`समय के साथ बदलाव के बारे में आपने यह बताया: ${change.hi}।`);
+      if (frequency?.hi) parts.push(`आपने बताया कि यह कितनी बार महसूस होता है: ${frequency.hi}।`);
+      if (contexts.length) {
+        parts.push(`आपने ये परिस्थितियाँ चुनीं: ${contexts.map((item) => item.label.hi).join(', ')}।`);
+      }
+      if (eye?.hi) parts.push(`आपने बताया कि यह ${eye.hi} में महसूस होता है।`);
+      return parts.join(' ');
     }
-    if (eye?.[language]) parts.push(`You said it is noticed in ${eye[language].toLowerCase()}.`);
+
+    const parts = [`You selected ${label.toLowerCase()} as the main experience you would like to discuss.`];
+    if (onset?.en) parts.push(`You first noticed it ${onset.en.toLowerCase()}.`);
+    if (change?.en) parts.push(`You described its change over time as: ${change.en.toLowerCase()}.`);
+    if (frequency?.en) parts.push(`You said you notice it: ${frequency.en.toLowerCase()}.`);
+    if (contexts.length) {
+      parts.push(`You selected these situations: ${contexts.map((item) => item.label.en).join(', ')}.`);
+    }
+    if (eye?.en) parts.push(`You said it is noticed in ${eye.en.toLowerCase()}.`);
     return parts.join(' ');
   };
 
@@ -237,15 +249,16 @@ export function buildVisionExperienceProfile(answers = {}, timelineEntries = [])
   const reportedExperiences = getReportedExperienceOptions(safeAnswers);
   const mainId = safeValue(safeAnswers.primary_concern?.value);
   const mainExperience = buildMainExperience(safeAnswers, reportedExperiences);
+  const activeMainId = mainExperience?.id || null;
   const activityImpacts = buildActivityImpacts(safeAnswers);
   const timeline = normalizeVisionTimelineEntries(timelineEntries);
-  const mainExperienceTimelineEntries = mainId
-    ? timeline.filter((entry) => entry.experienceId === mainId)
+  const mainExperienceTimelineEntries = activeMainId
+    ? timeline.filter((entry) => entry.experienceId === activeMainId)
     : [];
 
   return {
     mainExperience,
-    additionalExperiences: buildAdditionalExperiences(reportedExperiences, mainId, safeAnswers),
+    additionalExperiences: buildAdditionalExperiences(reportedExperiences, activeMainId, safeAnswers),
     activityImpacts,
     connections: buildConnections(mainExperience, activityImpacts),
     timeline: {
