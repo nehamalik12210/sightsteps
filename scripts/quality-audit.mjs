@@ -232,11 +232,15 @@ check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timelin
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
 const appointmentPackSource = read('src/utils/appointmentPack.js');
+const reportPreferencesSource = read('src/utils/reportPreferences.js');
 const appointmentPackComponentSource = read('src/components/AppointmentPreparationPack.jsx');
 const appointmentPackCssSource = read('src/components/AppointmentPreparationPack.css');
 const accessibilityControlsSource = read('src/components/AccessibilityControls.jsx');
 const accessibilityControlsCssSource = read('src/components/AccessibilityControls.css');
 check(report.includes('AppointmentPreparationPack') && report.includes("printBrief('brief')") && report.includes('Print appointment preparation pack'), 'report offers the appointment preparation pack as its primary print action');
+check(report.includes('normalizeDiscussionPriorities') && reportPreferencesSource.includes('new Set') && reportPreferencesSource.includes('.slice(0, 2)'), 'report ignores stale or duplicate priorities that no longer match reported experiences');
+check(/id="main-content" tabIndex="-1" aria-live="polite"/.test(appSource), 'route-guard loading state retains the global skip-navigation target');
+check(/<main className="ap" id="main-content" tabIndex="-1" aria-live="polite">/.test(activitySource), 'activity-profile loading state retains the global skip-navigation target');
 check(report.includes('buildAppointmentPreparationPack') && report.includes('setAppointmentPack'), 'appointment pack content is built from the current participant report state before printing');
 check(appointmentPackSource.includes('slice(0, 2)') && appointmentPackSource.includes('slice(0, 3)') && appointmentPackSource.includes('slice(0, 5)'), 'appointment pack enforces two priorities, three discussion prompts and five recent timeline entries');
 check(appointmentPackSource.includes('questionsToAsk') && appointmentPackSource.includes('preparedDate'), 'appointment pack includes participant questions and its preparation date');
