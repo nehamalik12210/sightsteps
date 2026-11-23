@@ -113,6 +113,7 @@ function appReducer(state, action) {
         consentGiven: true,
         activities: Array.isArray(action.payload?.activities) ? action.payload.activities : [],
         primaryActivity: action.payload?.primaryActivity || null,
+        visionTimelineEntries: normalizeVisionTimelineEntries(action.payload?.timelineEntries || []),
       };
 
     case 'DEMO_NEXT_STEP':
