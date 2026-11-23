@@ -53,7 +53,7 @@ function NewSessionGuard({ children }) {
 function RouteGuard({ children, requireProfile = false, requireIntake = false, requireVision = false }) {
   const session = useApp();
   if (!session.isHydrated) {
-    return <main className="app-main" aria-live="polite"><p>Loading session…</p></main>;
+    return <main className="app-main" id="main-content" tabIndex="-1" aria-live="polite"><p>Loading session…</p></main>;
   }
   const redirect = getProtectedRouteRedirect(session, { requireProfile, requireIntake, requireVision });
   return redirect ? <Navigate to={redirect} replace /> : children;
