@@ -703,7 +703,9 @@ assert(scatteredAnalysis.hasQuadrantConcentration === false, '4 corners → no q
 // Central vs peripheral
 const centralCells = [{ row: 8, col: 9 }, { row: 10, col: 10 }, { row: 7, col: 12 }];
 const centralAnalysis = analyzeEye(centralCells);
-assert(centralAnalysis.centralCount === 3, '3 cells in center zone');
+assert(centralAnalysis.centralCount === 3, '3 cells in middle grid area');
+const middleAreaDesc = describeSpatial(analyzeSpatial({ right: centralCells, left: [] }), 'en');
+assert(middleAreaDesc.right.some((line) => line.includes('middle area of this grid')), 'spatial text describes grid middle rather than anatomy');
 assert(centralAnalysis.peripheralCount === 0, '0 cells peripheral');
 
 const peripheralCells = [{ row: 0, col: 0 }, { row: 19, col: 19 }];
@@ -807,6 +809,8 @@ assert(descEN.comparison.length > 0, 'EN comparison generated for asymmetric res
 // Text descriptions — Hindi
 const descHI = describeSpatial(asymSpatial, 'hi');
 assert(descHI.disclaimer.includes('रेटिना'), 'HI disclaimer present');
+const middleAreaHindi = describeSpatial(analyzeSpatial({ right: centralCells, left: [] }), 'hi');
+assert(middleAreaHindi.right.some((line) => line.includes('ग्रिड के मध्य वाले हिस्से')), 'Hindi spatial text describes grid middle');
 assert(descHI.right.length > 0, 'HI right eye description generated');
 assert(descHI.left.length > 0, 'HI left eye description generated');
 
