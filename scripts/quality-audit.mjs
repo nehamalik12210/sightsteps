@@ -295,6 +295,17 @@ check(accessibilityControlsSource.includes('aria-pressed') && accessibilityContr
 // Pattern detection, Amsler grid, clinician brief and clinical language audit.
 check(existsSync(join(root, 'src/engine/patternEngine.js')), 'pattern detection engine exists');
 check(existsSync(join(root, 'src/data/patterns.js')), 'pattern definitions exist');
+const profileSource = read('src/components/VisionExperienceProfile.jsx');
+const clinicianBriefSource = read('src/components/ClinicianBrief.jsx');
+const reportSource = read('src/pages/Report.jsx');
+const appContextSource = read('src/context/AppContext.jsx');
+const demoPersonaSource = read('src/data/demoPersona.js');
+check(/verbosity = 'full'/.test(profileSource) && /verbosity === 'brief'/.test(profileSource) && /verbosity === 'pack'/.test(profileSource), 'one reusable experience profile supports full, brief and pack presentations');
+check(/verbosity="brief"/.test(clinicianBriefSource) && /verbosity="pack"/.test(appointmentPackComponentSource), 'clinician and appointment exports use compact profile variants');
+check(/timelineEntries: normalizeVisionTimelineEntries\(action\.payload\?\.timelineEntries/.test(appContextSource) && /timelineEntries: \[/.test(demoPersonaSource), 'guided demo loads seeded participant timeline examples');
+check(reportSource.indexOf('rpt__notice--compact') < reportSource.indexOf('<VisionExperienceProfile') && reportSource.indexOf('rpt-full-disclaimer') > reportSource.indexOf('rpt__privacy'), 'report places a short safety banner before the profile and full limitations after report content');
+check(!appointmentPackComponentSource.includes('Other experiences:') && !appointmentPackComponentSource.includes('Activities reported as affected:'), 'appointment pack avoids duplicate secondary-experience and activity-impact summaries');
+check(/group\.id === 'eyeCare'/.test(clinicianBriefSource), 'clinician brief avoids repeating the full reported-experience response table');
 check(existsSync(join(root, 'src/components/ClinicianBrief.jsx')), 'clinician brief component exists');
 check(existsSync(join(root, 'src/pages/AmslerGrid.jsx')), 'Amsler grid page exists');
 check(existsSync(join(root, 'scripts/clinical-language-audit.mjs')), 'clinical language audit script exists');
