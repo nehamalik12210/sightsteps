@@ -45,7 +45,8 @@
 .amsler__cell:focus-visible { outline: 2px solid var(--color-secondary); z-index: 10; }
 .amsler__cell--flagged { background: rgba(186, 26, 26, 0.3); }
 .amsler__cell--center { z-index: 5; }
-.amsler__dot-center { font-size: 10px; color: #333; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.amsler__center-marker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 6; display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; color: #333; font-size: 10px; line-height: 1; pointer-events: none; }
+.amsler__calibration-warning { margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-warning); border-radius: var(--radius-md); color: var(--color-warning); font-size: var(--fs-sm); line-height: var(--lh-relaxed); }
 
 .amsler__flagged-count { margin-top: var(--space-3); text-align: center; color: var(--color-primary); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
 .amsler__test-actions { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; max-width: 400px; margin-top: var(--space-4); }
@@ -68,7 +69,7 @@
 
 /* Results */
 .amsler__results-header { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); }
-.amsler__results-check { font-size: 48px; color: var(--color-success); }
+.amsler__results-check { font-size: 48px; color: var(--color-primary); }
 .amsler__results-header h1 { color: var(--color-secondary); font-size: var(--fs-xl); font-weight: 800; }
 
 .amsler__results-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-5); }
