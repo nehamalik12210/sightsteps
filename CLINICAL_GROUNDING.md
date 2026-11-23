@@ -7,7 +7,7 @@ Every pattern and screening activity in SightSteps is anchored to published clin
 
 ---
 
-## Amsler Grid Home Screening
+## Amsler Grid Self-Monitoring Activity
 
 **Grounding:** The Amsler grid is recommended as a home self-monitoring tool for macular changes by the American Academy of Ophthalmology (AAO). The AAO advises patients with or at risk of age-related macular degeneration to test their vision daily using an Amsler grid, one eye at a time, wearing reading glasses at 30–40 cm viewing distance, and to contact their ophthalmologist if lines appear wavy, blurred, or missing.
 
@@ -16,7 +16,7 @@ Every pattern and screening activity in SightSteps is anchored to published clin
 - American Academy of Ophthalmology. "Amsler Grid Test for Macular Degeneration." — [aao.org/eye-health/tips-prevention/amsler-grid-test](https://www.aao.org/eye-health/tips-prevention/amsler-grid-test)
 - Crossland M, Rubin G. "The Amsler chart: absence of evidence is not evidence of absence." *British Journal of Ophthalmology* 2007;91(3):391–393 — [doi:10.1136/bjo.2006.095315](https://doi.org/10.1136/bjo.2006.095315)
 
-**SightSteps implementation:** Renders a calibrated 20×20 grid at ~10 cm physical size, one eye at a time, with credit-card calibration. All results are framed as "home screening result, not a diagnosis."
+**SightSteps implementation and limitations:** SightSteps records only the grid regions a participant manually flags; it does not measure visual function, interpret a visual-field defect, identify a disease or rule out a problem when no regions are flagged. The interface uses an attempted 85.6 mm card calibration to target a 100 mm grid and blocks calibration on narrow viewports where that grid cannot fit. This software calibration is not yet validated across real phones, tablets, browser zoom settings or display densities. It must be independently tested on physical devices and reviewed by a qualified eye-care professional before clinical-context use. Results are participant-entered observations, not a clinical screening result.
 
 ---
 
