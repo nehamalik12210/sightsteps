@@ -109,19 +109,19 @@ section('5. AMSLER GRID WORDING');
 
 const amslerStrings = {
   'Activity intro disclaimer': {
-    en: 'This is a home screening activity, not a diagnosis. The Amsler grid is already recommended by optometrists for self-monitoring of macular changes. Show results to your eye-care professional at your next visit.',
+    en: 'Amsler grids are sometimes used for self-monitoring of central vision changes. SightSteps records only areas you choose to flag; it does not test or interpret your vision. No areas flagged does not rule out a problem.',
     hi: 'यह एक होम स्क्रीनिंग गतिविधि है, निदान नहीं। एम्सलर ग्रिड का उपयोग नेत्र चिकित्सक पहले से मरीजों को मैक्युलर परिवर्तनों की स्व-निगरानी के लिए सुझाते हैं। परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।',
   },
   'Instructions disclaimer': {
-    en: 'SightSteps is not a diagnostic tool. Amsler grid results are a home screening and do not replace a professional examination. Show these results to your eye-care professional at your next visit.',
+    en: 'SightSteps is not a diagnostic tool. This activity records only areas you choose to flag; it does not test or interpret your vision. A normal-looking grid does not rule out a problem.',
     hi: 'SightSteps निदान उपकरण नहीं है। एम्सलर ग्रिड के परिणाम होम स्क्रीनिंग हैं और पेशेवर जाँच का विकल्प नहीं हैं। ये परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।',
   },
   'Result disclaimer': {
-    en: 'This is a home screening result, not a diagnosis. Show these results to your optometrist at your next visit.',
+    en: 'This records only the areas you chose to flag. No areas flagged does not rule out a vision problem.',
     hi: 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। ये परिणाम अपने ऑप्टोमेट्रिस्ट को अपनी अगली मुलाक़ात में दिखाएँ।',
   },
   'Report Amsler disclaimer': {
-    en: 'This is a home screening result, not a diagnosis. Participant used a calibrated grid on a phone/tablet screen. Show this to your optometrist at your next visit.',
+    en: 'This records only areas the participant chose to flag. It does not test or interpret vision, and no areas flagged does not rule out a problem.',
     hi: 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया। अपनी अगली मुलाक़ात में अपने ऑप्टोमेट्रिस्ट को यह दिखाएँ।',
   },
 };
@@ -139,7 +139,7 @@ const briefStrings = {
     hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्क्रीनिंग परिणाम प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
   },
   'Amsler note in clinician brief': {
-    en: 'Home screening result — not a diagnosis. Participant used a calibrated grid on a phone/tablet screen.',
+    en: 'Participant-entered grid observations — not a clinical test result. A blank grid does not rule out a vision problem.',
     hi: 'होम स्क्रीनिंग परिणाम — निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया।',
   },
 };
