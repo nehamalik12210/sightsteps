@@ -98,13 +98,17 @@ Every pattern and self-monitoring activity in SightSteps is anchored to publishe
 
 ## Pattern: `low-light-contrast`
 
-**Trigger:** Low-light difficulty + outdoor activity + squinting.
+**Trigger:** The participant reports difficulty seeing in low light, explicitly selects low-light situations as a context, and reports squinting.
 
-**Grounding:** Contrast sensitivity changes — the ability to distinguish objects from their background at varying spatial frequencies — are a well-documented functional vision measure. Difficulty in low-light conditions combined with squinting suggests contrast sensitivity decline, which clinical literature identifies as an early functional marker of visual pathway aging.
+**Grounding:** Clinical literature discusses the role of lighting and contrast in visual performance. These background sources do not establish the cause of an individual participant's symptoms and do not justify inferring reduced contrast sensitivity from questionnaire answers alone.
+
+**SightSteps implementation:** This pattern surfaces only the participant's reported low-light difficulty and squinting as a topic to describe to an eye-care professional. It does not label the experience as a measured contrast-sensitivity change or infer an underlying cause.
 
 **Sources:**
 - Owsley C. "Contrast sensitivity." *Ophthalmology Clinics of North America* 2003;16(2):171–177 — [doi:10.1016/S0896-1549(03)00003-8](https://doi.org/10.1016/S0896-1549(03)00003-8)
 - Haegerstrom-Portnoy G, Schneck ME, Brabyn JA. "Seeing into old age: vision function beyond acuity." *Optometry and Vision Science* 1999;76(3):141–158
+
+---
 
 ---
 
