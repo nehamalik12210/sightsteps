@@ -181,6 +181,7 @@ check(/resettingRef = useRef\(false\)/.test(contextSource) && /resettingRef\.cur
 check(/resetPromiseRef/.test(contextSource), 'concurrent reset requests share a single cleanup operation');
 check(/db\.onversionchange/.test(storageSource) && /dbPromise = null/.test(storageSource), 'IndexedDB can be reopened after a schema-version change');
 check(/--space-7:/.test(baseCss) && /\.btn--danger-outline/.test(baseCss), 'report spacing and destructive outline button styles are defined');
+check(/\.btn\{[^}]*white-space:normal;[^}]*overflow-wrap:anywhere;[^}]*min-width:0;[^}]*max-width:100%;/.test(baseCss) && /\.btn \.material-symbols-outlined\{flex:0 0 auto;white-space:nowrap\}/.test(baseCss), 'shared buttons wrap long bilingual labels without shrinking or wrapping their icons');
 check(/NewSessionGuard/.test(appSource) && /getNewSessionRedirect/.test(appSource) && /allowNewSession/.test(appSource), 'onboarding distinguishes an intentional fresh journey from direct visits with an existing session');
 check(/Navigate to=\{redirect\} replace/.test(appSource), 'route guard redirects replace invalid history entries instead of creating navigation loops');
 check(/startPending/.test(onboarding) && /startSession\(selectedLang/.test(onboarding), 'consent navigation waits until the newly-created English or Hindi session is committed');
