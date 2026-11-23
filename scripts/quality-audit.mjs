@@ -82,6 +82,9 @@ for (const [key, entry] of Object.entries(translations)) {
 const html = read('index.html');
 const baseCss = read('src/index.css');
 const accessCss = read('src/accessibility.css');
+const activityCss = read('src/pages/ActivityProfile.css');
+const onboardingCss = read('src/pages/Onboarding.css');
+const followUpCss = read('src/pages/AppointmentFollowUp.css');
 const vite = read('vite.config.js');
 const effectiveCss = `${baseCss}\n${accessCss}`;
 const stylesheetFiles = collect('src').filter((path) => path.endsWith('.css'));
