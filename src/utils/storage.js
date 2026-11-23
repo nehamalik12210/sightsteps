@@ -91,6 +91,7 @@ export function createSessionRecord(state) {
     participantNote: typeof state.participantNote === 'string' ? state.participantNote : '',
     answers: state.answers || {},
     visionResults: state.visionResults || null,
+    amslerResults: state.amslerResults || null,
     report: state.report || null,
     appointmentFollowUp: state.appointmentFollowUp || { appointmentDate: '', professionalNotes: '', followUpPlan: '', nextAppointmentDate: '' },
     visionTimelineEntries: normalizeVisionTimelineEntries(state.visionTimelineEntries),
