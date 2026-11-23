@@ -20,8 +20,8 @@ function localized(value, lang) {
 }
 
 const DISCLAIMER = {
-  en: 'SightSteps is not a diagnostic tool. The observations, patterns and screening results below are participant-reported and are intended only to support a conversation with an eye-care professional.',
-  hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्क्रीनिंग परिणाम प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
+  en: 'SightSteps is not a diagnostic tool. The observations, patterns and activity records below are participant-reported and are intended only to support a conversation with an eye-care professional.',
+  hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और गतिविधि रिकॉर्ड प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
 };
 
 export default function ClinicianBrief({ onClose }) {
@@ -118,7 +118,7 @@ export default function ClinicianBrief({ onClose }) {
                     <p>{localized(pattern.discussionPrompt, lang)}</p>
                   </div>
                   <p className="clinician-brief__sources">
-                    <strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(pattern.sources)}
+                    <strong>{lang === 'hi' ? 'इस पैटर्न से जुड़े आपके जवाब:' : 'Your responses contributing to this pattern:'}</strong> {sourcesText(pattern.sources)}
                   </p>
                 </div>
               ))}
@@ -159,7 +159,7 @@ export default function ClinicianBrief({ onClose }) {
             <section className="clinician-brief__section">
               <h2>
                 <span className="material-symbols-outlined" aria-hidden="true">grid_on</span>
-                {lang === 'hi' ? 'एम्सलर ग्रिड होम स्क्रीनिंग परिणाम' : 'Amsler Grid Home Screening Results'}
+                {lang === 'hi' ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि का रिकॉर्ड' : 'Amsler Grid Self-Monitoring Activity Record'}
               </h2>
               <div className="clinician-brief__amsler">
                 <div className="clinician-brief__amsler-eye">
@@ -198,7 +198,7 @@ export default function ClinicianBrief({ onClose }) {
                   <p>{localized(point.context, lang)}</p>
                   {point.sources?.length > 0 && (
                     <p className="clinician-brief__sources">
-                      <strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(point.sources)}
+                      <strong>{lang === 'hi' ? 'संबंधित प्रतिभागी जवाब:' : 'Related participant responses:'}</strong> {sourcesText(point.sources)}
                     </p>
                   )}
                 </div>
