@@ -28,7 +28,7 @@ const rameshPersona = {
     outdoor_time: { value: 'moderate', label: { en: 'A few hours', hi: 'कुछ घंटे' } },
     primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
     experience_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
-    experience_change: { value: 'varies', label: { en: 'It varies', hi: 'इसमें उतार-चढ़ाव होता है' } },
+    experience_change: { value: 'more_noticeable', label: { en: 'Getting more noticeable', hi: 'अधिक ध्यान देने योग्य हो रहा है' } },
     experience_context: { value: ['near_tasks', 'screens'], label: { en: 'Reading or other near tasks, Using screens', hi: 'पढ़ना या पास के काम, स्क्रीन का उपयोग' } },
     experience_frequency: { value: 'daily', label: { en: 'Every day', hi: 'रोज़' } },
     which_eye: { value: 'both', label: { en: 'Both eyes', hi: 'दोनों आँखें' } },
