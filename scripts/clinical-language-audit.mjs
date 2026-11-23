@@ -65,6 +65,7 @@ const ALLOWLIST = [
   'low-light conditions',
   'lighting conditions',
   'eye conditions',
+  'eye condition',
   'actual conditions',
   'outdoor conditions',
   // Allowed negating uses of "you have"
@@ -201,7 +202,7 @@ const STATIC_COPY_FILES = [
 ];
 for (const file of STATIC_COPY_FILES) {
   const source = readFileSync(new URL(file, import.meta.url), 'utf8');
-  const literalPattern = /([\"'])(?:\\\\.|(?!\\1)[\\s\\S])*?\\1/g;
+  const literalPattern = /(["'])(?:\\.|(?!\1)[\s\S])*\1/g;
   for (const match of source.matchAll(literalPattern)) {
     const literal = match[0].slice(1, -1);
     scanText(`${file} UI string`, literal);
