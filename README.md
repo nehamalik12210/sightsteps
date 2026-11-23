@@ -30,6 +30,9 @@ A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of parti
 
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
+### 🧭 Everyday Vision Experience Profile
+A bilingual synthesis layer (`src/engine/visionExperienceProfile.js`) connects the participant's main and additional reported experiences with onset, change over time, frequency, contexts, eye involvement, activity-specific impacts and participant-recorded timeline entries. Each profile section retains source answer IDs and displays the source responses on demand. The same profile is reused in the detailed report, clinician brief and compact appointment preparation pack. It does not score severity, measure visual performance, infer a diagnosis or determine urgency.
+
 ### 🔲 Amsler Grid Self-Monitoring Activity
 An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked unless the calibrated 10 cm square fits within both visible viewport dimensions with reserved space for controls. Wide but short landscape-phone viewports are blocked. This screen-fit guard does not validate physical display calibration. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
 
@@ -245,10 +248,10 @@ The latest verified build completed with:
 
 | Check | Result |
 |---|---|
-| Static quality audit | **2,240 passed**, 0 failed |
-| Regression test suite | **749 passed**, 0 failed (incl. pattern engine + calibration viewport + Amsler spatial tests) |
+| Static quality audit | **2,387 passed**, 0 failed |
+| Regression test suite | **781 passed**, 0 failed (incl. profile synthesis, two-dimensional calibration fit, pattern engine and Amsler spatial tests) |
 | Clinical language audit | **PASSED** — 0 violations |
-| Vite production build | 93 modules transformed |
+| Vite production build | 96 modules transformed |
 | PWA service worker | 11 precache entries generated |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
