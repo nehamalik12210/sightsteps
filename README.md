@@ -104,11 +104,11 @@ The root `vercel.json` rewrite sends application routes back to `index.html`, al
 
 The latest verified production build on `main` completed with:
 
-- **1,783 passed, 0 failed** in the static quality audit.
-- **571 passed, 0 failed** in the regression test suite.
-- Vite transformed 78 modules and completed the production build.
-- The PWA service worker was generated with 11 precache entries (830.49 KiB).
-- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `58214a5`.
+- **1,790 passed, 0 failed** in the static quality audit.
+- **576 passed, 0 failed** in the regression test suite.
+- Vite transformed 79 modules and completed the production build.
+- The PWA service worker was generated with 11 precache entries (830.86 KiB).
+- Vercel reported the production deployment as **READY**, with the `sightsteps.vercel.app` alias attached to commit `7c380df`.
 
 These are automated source, data, routing, persistence, appointment-pack and accessibility-control checks. They are not proof of clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
