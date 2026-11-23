@@ -1,3 +1,4 @@
+import VisionExperienceProfile from './VisionExperienceProfile.jsx';
 import './AppointmentPreparationPack.css';
 
 export default function AppointmentPreparationPack({ pack, language = 'en' }) {
@@ -28,12 +29,7 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
           ) : (
             <p className="appointment-pack__empty">{hi ? 'कोई प्राथमिकता नहीं चुनी गई।' : 'No conversation priorities selected.'}</p>
           )}
-          {pack.activities.length > 0 && (
-            <p className="appointment-pack__context">
-              <strong>{hi ? 'प्रभावित गतिविधियाँ: ' : 'Activities reported as affected: '}</strong>
-              {pack.activities.join(hi ? ' · ' : ' · ')}
-            </p>
-          )}
+
         </section>
 
         <section className="appointment-pack__section" aria-labelledby="appointment-pack-questions">
@@ -46,34 +42,12 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
         </section>
       </div>
 
-      {pack.experienceProfile && (
-        <section className="appointment-pack__section" aria-labelledby="appointment-pack-profile">
-          <h2 id="appointment-pack-profile">{hi ? 'रोज़मर्रा के दृष्टि अनुभव की प्रोफ़ाइल' : 'Everyday vision experience profile'}</h2>
-          {pack.experienceProfile.mainExperience ? (
-            <div className="appointment-pack__profile-main">
-              <strong>{pack.experienceProfile.mainExperience.label}</strong>
-              <p>{pack.experienceProfile.mainExperience.summary}</p>
-            </div>
-          ) : (
-            <p className="appointment-pack__empty">{hi ? 'कोई मुख्य अनुभव दर्ज नहीं है।' : 'No main experience was recorded.'}</p>
-          )}
-          {pack.experienceProfile.additionalExperiences.length > 0 && (
-            <p className="appointment-pack__context">
-              <strong>{hi ? 'अन्य अनुभव: ' : 'Other experiences: '}</strong>
-              {pack.experienceProfile.additionalExperiences.join(' · ')}
-            </p>
-          )}
-          {pack.experienceProfile.activityImpacts.length > 0 && (
-            <ul className="appointment-pack__profile-activities">
-              {pack.experienceProfile.activityImpacts.map((item, index) => (
-                <li key={`${item.activity}-${index}`}>
-                  <strong>{item.activity}</strong>
-                  <span>{item.summary}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      {pack.experienceProfile?.summary && (
+        <VisionExperienceProfile
+          verbosity="pack"
+          summary={pack.experienceProfile.summary}
+          language={language}
+        />
       )}
 
       <section className="appointment-pack__section appointment-pack__discussion" aria-labelledby="appointment-pack-discussion">
