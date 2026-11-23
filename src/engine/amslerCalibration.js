@@ -9,6 +9,7 @@ export const CREDIT_CARD_WIDTH_MM = 85.6;
 export const GRID_PHYSICAL_MM = 100;
 export const MIN_CALIBRATION_VIEWPORT_PX = 600;
 export const VIEWPORT_MARGIN_PX = 32;
+export const VIEWPORT_VERTICAL_RESERVE_PX = 112;
 export const MAX_CALIBRATION_SLIDER_PX = 500;
 export const MIN_CALIBRATION_SLIDER_PX = 150;
 
@@ -31,13 +32,26 @@ export function getMaxCalibrationSliderWidth(viewportWidthPx) {
   );
 }
 
-export function canCalibrateAmsler(viewportWidthPx, sliderWidthPx) {
-  if (!Number.isFinite(viewportWidthPx) || !Number.isFinite(sliderWidthPx)) return false;
+export function canCalibrateAmsler(viewportWidthPx, viewportHeightPx, sliderWidthPx) {
+  if (
+    !Number.isFinite(viewportWidthPx)
+    || !Number.isFinite(viewportHeightPx)
+    || !Number.isFinite(sliderWidthPx)
+  ) return false;
   if (viewportWidthPx < MIN_CALIBRATION_VIEWPORT_PX) return false;
-  return calculateGridSizePx(sliderWidthPx) <= viewportWidthPx - VIEWPORT_MARGIN_PX;
+  return doesCalibratedGridFit(
+    viewportWidthPx,
+    viewportHeightPx,
+    calculateGridSizePx(sliderWidthPx),
+  );
 }
 
-export function doesCalibratedGridFit(viewportWidthPx, gridWidthPx) {
-  if (!Number.isFinite(viewportWidthPx) || !Number.isFinite(gridWidthPx)) return false;
-  return viewportWidthPx >= gridWidthPx + VIEWPORT_MARGIN_PX;
+export function doesCalibratedGridFit(viewportWidthPx, viewportHeightPx, gridWidthPx) {
+  if (
+    !Number.isFinite(viewportWidthPx)
+    || !Number.isFinite(viewportHeightPx)
+    || !Number.isFinite(gridWidthPx)
+  ) return false;
+  return viewportWidthPx >= gridWidthPx + VIEWPORT_MARGIN_PX
+    && viewportHeightPx >= gridWidthPx + VIEWPORT_VERTICAL_RESERVE_PX;
 }
