@@ -180,6 +180,14 @@ const normalizedTimeline = normalizeVisionTimelineEntries(unsortedTimeline.conca
   { id: 'invalid', date: '2026-02-30', experienceId: 'other', experienceLabel: 'Invalid' },
 ]));
 assert(normalizedTimeline.length === 2, 'malformed timeline entries are excluded from persisted data');
+
+const duplicateTimeline = normalizeVisionTimelineEntries([
+  { id: 'duplicate-id', date: '2026-11-12', time: '', experienceId: 'other', experienceLabel: 'Older version' },
+  { id: 'duplicate-id', date: '2026-11-16', time: '', experienceId: 'other', experienceLabel: 'Newest version' },
+  null,
+]);
+assert(duplicateTimeline.length === 1 && duplicateTimeline[0].experienceLabel === 'Newest version', 'timeline normalization keeps only the newest valid row for each ID');
+assert(sortVisionTimelineEntries([null, unsortedTimeline[0]]).length === 1, 'timeline sorting safely ignores non-object rows');
 const overflowTimeline = Array.from({ length: MAX_VISION_TIMELINE_ENTRIES + 5 }, (_, index) => ({
   id: 'entry-' + index,
   date: '2026-11-16',
