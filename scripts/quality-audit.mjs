@@ -213,6 +213,7 @@ check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('a
 // Participant timeline and appointment preparation output.
 const timelinePageSource = read('src/pages/VisionTimeline.jsx');
 const timelineUtilitySource = read('src/utils/visionTimeline.js');
+const appointmentPackSource = read('src/utils/appointmentPack.js');
 const timelineCssSource = read('src/pages/VisionTimeline.css');
 const reportCssSource = read('src/pages/Report.css');
 check(appSource.includes('path="/timeline"') && appSource.includes('VisionTimeline'), 'participant timeline has a guarded application route');
@@ -233,7 +234,6 @@ check(reportCssSource.includes('.rpt__priority-context') && reportCssSource.incl
 check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timeline inputs retain a mobile-friendly minimum text size');
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
-const appointmentPackSource = read('src/utils/appointmentPack.js');
 const reportPreferencesSource = read('src/utils/reportPreferences.js');
 const appointmentPackComponentSource = read('src/components/AppointmentPreparationPack.jsx');
 const appointmentPackCssSource = read('src/components/AppointmentPreparationPack.css');
