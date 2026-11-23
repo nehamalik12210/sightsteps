@@ -25,6 +25,7 @@ export function buildAppointmentPreparationPack({
   questionsToAsk = '',
   timelineEntries = [],
   amslerResults = null,
+  experienceProfile = null,
   now = new Date(),
 } = {}) {
   const locale = language === 'hi' ? 'hi-IN' : 'en-IN';
@@ -77,6 +78,27 @@ export function buildAppointmentPreparationPack({
       }
     : null;
 
+  const safeExperienceProfile = experienceProfile && typeof experienceProfile === 'object'
+    ? {
+        mainExperience: experienceProfile.mainExperience
+          ? {
+              label: compactText(localized(experienceProfile.mainExperience.label, language), 72),
+              summary: compactText(localized(experienceProfile.mainExperience.narrative, language), 260),
+            }
+          : null,
+        additionalExperiences: (experienceProfile.additionalExperiences || [])
+          .slice(0, 3)
+          .map((item) => compactText(localized(item.label, language), 64))
+          .filter(Boolean),
+        activityImpacts: (experienceProfile.activityImpacts || [])
+          .slice(0, 2)
+          .map((item) => ({
+            activity: compactText(localized(item.label, language), 48),
+            summary: compactText(localized(item.summary, language), 130),
+          })),
+      }
+    : null;
+
   // Spatial analysis for the prep pack
   let amslerSpatialText = null;
   if (safeAmsler && amslerResults.data) {
@@ -97,6 +119,7 @@ export function buildAppointmentPreparationPack({
     discussionPoints: safeDiscussionPoints,
     questionsToAsk: compactText(questionsToAsk, 480),
     timelineEntries: orderedTimeline,
+    experienceProfile: safeExperienceProfile,
     amsler: safeAmsler,
     amslerSpatial: amslerSpatialText,
     language: language === 'hi' ? 'hi' : 'en',
