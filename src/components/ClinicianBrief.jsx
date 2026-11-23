@@ -12,6 +12,8 @@ import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { evaluatePatterns } from '../engine/patternEngine.js';
 import { evaluateClusters } from '../data/patternClusters.js';
 import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
+import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
+import VisionExperienceProfile from './VisionExperienceProfile.jsx';
 import './ClinicianBrief.css';
 
 function localized(value, lang) {
@@ -32,6 +34,7 @@ export default function ClinicianBrief({ onClose }) {
     primaryActivity,
     participantNote,
     amslerResults,
+    visionTimelineEntries,
     isDemo,
     demoPersona,
   } = useApp();
@@ -44,6 +47,11 @@ export default function ClinicianBrief({ onClose }) {
     participantNote,
     countableQuestionIds: isDemo ? demoPersona?.demoQuestionIds : undefined,
   }), [answers, activities, primaryActivity, participantNote, isDemo, demoPersona]);
+
+  const experienceProfile = useMemo(
+    () => buildVisionExperienceProfile(answers, visionTimelineEntries || []),
+    [answers, visionTimelineEntries],
+  );
 
   const matchedPatterns = useMemo(() => evaluatePatterns(answers), [answers]);
   const matchedClusters = useMemo(
@@ -88,6 +96,14 @@ export default function ClinicianBrief({ onClose }) {
           <span className="material-symbols-outlined" aria-hidden="true">info</span>
           <p>{DISCLAIMER[lang]}</p>
         </div>
+
+        {(experienceProfile.hasReportedExperience || experienceProfile.hasActivityImpact || experienceProfile.hasTimelineEntries) && (
+          <VisionExperienceProfile
+            profile={experienceProfile}
+            answers={answers}
+            language={lang}
+          />
+        )}
 
         {matchedPatterns.length > 0 && (
           <section className="clinician-brief__section">
