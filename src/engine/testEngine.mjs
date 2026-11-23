@@ -13,6 +13,7 @@ import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_
 import { normalizeVisionTimelineEntries, sortVisionTimelineEntries, validateVisionTimelineDraft, MAX_VISION_TIMELINE_ENTRIES } from '../utils/visionTimeline.js';
 import rameshPersona from '../data/demoPersona.js';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
+import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 
 let passed = 0;
 let failed = 0;
@@ -225,6 +226,18 @@ assert(preparationPack.timelineEntries[0].dateValue === '2026-11-07', 'appointme
 assert(preparationPack.language === 'en' && Boolean(preparationPack.preparedDate), 'appointment pack retains language and preparation date');
 const hindiPack = buildAppointmentPreparationPack({ language: 'hi', priorities: [{ id: 'x', label: { en: 'Blurred vision', hi: 'धुंधला दिखाई देना' } }], now: new Date('2026-11-18T10:00:00.000Z') });
 assert(hindiPack.priorities[0].label === 'धुंधला दिखाई देना', 'appointment pack uses Hindi labels when Hindi is selected');
+
+assert(
+  JSON.stringify(normalizeDiscussionPriorities(
+    ['blurred_vision', 'old_concern', 'blurred_vision', 'headaches', 'squinting'],
+    ['blurred_vision', 'headaches', 'squinting'],
+  )) === JSON.stringify(['blurred_vision', 'headaches']),
+  'report priorities discard stale and duplicate concerns and remain capped at two',
+);
+assert(
+  normalizeDiscussionPriorities(['old_concern'], ['blurred_vision']).length === 0,
+  'report priorities clear when none of the saved choices remain reported',
+);
 
 console.log('\n=== Saved session record completeness ===');
 const savedRecord = createSessionRecord({
