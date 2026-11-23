@@ -25,6 +25,21 @@ function AmslerGrid() {
   // Credit card width = 85.6mm
   const CARD_WIDTH_MM = 85.6;
   const [sliderWidthPx, setSliderWidthPx] = useState(300);
+  const [viewportWidthPx, setViewportWidthPx] = useState(() => (typeof window === 'undefined' ? 0 : window.innerWidth));
+
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidthPx(window.innerWidth);
+    window.addEventListener('resize', updateViewportWidth);
+    return () => window.removeEventListener('resize', updateViewportWidth);
+  }, []);
+
+  const maxSliderWidthPx = Math.min(500, Math.max(150, Math.floor((viewportWidthPx - 32) * CARD_WIDTH_MM / 100)));
+  const previewGridSizePx = (sliderWidthPx / CARD_WIDTH_MM) * 100;
+  const canCalibrate = viewportWidthPx >= 600 && previewGridSizePx <= viewportWidthPx - 32;
+
+  useEffect(() => {
+    setSliderWidthPx((current) => Math.min(current, maxSliderWidthPx));
+  }, [maxSliderWidthPx]);
 
   // Spatial analysis — must be before any conditional returns to satisfy Rules of Hooks
   const spatial = useMemo(() => analyzeSpatial(flaggedCells), [flaggedCells]);
@@ -37,6 +52,7 @@ function AmslerGrid() {
   }, [reportPending, amslerResults, navigate]);
 
   const handleCalibrate = () => {
+    if (!canCalibrate) return;
     const pxPerMm = sliderWidthPx / CARD_WIDTH_MM;
     setCalibrationPxPerMm(pxPerMm);
     setPhase('instructions');
@@ -108,12 +124,11 @@ function AmslerGrid() {
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
         const isFlagged = flaggedCells[currentEye].some((cell) => cell.row === r && cell.col === c);
-        const isCenter = r === Math.floor(GRID_SIZE / 2) && c === Math.floor(GRID_SIZE / 2);
         cells.push(
           <button
             key={`${r}-${c}`}
             type="button"
-            className={`amsler__cell${isFlagged ? ' amsler__cell--flagged' : ''}${isCenter ? ' amsler__cell--center' : ''}`}
+            className={`amsler__cell${isFlagged ? ' amsler__cell--flagged' : ''}`}
             style={{
               width: `${cellSizePx}px`,
               height: `${cellSizePx}px`,
@@ -124,7 +139,6 @@ function AmslerGrid() {
             aria-label={`${lang === 'hi' ? 'ग्रिड सेल' : 'Grid cell'} ${r + 1},${c + 1}${isFlagged ? (lang === 'hi' ? ' — चिह्नित' : ' — flagged') : ''}`}
             aria-pressed={isFlagged}
           >
-            {isCenter && <span className="amsler__dot-center" aria-hidden="true">●</span>}
           </button>
         );
       }
@@ -164,15 +178,15 @@ function AmslerGrid() {
         <div className="amsler__content animate-fade-in">
           <div className="amsler__notice" role="note">
             <span className="material-symbols-outlined" aria-hidden="true">info</span>
-            <p>{lang === 'hi' ? 'यह एक होम स्क्रीनिंग गतिविधि है, निदान नहीं। एम्सलर ग्रिड का उपयोग नेत्र चिकित्सक पहले से मरीजों को मैक्युलर परिवर्तनों की स्व-निगरानी के लिए सुझाते हैं। परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।' : 'This is a home screening activity, not a diagnosis. The Amsler grid is already recommended by optometrists for self-monitoring of macular changes. Show results to your eye-care professional at your next visit.'}</p>
+            <p>{lang === 'hi' ? 'एम्सलर ग्रिड का उपयोग कुछ लोग केंद्रीय दृष्टि में बदलाव की स्व-निगरानी के लिए करते हैं। SightSteps केवल आपके द्वारा चिह्नित क्षेत्रों को दर्ज करता है; यह आपकी दृष्टि की जाँच या व्याख्या नहीं करता। कोई क्षेत्र चिह्नित न होना समस्या को खारिज नहीं करता।' : 'Amsler grids are sometimes used for self-monitoring of central vision changes. SightSteps only records the areas you choose to flag; it does not test or interpret your vision. No areas flagged does not rule out a problem.'}</p>
           </div>
 
-          <h1 className="amsler__title">{lang === 'hi' ? 'एम्सलर ग्रिड होम स्क्रीनिंग' : 'Amsler Grid Home Screening'}</h1>
-          <p className="amsler__desc">{lang === 'hi' ? 'यह एक सरल स्क्रीनिंग है जो मैक्युलर (केंद्रीय दृष्टि) परिवर्तनों का पता लगाने में मदद कर सकती है। कृपया पहले अपने स्क्रीन को कैलिब्रेट करें।' : 'A simple screening that can help detect macular (central vision) changes. Please calibrate your screen first.'}</p>
+          <h1 className="amsler__title">{lang === 'hi' ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' : 'Amsler Grid Self-Monitoring Activity'}</h1>
+          <p className="amsler__desc">{lang === 'hi' ? 'यह ग्रिड केंद्रीय दृष्टि में बदलाव को स्वयं देखने के लिए उपयोग किया जाता है। SightSteps केवल आपके चिह्नित क्षेत्रों को दर्ज करता है; यह किसी नेत्र स्थिति का पता नहीं लगा सकता या उसे खारिज नहीं कर सकता।' : 'This grid is sometimes used to monitor changes in central vision. SightSteps records only the areas you choose to flag; it cannot detect or rule out an eye condition.'}</p>
 
           <div className="amsler__calibration">
             <h2>{lang === 'hi' ? 'स्क्रीन कैलिब्रेशन' : 'Screen Calibration'}</h2>
-            <p>{lang === 'hi' ? 'एक क्रेडिट कार्ड या आईडी कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और नीचे की पट्टी को कार्ड की चौड़ाई से मिलाएँ।' : 'Place a credit card or ID card (85.6 mm wide) against the screen and drag the slider to match the card width.'}</p>
+            <p>{lang === 'hi' ? 'एक मानक क्रेडिट कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और स्लाइडर को कार्ड की पूरी चौड़ाई से बिल्कुल मिलाएँ। फ़ोन पर पहले लैंडस्केप मोड अपनाएँ। अनुमान न लगाएँ। पूरा 10 cm ग्रिड स्क्रीन पर फिट होना चाहिए; ऐसा न हो तो बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें।' : 'Place a standard credit card (85.6 mm wide) against the screen and match the slider to its full width exactly. On a phone, rotate to landscape first. Do not estimate. The complete 10 cm grid must fit on screen; otherwise use a larger display or skip this activity.'}</p>
             <div className="amsler__calibration-ruler">
               <div
                 ref={sliderRef}
@@ -185,16 +199,22 @@ function AmslerGrid() {
                 type="range"
                 className="amsler__ruler-slider"
                 min="150"
-                max="500"
+                max={maxSliderWidthPx}
                 value={sliderWidthPx}
+                disabled={viewportWidthPx < 600}
                 onChange={(e) => setSliderWidthPx(Number(e.target.value))}
                 aria-label={lang === 'hi' ? 'कैलिब्रेशन स्लाइडर' : 'Calibration slider'}
               />
             </div>
+            {viewportWidthPx < 600 ? (
+              <p className="amsler__calibration-warning" role="status">{lang === 'hi' ? 'कैलिब्रेशन के लिए स्क्रीन बहुत संकरी है। फ़ोन को लैंडस्केप में घुमाएँ या बड़ी स्क्रीन का उपयोग करें।' : 'This screen is too narrow for calibration. Rotate your phone to landscape or use a larger display.'}</p>
+            ) : !canCalibrate ? (
+              <p className="amsler__calibration-warning" role="status">{lang === 'hi' ? 'कैलिब्रेटेड 10 cm ग्रिड इस स्क्रीन पर फिट नहीं होगा। ग्रिड को छोटा न करें; बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें।' : 'The calibrated 10 cm grid will not fit this screen. Do not shrink it; use a larger display or skip the activity.'}</p>
+            ) : null}
           </div>
 
           <div className="amsler__intro-actions">
-            <button className="btn btn--primary btn--full btn--lg" type="button" onClick={handleCalibrate}>
+            <button className="btn btn--primary btn--full btn--lg" type="button" onClick={handleCalibrate} disabled={!canCalibrate}>
               <span className="material-symbols-outlined" aria-hidden="true">straighten</span>
               {lang === 'hi' ? 'कैलिब्रेट करें और आगे बढ़ें' : 'Calibrate and continue'}
             </button>
@@ -285,6 +305,7 @@ function AmslerGrid() {
               ))}
             </div>
             {renderGrid()}
+            <span className="amsler__center-marker" aria-hidden="true">●</span>
           </div>
           <p className="amsler__flagged-count" aria-live="polite">
             {lang === 'hi'
@@ -327,8 +348,8 @@ function AmslerGrid() {
       </header>
       <div className="amsler__content animate-fade-in">
         <div className="amsler__results-header">
-          <span className="material-symbols-outlined amsler__results-check" aria-hidden="true">check_circle</span>
-          <h1>{lang === 'hi' ? 'स्क्रीनिंग पूरी हुई' : 'Screening Complete'}</h1>
+          <span className="material-symbols-outlined amsler__results-check" aria-hidden="true">assignment_turned_in</span>
+          <h1>{lang === 'hi' ? 'गतिविधि पूरी हुई' : 'Activity Complete'}</h1>
         </div>
 
         <div className="amsler__results-grid">
@@ -375,7 +396,7 @@ function AmslerGrid() {
 
         <div className="amsler__notice" role="note">
           <span className="material-symbols-outlined" aria-hidden="true">info</span>
-          <p>{lang === 'hi' ? 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। ये परिणाम अपने ऑप्टोमेट्रिस्ट को अपनी अगली मुलाक़ात में दिखाएँ।' : 'This is a home screening result, not a diagnosis. Show these results to your optometrist at your next visit.'}</p>
+          <p>{lang === 'hi' ? 'यह केवल आपके द्वारा चिह्नित क्षेत्रों का रिकॉर्ड है। कोई क्षेत्र चिह्नित न होना दृष्टि की समस्या को खारिज नहीं करता और यह गतिविधि सभी बदलाव नहीं पकड़ सकती। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो नियमित अपॉइंटमेंट की प्रतीक्षा किए बिना शीघ्र नेत्र-देखभाल पेशेवर से संपर्क करें।' : 'This records only the areas you chose to flag. No areas flagged does not rule out a vision problem, and this activity cannot detect every change. If you notice new distortion, blurred or missing areas, contact an eye-care professional promptly rather than waiting for a routine appointment.'}</p>
         </div>
 
         <button className="btn btn--primary btn--full btn--lg" type="button" onClick={handleFinish} disabled={reportPending}>
