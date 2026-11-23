@@ -495,8 +495,16 @@ assert(rameshPatterns.length > 0, 'Ramesh profile triggers at least one pattern'
 assert(rameshPatterns.some((p) => p.id === 'close-work-headache'), 'Ramesh triggers close-work-headache pattern');
 // Ramesh: eye_exam=never + 3 experiences → overdue-exam
 assert(rameshPatterns.some((p) => p.id === 'overdue-exam'), 'Ramesh triggers overdue-exam pattern');
-// Ramesh: night_vision=sometimes, outdoor_time=moderate, squinting=yes → low-light-contrast
-assert(rameshPatterns.some((p) => p.id === 'low-light-contrast'), 'Ramesh triggers low-light-contrast pattern');
+// Outdoor time alone must not be treated as evidence of low-light difficulty.
+assert(!rameshPatterns.some((p) => p.id === 'low-light-contrast'), 'low-light pattern does not fire from outdoor time alone');
+
+const lowLightAnswers = {
+  night_vision: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  experience_context: { value: ['low_light'], label: { en: 'Low-light situations', hi: 'कम रोशनी की स्थिति' } },
+  squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
+};
+const lowLightPatterns = evaluatePatterns(lowLightAnswers);
+assert(lowLightPatterns.some((p) => p.id === 'low-light-contrast'), 'low-light pattern requires explicit low-light context, night difficulty and squinting');
 
 for (const pattern of rameshPatterns) {
   assert(pattern.sources.length >= 2, `matched pattern ${pattern.id} has ≥2 source links`);
@@ -651,6 +659,7 @@ import { evaluateClusters } from '../data/patternClusters.js';
 const emptyAnalysis = analyzeEye([]);
 assert(emptyAnalysis.count === 0, 'empty cells → count 0');
 assert(emptyAnalysis.spread === 'none', 'empty cells → spread "none"');
+assert(emptyAnalysis.hasQuadrantConcentration === false, 'empty cells → no quadrant concentration');
 assert(emptyAnalysis.centroid === null, 'empty cells → null centroid');
 assert(emptyAnalysis.dominantQuadrant === null, 'empty cells → no dominant quadrant');
 
@@ -660,13 +669,13 @@ assert(singleAnalysis.count === 1, 'single cell → count 1');
 assert(singleAnalysis.spread === 'single', 'single cell → spread "single"');
 assert(singleAnalysis.centroid.row === 2 && singleAnalysis.centroid.col === 3, 'single cell centroid matches');
 
-// Clustered in upper-left
+// Concentrated in the upper-left quadrant (not necessarily adjacent cells)
 const ulCells = [{ row: 1, col: 2 }, { row: 2, col: 1 }, { row: 3, col: 3 }, { row: 0, col: 0 }];
 const ulAnalysis = analyzeEye(ulCells);
 assert(ulAnalysis.quadrants.UL === 4, 'all 4 cells in UL quadrant');
 assert(ulAnalysis.dominantQuadrant === 'UL', 'dominant quadrant is UL');
-assert(ulAnalysis.spread === 'clustered', 'UL cluster → spread "clustered"');
-assert(ulAnalysis.hasCluster === true, 'UL cluster → hasCluster true');
+assert(ulAnalysis.spread === 'quadrant-concentrated', 'UL flags → quadrant-concentrated');
+assert(ulAnalysis.hasQuadrantConcentration === true, 'UL flags → hasQuadrantConcentration true');
 
 // Scattered across quadrants
 const scatteredCells = [
@@ -674,9 +683,9 @@ const scatteredCells = [
   { row: 15, col: 1 }, { row: 15, col: 15 },
 ];
 const scatteredAnalysis = analyzeEye(scatteredCells);
-assert(scatteredAnalysis.spread === 'scattered', '4 corners → spread "scattered"');
+assert(scatteredAnalysis.spread === 'distributed', '4 corners → spread "distributed"');
 assert(scatteredAnalysis.dominantQuadrant === null, '4 corners → no dominant quadrant');
-assert(scatteredAnalysis.hasCluster === false, '4 corners → hasCluster false');
+assert(scatteredAnalysis.hasQuadrantConcentration === false, '4 corners → no quadrant concentration');
 
 // Central vs peripheral
 const centralCells = [{ row: 8, col: 9 }, { row: 10, col: 10 }, { row: 7, col: 12 }];
@@ -798,9 +807,10 @@ assert(emptyDesc.right[0].includes('no regions flagged'), 'empty right eye says 
 assert(emptyDesc.left[0].includes('no regions flagged'), 'empty left eye says no regions');
 
 // Clustered description mentions quadrant
-const clusterSpatial = analyzeSpatial({ right: ulCells, left: [] });
-const clusterDesc = describeSpatial(clusterSpatial, 'en');
-assert(clusterDesc.right[0].includes('upper-left'), 'clustered description mentions quadrant name');
+const concentratedSpatial = analyzeSpatial({ right: ulCells, left: [] });
+const concentratedDesc = describeSpatial(concentratedSpatial, 'en');
+assert(concentratedDesc.right[0].includes('upper-left'), 'quadrant-concentration description mentions quadrant name');
+assert(!concentratedDesc.right[0].toLowerCase().includes('cluster'), 'spatial description does not claim physical clustering');
 
 console.log(`\n${'='.repeat(44)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
