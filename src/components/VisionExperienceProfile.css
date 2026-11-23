@@ -288,3 +288,37 @@
   }
   .vep__sources summary { color: #222; }
 }
+/* Compact clinician and appointment-pack summaries share the same profile data. */
+.vep--compact {
+  display: block;
+  padding: 9px 11px;
+  margin: 0 0 var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container-lowest);
+}
+.vep--compact .vep__brief-label {
+  margin: 0 0 3px;
+  color: var(--color-primary);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+.vep--compact .vep__compact-title {
+  margin: 0 0 4px;
+  color: var(--color-secondary);
+  font-size: 10pt;
+  font-weight: 800;
+}
+.vep--compact .vep__compact-summary {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.vep--pack {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  break-inside: avoid;
+}
+@media print { .vep--compact { box-shadow: none; break-inside: avoid; } }
