@@ -39,7 +39,6 @@ function AmslerGrid() {
   }, []);
 
   const maxSliderWidthPx = getMaxCalibrationSliderWidth(viewportWidthPx);
-  const previewGridSizePx = calculateGridSizePx(sliderWidthPx);
   const canCalibrate = canCalibrateAmsler(viewportWidthPx, sliderWidthPx);
 
   useEffect(() => {
@@ -257,7 +256,7 @@ function AmslerGrid() {
           </ol>
           <div className="amsler__notice" role="note">
             <span className="material-symbols-outlined" aria-hidden="true">warning</span>
-            <p>{lang === 'hi' ? 'SightSteps निदान उपकरण नहीं है। एम्सलर ग्रिड के परिणाम होम स्क्रीनिंग हैं और पेशेवर जाँच का विकल्प नहीं हैं। ये परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।' : 'SightSteps is not a diagnostic tool. Amsler grid results are a home screening and do not replace a professional examination. Show these results to your eye-care professional at your next visit.'}</p>
+            <p>{lang === 'hi' ? 'यह गतिविधि केवल आपके द्वारा चिह्नित क्षेत्रों को दर्ज करती है। यह दृष्टि की जाँच, व्याख्या या किसी समस्या को खारिज नहीं करती। कोई क्षेत्र चिह्नित न होने पर भी चिंता हो तो नेत्र-देखभाल पेशेवर से चर्चा करें। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो शीघ्र संपर्क करें।' : 'This activity records only the areas you choose to flag. It does not test or interpret vision or rule out a problem. Discuss any concern with an eye-care professional even when no areas are flagged. Contact one promptly for new distortion, blurred or missing areas.'}</p>
           </div>
           <button className="btn btn--primary btn--full btn--lg" type="button" onClick={startTest}>
             <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
@@ -327,7 +326,7 @@ function AmslerGrid() {
               ? `${flaggedCells[currentEye].length} क्षेत्र चिह्नित`
               : `${flaggedCells[currentEye].length} regions flagged`}
           </p>
-          <div className="amsler__kb-fallback" role="group" aria-label={lang === 'hi' ? 'कीबोर्ड से क्षेत्र जोड़ें' : 'Flag region by keyboard'}>
+          <div className="amsler__kb-fallback" role="group" aria-label={lang === 'hi' ? 'कीबोर्ड से क्षेत्र जोड़ें' : 'Flag region by keyboard'} hidden={!gridFitsCurrentViewport}>
             <label className="amsler__kb-label">{lang === 'hi' ? 'कीबोर्ड: पंक्ति और स्तंभ दर्ज करें' : 'Keyboard: enter row and column'}</label>
             <div className="amsler__kb-inputs">
               <input type="number" min="1" max={GRID_SIZE} value={kbRow} onChange={(e) => setKbRow(e.target.value)} placeholder={lang === 'hi' ? 'पंक्ति' : 'Row'} className="amsler__kb-input" aria-label={lang === 'hi' ? 'पंक्ति (1-20)' : 'Row (1-20)'} />
