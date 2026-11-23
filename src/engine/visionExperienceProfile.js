@@ -247,7 +247,6 @@ export function buildVisionExperienceProfile(answers = {}, timelineEntries = [])
     ? answers
     : {};
   const reportedExperiences = getReportedExperienceOptions(safeAnswers);
-  const mainId = safeValue(safeAnswers.primary_concern?.value);
   const mainExperience = buildMainExperience(safeAnswers, reportedExperiences);
   const activeMainId = mainExperience?.id || null;
   const activityImpacts = buildActivityImpacts(safeAnswers);
