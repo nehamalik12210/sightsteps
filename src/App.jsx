@@ -6,6 +6,7 @@ import Onboarding from './pages/Onboarding.jsx';
 import ActivityProfile from './pages/ActivityProfile.jsx';
 import Intake from './pages/Intake.jsx';
 import VisionActivity from './pages/VisionActivity.jsx';
+import AmslerGrid from './pages/AmslerGrid.jsx';
 import Report from './pages/Report.jsx';
 import AppointmentFollowUp from './pages/AppointmentFollowUp.jsx';
 import VisionTimeline from './pages/VisionTimeline.jsx';
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/activities" element={<RouteGuard><ActivityProfile /></RouteGuard>} />
           <Route path="/intake" element={<RouteGuard requireProfile><Intake /></RouteGuard>} />
           <Route path="/vision" element={<RouteGuard requireProfile requireIntake><VisionActivity /></RouteGuard>} />
+          <Route path="/amsler" element={<RouteGuard requireProfile requireIntake><AmslerGrid /></RouteGuard>} />
           <Route path="/report" element={<RouteGuard requireProfile requireIntake requireVision><Report /></RouteGuard>} />
           <Route path="/follow-up" element={<RouteGuard requireProfile requireIntake requireVision><AppointmentFollowUp /></RouteGuard>} />
           <Route path="/timeline" element={<RouteGuard requireProfile requireIntake requireVision><VisionTimeline /></RouteGuard>} />
