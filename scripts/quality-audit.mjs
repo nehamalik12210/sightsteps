@@ -291,6 +291,22 @@ check(reportCssSource.includes(':not(.appointment-pack)') && reportCssSource.inc
 check(accessibilityControlsSource.includes('href="#main-content"') && accessibilityControlsSource.includes('Skip to main content'), 'keyboard users can skip directly to the page main content');
 check(accessibilityControlsSource.includes('sightsteps.display-preferences.v1') && accessibilityControlsSource.includes('localStorage'), 'display preferences persist locally and fail safely when storage is unavailable');
 check(accessibilityControlsSource.includes('aria-pressed') && accessibilityControlsSource.includes('aria-labelledby'), 'display settings expose their state and labelled control group');
+
+// Pattern detection, Amsler grid, clinician brief and clinical language audit.
+check(existsSync(join(root, 'src/engine/patternEngine.js')), 'pattern detection engine exists');
+check(existsSync(join(root, 'src/data/patterns.js')), 'pattern definitions exist');
+check(existsSync(join(root, 'src/components/ClinicianBrief.jsx')), 'clinician brief component exists');
+check(existsSync(join(root, 'src/pages/AmslerGrid.jsx')), 'Amsler grid page exists');
+check(existsSync(join(root, 'scripts/clinical-language-audit.mjs')), 'clinical language audit script exists');
+check(existsSync(join(root, 'CLINICAL_REVIEW_PENDING.md')), 'clinical review framework document exists');
+const patternEngineSource = read('src/engine/patternEngine.js');
+check(patternEngineSource.includes('evaluatePatterns'), 'pattern engine exports evaluatePatterns');
+check(report.includes('evaluatePatterns') && report.includes('matchedPatterns'), 'report integrates pattern detection engine');
+check(report.includes('ClinicianBrief') && report.includes('showClinicianBrief'), 'report integrates clinician brief overlay');
+check(report.includes('rpt__patterns-section') && report.includes('rpt__pattern-card'), 'report renders pattern cards with their own section');
+check(report.includes('amslerResults') && report.includes('rpt__amsler-section'), 'report renders Amsler screening results');
+const amslerGridSource = read('src/pages/AmslerGrid.jsx');
+check(/id="main-content"/.test(amslerGridSource), 'Amsler grid page has a skip-navigation main landmark');
 check(accessibilityControlsSource.includes("addEventListener('pointerdown', handleOutsidePointer)") && accessibilityControlsSource.includes("detailsRef.current.contains(event.target)"), 'accessibility settings close when a user taps outside the panel');
 check(accessibilityControlsCssSource.includes('data-a11y-contrast') && accessibilityControlsCssSource.includes('data-a11y-targets') && accessibilityControlsCssSource.includes('data-a11y-motion'), 'display settings provide contrast, larger targets and reduced-motion modes');
 check(baseCss.includes('var(--a11y-scale') && accessCss.includes('data-a11y-scale'), 'global typography can scale while preserving responsive rem sizing');
@@ -299,6 +315,7 @@ for (const pagePath of [
   'src/pages/Landing.jsx', 'src/pages/Onboarding.jsx', 'src/pages/ActivityProfile.jsx',
   'src/pages/Intake.jsx', 'src/pages/VisionActivity.jsx', 'src/pages/Report.jsx',
   'src/pages/AppointmentFollowUp.jsx', 'src/pages/VisionTimeline.jsx', 'src/pages/KioskSetup.jsx',
+  'src/pages/AmslerGrid.jsx',
 ]) {
   check(/id="main-content"/.test(read(pagePath)), `${pagePath} has a skip-navigation main landmark`);
 }
