@@ -193,7 +193,7 @@ export default function VisionActivity() {
           <p className="va__amsler-cta-label">{lang === 'hi' ? 'एक और वैकल्पिक स्क्रीनिंग गतिविधि आज़माएँ:' : 'Try another optional screening activity:'}</p>
           <button className="btn btn--outline btn--full" type="button" onClick={() => navigate('/amsler')}>
             <span className="material-symbols-outlined" aria-hidden="true">grid_on</span>
-            {lang === 'hi' ? 'एम्सलर ग्रिड होम स्क्रीनिंग' : 'Amsler Grid Home Screening'}
+            {lang === 'hi' ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' : 'Amsler Grid Self-Monitoring Activity'}
           </button>
         </div>
       </section>
