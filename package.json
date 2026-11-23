@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "node src/engine/testEngine.mjs",
     "audit": "node scripts/quality-audit.mjs",
-    "check": "npm run audit && npm test"
+    "clinical-lint": "node scripts/clinical-language-audit.mjs",
+    "export-review": "node scripts/export-prompts.mjs",
+    "check": "npm run audit && npm test && npm run clinical-lint"
   },
   "dependencies": {
     "react": "^19.1.0",
