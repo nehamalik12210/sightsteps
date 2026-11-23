@@ -48,7 +48,7 @@ export function analyzeEye(cells) {
       peripheralCount: 0,
       dominantQuadrant: null,
       spread: 'none',
-      hasCluster: false,
+      hasQuadrantConcentration: false,
     };
   }
 
@@ -82,19 +82,20 @@ export function analyzeEye(cells) {
     ? sortedQuadrants[0][0]
     : null;
 
-  // Spread: clustered (dominant quadrant has >60%) vs scattered
+  // Describe quadrant concentration only; cells in one quadrant are not
+  // necessarily physically adjacent, so this is not a spatial-cluster test.
   const maxQuadrantRatio = sortedQuadrants[0][1] / cells.length;
   let spread;
   if (cells.length === 1) {
     spread = 'single';
   } else if (maxQuadrantRatio >= 0.6) {
-    spread = 'clustered';
+    spread = 'quadrant-concentrated';
   } else {
-    spread = 'scattered';
+    spread = 'distributed';
   }
 
-  // hasCluster: at least 3 flags with >60% in one quadrant
-  const hasCluster = cells.length >= 3 && maxQuadrantRatio >= 0.6;
+  // At least three flags, with 60% or more in a single quadrant.
+  const hasQuadrantConcentration = cells.length >= 3 && maxQuadrantRatio >= 0.6;
 
   return {
     count: cells.length,
@@ -104,7 +105,7 @@ export function analyzeEye(cells) {
     peripheralCount,
     dominantQuadrant,
     spread,
-    hasCluster,
+    hasQuadrantConcentration,
   };
 }
 
@@ -165,11 +166,11 @@ export function describeSpatial(spatial, lang = 'en') {
       lines.push(lang === 'hi'
         ? `${eyeLabel}: 1 क्षेत्र चिह्नित।`
         : `${eyeLabel}: 1 region flagged.`);
-    } else if (analysis.spread === 'clustered' && analysis.dominantQuadrant) {
+    } else if (analysis.spread === 'quadrant-concentrated' && analysis.dominantQuadrant) {
       const qLabel = QUADRANT_LABELS[analysis.dominantQuadrant][lang];
       lines.push(lang === 'hi'
-        ? `${eyeLabel}: आपके चिह्नित क्षेत्र ${qLabel} भाग में केंद्रित हैं (${analysis.quadrants[analysis.dominantQuadrant]} / ${analysis.count})।`
-        : `${eyeLabel}: your flags concentrate in the ${qLabel} quadrant (${analysis.quadrants[analysis.dominantQuadrant]} of ${analysis.count}).`);
+        ? `${eyeLabel}: आपके अधिकतर चिह्न ${qLabel} क्वाड्रंट में हैं (${analysis.quadrants[analysis.dominantQuadrant]} / ${analysis.count})।`
+        : `${eyeLabel}: most of your flags are within the ${qLabel} quadrant (${analysis.quadrants[analysis.dominantQuadrant]} of ${analysis.count}).`);
     } else {
       lines.push(lang === 'hi'
         ? `${eyeLabel}: आपके ${analysis.count} चिह्नित क्षेत्र ग्रिड पर फैले हुए हैं।`
