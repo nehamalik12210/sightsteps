@@ -285,7 +285,7 @@ function profileValue(value, language) {
 }
 
 function truncateSummary(value, limit) {
-  const text = String(value || '').replace(/\\s+/g, ' ').trim();
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
   if (text.length <= limit) return text;
   const clipped = text.slice(0, Math.max(0, limit - 1));
   const lastSpace = clipped.lastIndexOf(' ');
