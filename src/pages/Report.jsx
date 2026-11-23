@@ -741,7 +741,7 @@ export default function Report() {
               <div>
                 <h3>{lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h3>
                 <p>{lang === 'hi'
-                  ? 'एक पृष्ठ का प्रिंट-अनुकूल सारांश जिसमें अनुमानित पैटर्न, अवलोकन, स्क्रीनिंग परिणाम और चर्चा विषय हैं।'
+                  ? 'एक पृष्ठ का प्रिंट-अनुकूल सारांश जिसमें अनुमानित पैटर्न, प्रतिभागी के अवलोकन, एम्सलर स्व-निगरानी गतिविधि का रिकॉर्ड और चर्चा विषय हैं।'
                   : 'A one-page print-friendly summary with inferred patterns, participant observations, the Amsler activity record and discussion topics.'}</p>
               </div>
             </div>
