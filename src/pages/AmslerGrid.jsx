@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
+import {
+  CREDIT_CARD_WIDTH_MM,
+  GRID_PHYSICAL_MM,
+  calculateGridSizePx,
+  canCalibrateAmsler,
+  doesCalibratedGridFit,
+  getMaxCalibrationSliderWidth,
+} from '../engine/amslerCalibration.js';
 import './AmslerGrid.css';
 
 const GRID_SIZE = 20;
-const GRID_PHYSICAL_CM = 10;
 
 function AmslerGrid() {
   const navigate = useNavigate();
@@ -22,8 +29,6 @@ function AmslerGrid() {
   const [kbCol, setKbCol] = useState('');
   const sliderRef = useRef(null);
 
-  // Credit card width = 85.6mm
-  const CARD_WIDTH_MM = 85.6;
   const [sliderWidthPx, setSliderWidthPx] = useState(300);
   const [viewportWidthPx, setViewportWidthPx] = useState(() => (typeof window === 'undefined' ? 0 : window.innerWidth));
 
@@ -33,9 +38,9 @@ function AmslerGrid() {
     return () => window.removeEventListener('resize', updateViewportWidth);
   }, []);
 
-  const maxSliderWidthPx = Math.min(500, Math.max(150, Math.floor((viewportWidthPx - 32) * CARD_WIDTH_MM / 100)));
-  const previewGridSizePx = (sliderWidthPx / CARD_WIDTH_MM) * 100;
-  const canCalibrate = viewportWidthPx >= 600 && previewGridSizePx <= viewportWidthPx - 32;
+  const maxSliderWidthPx = getMaxCalibrationSliderWidth(viewportWidthPx);
+  const previewGridSizePx = calculateGridSizePx(sliderWidthPx);
+  const canCalibrate = canCalibrateAmsler(viewportWidthPx, sliderWidthPx);
 
   useEffect(() => {
     setSliderWidthPx((current) => Math.min(current, maxSliderWidthPx));
@@ -53,7 +58,7 @@ function AmslerGrid() {
 
   const handleCalibrate = () => {
     if (!canCalibrate) return;
-    const pxPerMm = sliderWidthPx / CARD_WIDTH_MM;
+    const pxPerMm = sliderWidthPx / CREDIT_CARD_WIDTH_MM;
     setCalibrationPxPerMm(pxPerMm);
     setPhase('instructions');
   };
@@ -64,10 +69,12 @@ function AmslerGrid() {
     setPhase('testing');
   };
 
-  const gridSizePx = calibrationPxPerMm ? calibrationPxPerMm * GRID_PHYSICAL_CM * 10 : 300;
+  const gridSizePx = calibrationPxPerMm ? calibrationPxPerMm * GRID_PHYSICAL_MM : 300;
   const cellSizePx = gridSizePx / GRID_SIZE;
+  const gridFitsCurrentViewport = doesCalibratedGridFit(viewportWidthPx, gridSizePx);
 
   const handleCellClick = useCallback((row, col) => {
+    if (!gridFitsCurrentViewport) return;
     setFlaggedCells((prev) => {
       const eyeCells = prev[currentEye];
       const existing = eyeCells.findIndex((c) => c.row === row && c.col === col);
@@ -76,9 +83,10 @@ function AmslerGrid() {
       }
       return { ...prev, [currentEye]: [...eyeCells, { row, col }] };
     });
-  }, [currentEye]);
+  }, [currentEye, gridFitsCurrentViewport]);
 
   const handleNextEye = () => {
+    if (!gridFitsCurrentViewport) return;
     if (currentEye === 'right') {
       setCurrentEye('left');
     } else {
@@ -172,7 +180,7 @@ function AmslerGrid() {
           <button className="amsler__back-btn" type="button" onClick={() => navigate('/vision', { replace: true })} aria-label={t('common.back', lang)}>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
-          <span className="amsler__topbar-title">{lang === 'hi' ? 'एम्सलर ग्रिड स्क्रीनिंग' : 'Amsler Grid Screening'}</span>
+          <span className="amsler__topbar-title">{lang === 'hi' ? 'एम्सलर ग्रिड गतिविधि' : 'Amsler Grid Activity'}</span>
           <span className="amsler__topbar-spacer" />
         </header>
         <div className="amsler__content animate-fade-in">
@@ -242,7 +250,7 @@ function AmslerGrid() {
           <h1 className="amsler__title">{lang === 'hi' ? 'एम्सलर ग्रिड का उपयोग कैसे करें' : 'How to use the Amsler Grid'}</h1>
           <ol className="amsler__steps">
             <li><span className="amsler__step-num">1</span><span>{lang === 'hi' ? 'अपना चश्मा पहनें (यदि आप सामान्य रूप से पढ़ने के लिए पहनते हैं)।' : 'Wear your reading glasses (if you normally use them for near work).'}</span></li>
-            <li><span className="amsler__step-num">2</span><span>{lang === 'hi' ? 'फ़ोन या टैबलेट को लगभग 30-40 cm (एक हाथ की दूरी) पर रखें।' : 'Hold the phone or tablet about 30-40 cm (arm\'s length) away.'}</span></li>
+            <li><span className="amsler__step-num">2</span><span>{lang === 'hi' ? 'फ़ोन या टैबलेट को लगभग 30-40 cm (एक हाथ की दूरी) पर रखें। दोनों आँखों के लिए गतिविधि पूरी होने तक स्क्रीन की दिशा और ब्राउज़र ज़ूम न बदलें।' : 'Hold the phone or tablet about 30-40 cm (arm\'s length) away. Keep screen orientation and browser zoom unchanged until both eyes are complete.'}</span></li>
             <li><span className="amsler__step-num">3</span><span>{lang === 'hi' ? 'अपनी बाईं आँख ढकें और दाईं आँख से केंद्र के बिंदु पर ध्यान केंद्रित करें।' : 'Cover your left eye and focus on the central dot with your right eye.'}</span></li>
             <li><span className="amsler__step-num">4</span><span>{lang === 'hi' ? 'केंद्र पर ध्यान केंद्रित रखते हुए, किसी भी क्षेत्र पर टैप करें जहाँ रेखाएँ लहरदार, धुंधली या गायब दिखें।' : 'While keeping your focus on the center, tap any areas where lines appear wavy, blurred or missing.'}</span></li>
             <li><span className="amsler__step-num">5</span><span>{lang === 'hi' ? 'फिर दाईं आँख ढकें और बाईं आँख से दोहराएँ।' : 'Then cover your right eye and repeat with your left eye.'}</span></li>
@@ -293,7 +301,7 @@ function AmslerGrid() {
           <p className="amsler__test-prompt">
             {lang === 'hi' ? 'केंद्र के बिंदु पर ध्यान केंद्रित करें। लहरदार, धुंधली या गायब रेखाओं वाले क्षेत्रों पर टैप करें।' : 'Focus on the center dot. Tap any areas where lines appear wavy, blurred or missing.'}
           </p>
-          <div className="amsler__grid-container" style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }}>
+          <div className="amsler__grid-container" style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }} hidden={!gridFitsCurrentViewport}>
             <div className="amsler__grid-lines" style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }}>
               {/* Horizontal lines */}
               {Array.from({ length: GRID_SIZE + 1 }, (_, i) => (
@@ -307,6 +315,13 @@ function AmslerGrid() {
             {renderGrid()}
             <span className="amsler__center-marker" aria-hidden="true">●</span>
           </div>
+          {!gridFitsCurrentViewport && (
+            <p className="amsler__calibration-warning" role="status">
+              {lang === 'hi'
+                ? 'स्क्रीन की चौड़ाई बदल गई है। ग्रिड को फिर से फिट करने के लिए फ़ोन को लैंडस्केप में घुमाएँ या बड़ी स्क्रीन का उपयोग करें। तब तक आगे नहीं बढ़ सकते।'
+                : 'The screen width changed. Rotate back to landscape or use a larger display so the calibrated grid fits again. You cannot continue until it fits.'}
+            </p>
+          )}
           <p className="amsler__flagged-count" aria-live="polite">
             {lang === 'hi'
               ? `${flaggedCells[currentEye].length} क्षेत्र चिह्नित`
@@ -323,7 +338,7 @@ function AmslerGrid() {
             </div>
           </div>
           <div className="amsler__test-actions">
-            <button className="btn btn--primary btn--full" type="button" onClick={handleNextEye}>
+            <button className="btn btn--primary btn--full" type="button" onClick={handleNextEye} disabled={!gridFitsCurrentViewport}>
               {currentEye === 'right'
                 ? (lang === 'hi' ? 'बाईं आँख पर जाएँ' : 'Continue to left eye')
                 : (lang === 'hi' ? 'परिणाम देखें' : 'View results')}
