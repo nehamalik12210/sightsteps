@@ -110,8 +110,6 @@ Every pattern and self-monitoring activity in SightSteps is anchored to publishe
 
 ---
 
----
-
 ## Pattern: `overdue-exam`
 
 **Trigger:** No recent professional examination + two or more reported vision-related experiences.
@@ -129,14 +127,14 @@ Every pattern and self-monitoring activity in SightSteps is anchored to publishe
 
 | Pattern / Activity | Primary Source | Novel Clinical Claim? |
 |---|---|---|
-| Amsler grid | AAO home screening recommendation | No |
+| Amsler grid | AAO home self-monitoring recommendation | No |
 | `screen-strain` | AOA Computer Vision Syndrome definition | No |
 | `night-vision` | Age-related contrast sensitivity literature | No |
 | `close-work-headache` | AAO refractive error guidance | No |
 | `asymmetry` | RCOphth Emergency Eye Care; NICE NG81 referral criteria | No |
 | `presbyopia` | WHO World Report on Vision; Mayo Clinic | No |
 | `digital-eye-strain` | AOA Computer Vision Syndrome definition | No |
-| `low-light-contrast` | Contrast sensitivity clinical literature | No |
+| `low-light-contrast` | Low-light visual-performance background literature; participant report only | No |
 | `overdue-exam` | AOA/AAO routine examination guidelines | No |
 
 Every pattern operationalises existing guidance as a discussion prompt. No pattern claims to diagnose, screen, or determine urgency.
