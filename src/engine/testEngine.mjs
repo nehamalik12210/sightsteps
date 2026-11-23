@@ -201,6 +201,7 @@ const packTimeline = Array.from({ length: 7 }, (_, index) => ({
   id: 'pack-entry-' + (index + 1),
   date: `2026-11-${String(index + 1).padStart(2, '0')}`,
   time: '09:30',
+  experienceId: 'blurred_vision',
   experienceLabel: { en: 'Blurred vision', hi: 'धुंधला दिखाई देना' },
   context: 'Reading',
   impact: 'Needed to pause.',
