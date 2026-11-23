@@ -337,7 +337,7 @@ export default function Report() {
             <div className="rpt__sec-head">
               <div>
                 <p className="rpt__kicker">{lang === 'hi' ? 'होम स्क्रीनिंग' : 'HOME SCREENING'}</p>
-                <h2 id="rpt-amsler-heading" className="rpt__sec-title">{lang === 'hi' ? 'एम्सलर ग्रिड स्क्रीनिंग परिणाम' : 'Amsler Grid Screening Results'}</h2>
+                <h2 id="rpt-amsler-heading" className="rpt__sec-title">{lang === 'hi' ? 'एम्सलर ग्रिड गतिविधि का रिकॉर्ड' : 'Amsler Grid Activity Record'}</h2>
               </div>
               <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">grid_on</span>
             </div>
@@ -357,8 +357,8 @@ export default function Report() {
             <div className="rpt__inline-note">
               <span className="material-symbols-outlined" aria-hidden="true">info</span>
               <p>{lang === 'hi'
-                ? 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया। अपनी अगली मुलाक़ात में अपने ऑप्टोमेट्रिस्ट को यह दिखाएँ।'
-                : 'This is a home screening result, not a diagnosis. Participant used a calibrated grid on a phone/tablet screen. Show this to your optometrist at your next visit.'}</p>
+                ? 'यह प्रतिभागी द्वारा ग्रिड पर चिह्नित क्षेत्रों का रिकॉर्ड है। कोई क्षेत्र चिह्नित न होना दृष्टि की समस्या को खारिज नहीं करता। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो नियमित अपॉइंटमेंट की प्रतीक्षा किए बिना शीघ्र नेत्र-देखभाल पेशेवर से संपर्क करें।'
+                : 'This records only the areas the participant chose to flag. No areas flagged does not rule out a vision problem. If new distortion, blurred or missing areas are noticed, contact an eye-care professional promptly rather than waiting for a routine appointment.'}</p>
             </div>
           </section>
         )}
