@@ -829,6 +829,18 @@ assert(digitalClusters[0].id === 'digital-screen-cluster', 'digital cluster ID c
 // Cluster text is bilingual
 assert(nearVisionCluster.title.en && nearVisionCluster.title.hi, 'cluster title is bilingual');
 assert(nearVisionCluster.summary.en && nearVisionCluster.summary.hi, 'cluster summary is bilingual');
+assert(
+  !/good sign/i.test(strings['patterns.noneMatched.subtitle']?.en || ''),
+  'unmatched patterns copy does not reassure users that this is a good sign'
+);
+assert(
+  /does not mean vision concerns are absent/i.test(strings['patterns.noneMatched.subtitle']?.en || ''),
+  'unmatched patterns copy explicitly avoids ruling out concerns'
+);
+assert(
+  !/screening results/i.test(strings['disclaimer.full']?.en || ''),
+  'shared report disclaimer does not call activity records screening results'
+);
 
 // Text descriptions — English
 const descEN = describeSpatial(asymSpatial, 'en');
