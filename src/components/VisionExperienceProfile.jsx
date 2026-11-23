@@ -1,5 +1,6 @@
 import questionBank from '../data/questions.js';
 import { formatVisionTimelineDate } from '../utils/visionTimeline.js';
+import { buildCompactExperienceSummary } from '../engine/visionExperienceProfile.js';
 import './VisionExperienceProfile.css';
 
 function localized(value, language) {
@@ -47,10 +48,35 @@ function MetadataItem({ label, value }) {
   );
 }
 
-export default function VisionExperienceProfile({ profile, answers = {}, language = 'en' }) {
-  if (!profile) return null;
+export default function VisionExperienceProfile({
+  profile,
+  summary = '',
+  answers = {},
+  language = 'en',
+  verbosity = 'full',
+}) {
   const lang = language === 'hi' ? 'hi' : 'en';
   const isHindi = lang === 'hi';
+  if (verbosity === 'brief' || verbosity === 'pack') {
+    const compactSummary = summary || buildCompactExperienceSummary(
+      profile,
+      lang,
+      verbosity === 'brief' ? 360 : 240,
+      verbosity === 'brief' ? 3 : 2,
+    );
+    if (!compactSummary) return null;
+    return (
+      <section className={`vep vep--compact vep--${verbosity}`} aria-label={isHindi ? 'दर्ज किए गए दृष्टि अनुभव का सारांश' : 'Summary of reported vision experiences'}>
+        {verbosity === 'brief' ? (
+          <p className="vep__brief-label">{isHindi ? 'प्रतिभागी द्वारा बताए गए अनुभव' : 'PARTICIPANT-REPORTED CONTEXT'}</p>
+        ) : (
+          <h2 className="vep__compact-title">{isHindi ? 'बताए गए दृष्टि अनुभव' : 'Reported vision experience'}</h2>
+        )}
+        <p className="vep__compact-summary">{compactSummary}</p>
+      </section>
+    );
+  }
+  if (!profile) return null;
   const main = profile.mainExperience;
   const sourceIds = [...new Set([
     ...(main?.sourceIds || []),
