@@ -16,6 +16,12 @@ import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 import { evaluatePatterns } from './patternEngine.js';
+import {
+  calculateGridSizePx,
+  canCalibrateAmsler,
+  doesCalibratedGridFit,
+  getMaxCalibrationSliderWidth,
+} from './amslerCalibration.js';
 
 let passed = 0;
 let failed = 0;
@@ -621,6 +627,13 @@ assert(toggleNew.length === 3, 'tapping an unflagged cell adds it');
 // Calibration edge cases
 assert(150 / CARD_WIDTH_MM > 0, 'minimum slider value still produces valid calibration');
 assert(500 / CARD_WIDTH_MM > 0, 'maximum slider value still produces valid calibration');
+assert(Math.abs(calculateGridSizePx(300) - testGridSizePx) < 0.001, 'shared grid-size helper matches 10cm calibration math');
+assert(canCalibrateAmsler(600, getMaxCalibrationSliderWidth(600)), '600px viewport fits the maximum allowed calibrated grid');
+assert(!canCalibrateAmsler(599, getMaxCalibrationSliderWidth(599)), 'narrow viewports cannot start Amsler calibration');
+assert(!canCalibrateAmsler(600, 500), 'calibration is blocked when the full grid would overflow');
+assert(doesCalibratedGridFit(600, 568), 'calibrated grid fits when viewport includes the 32px margin');
+assert(!doesCalibratedGridFit(599, 568), 'grid no longer fits after the viewport narrows');
+assert(!doesCalibratedGridFit(Number.NaN, 300), 'invalid viewport measurements fail closed');
 
 // === Appointment Pack — Amsler Integration ===
 console.log('\n=== Appointment pack Amsler integration ===');
