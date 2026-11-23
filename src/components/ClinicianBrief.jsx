@@ -14,6 +14,7 @@ import { evaluateClusters } from '../data/patternClusters.js';
 import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
 import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
 import VisionExperienceProfile from './VisionExperienceProfile.jsx';
+import { formatVisionTimelineDate } from '../utils/visionTimeline.js';
 import './ClinicianBrief.css';
 
 function localized(value, lang) {
@@ -22,8 +23,8 @@ function localized(value, lang) {
 }
 
 const DISCLAIMER = {
-  en: 'SightSteps is not a diagnostic tool. The observations, patterns and activity records below are participant-reported and are intended only to support a conversation with an eye-care professional.',
-  hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और गतिविधि रिकॉर्ड प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
+  en: 'Participant-reported information — not a diagnostic instrument.',
+  hi: 'प्रतिभागी द्वारा बताई गई जानकारी — यह निदान उपकरण नहीं है।',
 };
 
 export default function ClinicianBrief({ onClose }) {
@@ -97,12 +98,32 @@ export default function ClinicianBrief({ onClose }) {
           <p>{DISCLAIMER[lang]}</p>
         </div>
 
-        {(experienceProfile.hasReportedExperience || experienceProfile.hasActivityImpact || experienceProfile.hasTimelineEntries) && (
+        {(experienceProfile.hasReportedExperience || experienceProfile.hasActivityImpact) && (
           <VisionExperienceProfile
             profile={experienceProfile}
-            answers={answers}
+            verbosity="brief"
             language={lang}
           />
+        )}
+
+        {experienceProfile.timeline.entries.length > 0 && (
+          <section className="clinician-brief__section clinician-brief__timeline">
+            <h2>
+              <span className="material-symbols-outlined" aria-hidden="true">timeline</span>
+              {lang === 'hi' ? 'हाल के प्रतिभागी टाइमलाइन रिकॉर्ड' : 'Recent Participant-Entered Timeline'}
+            </h2>
+            <ol>
+              {experienceProfile.timeline.entries.slice(0, 3).map((entry) => (
+                <li key={entry.id}>
+                  <time dateTime={entry.date}>{formatVisionTimelineDate(entry.date, lang)}{entry.time ? ' · ' + entry.time : ''}</time>
+                  <strong>{localized(entry.experienceLabel, lang)}</strong>
+                  {[entry.context, entry.impact].filter(Boolean).length > 0 && (
+                    <span>{[entry.context, entry.impact].filter(Boolean).join(' · ')}</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
         )}
 
         {matchedPatterns.length > 0 && (
@@ -145,9 +166,9 @@ export default function ClinicianBrief({ onClose }) {
         <section className="clinician-brief__section">
           <h2>
             <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
-            {lang === 'hi' ? 'बताए गए अनुभव और पृष्ठभूमि' : 'Reported Experiences & Background'}
+            {lang === 'hi' ? 'आँखों की देखभाल की पृष्ठभूमि' : 'Eye-care Background'}
           </h2>
-          {report.groups.map((group) => (
+          {report.groups.filter((group) => group.id === 'eyeCare').map((group) => (
             <div key={group.id} className="clinician-brief__group">
               <h3>{localized(group.title, lang)}</h3>
               <table className="clinician-brief__table">
@@ -233,9 +254,6 @@ export default function ClinicianBrief({ onClose }) {
           </section>
         )}
 
-        <footer className="clinician-brief__footer">
-          <p>{DISCLAIMER[lang]}</p>
-        </footer>
       </div>
     </div>
   );
