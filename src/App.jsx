@@ -12,6 +12,7 @@ import VisionTimeline from './pages/VisionTimeline.jsx';
 import KioskSetup from './pages/KioskSetup.jsx';
 import KioskGuard from './components/KioskGuard.jsx';
 import AccessibilityControls from './components/AccessibilityControls.jsx';
+import OfflineStatus from './components/OfflineStatus.jsx';
 import { useApp } from './context/AppContext.jsx';
 import { getNewSessionRedirect, getProtectedRouteRedirect } from './utils/sessionRouting.js';
 
@@ -64,6 +65,7 @@ export default function App() {
     <AppProvider>
       <div className="app">
         <AccessibilityControls />
+        <OfflineStatus />
         <RouteFocusManager />
         <KioskGuard />
         <Routes>
