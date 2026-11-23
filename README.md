@@ -31,7 +31,7 @@ A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of parti
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
 ### 🔲 Amsler Grid Self-Monitoring Activity
-An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked on narrow viewports where the calibrated 10 cm grid cannot fit. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
+An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked unless the calibrated 10 cm square fits within both visible viewport dimensions with reserved space for controls. Wide but short landscape-phone viewports are blocked. This screen-fit guard does not validate physical display calibration. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
 
 ### 🩺 Clinician Brief
 A one-page, print-optimised summary designed for a clinician's two-minute scan, containing inferred patterns, observation groups, Amsler results, discussion prompts and source references.
