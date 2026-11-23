@@ -84,7 +84,7 @@ function AmslerGrid() {
 
   const gridSizePx = calibrationPxPerMm ? calibrationPxPerMm * GRID_PHYSICAL_MM : 300;
   const cellSizePx = gridSizePx / GRID_SIZE;
-  const gridFitsCurrentViewport = doesCalibratedGridFit(viewportWidthPx, gridSizePx);
+  const gridFitsCurrentViewport = doesCalibratedGridFit(viewportWidthPx, viewportHeightPx, gridSizePx);
 
   const handleCellClick = useCallback((row, col) => {
     if (!gridFitsCurrentViewport) return;
