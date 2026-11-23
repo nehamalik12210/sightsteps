@@ -71,7 +71,7 @@ export default function ActivityProfile() {
   }, [pendingProfile, savedActivities, savedPrimary, navigate]);
 
   if (!isHydrated) {
-    return <main className="ap" aria-live="polite"><div className="ap__body"><p>{t('common.loading', lang)}</p></div></main>;
+    return <main className="ap" id="main-content" tabIndex="-1" aria-live="polite"><div className="ap__body"><p>{t('common.loading', lang)}</p></div></main>;
   }
 
   if (isDemo && demoPersona) return null;
