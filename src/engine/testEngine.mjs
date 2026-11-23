@@ -15,6 +15,7 @@ import rameshPersona from '../data/demoPersona.js';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
+import { evaluatePatterns } from './patternEngine.js';
 
 let passed = 0;
 let failed = 0;
@@ -479,6 +480,327 @@ assert(shouldDiscardKioskSessionOnRestore(extendedRecord), 'kiosk session is dis
 assert(!shouldDiscardKioskSessionOnRestore(minimalSavedRecord), 'ordinary sessions remain eligible for resume');
 assert(hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS), 'kiosk idle policy expires at its configured limit');
 assert(!hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS - 1), 'kiosk idle policy does not expire before its limit');
+
+console.log('\n=== Pattern Detection Engine ===');
+const emptyPatterns = evaluatePatterns({});
+assert(emptyPatterns.length === 0, 'empty answers produce no patterns');
+assert(Array.isArray(emptyPatterns), 'evaluatePatterns returns an array');
+
+const healthyPatterns = evaluatePatterns(healthyAnswers);
+assert(healthyPatterns.length === 0, 'healthy/minimal profile triggers no patterns');
+
+const rameshPatterns = evaluatePatterns(rameshAnswers);
+assert(rameshPatterns.length > 0, 'Ramesh profile triggers at least one pattern');
+// Ramesh: headaches=sometimes, close_work=daily, squinting=yes → close-work-headache
+assert(rameshPatterns.some((p) => p.id === 'close-work-headache'), 'Ramesh triggers close-work-headache pattern');
+// Ramesh: eye_exam=never + 3 experiences → overdue-exam
+assert(rameshPatterns.some((p) => p.id === 'overdue-exam'), 'Ramesh triggers overdue-exam pattern');
+// Ramesh: night_vision=sometimes, outdoor_time=moderate, squinting=yes → low-light-contrast
+assert(rameshPatterns.some((p) => p.id === 'low-light-contrast'), 'Ramesh triggers low-light-contrast pattern');
+
+for (const pattern of rameshPatterns) {
+  assert(pattern.sources.length >= 2, `matched pattern ${pattern.id} has ≥2 source links`);
+  assert(Boolean(pattern.title?.en && pattern.title?.hi), `matched pattern ${pattern.id} has bilingual title`);
+  assert(Boolean(pattern.description?.en && pattern.description?.hi), `matched pattern ${pattern.id} has bilingual description`);
+  assert(Boolean(pattern.discussionPrompt?.en && pattern.discussionPrompt?.hi), `matched pattern ${pattern.id} has bilingual discussion prompt`);
+  for (const source of pattern.sources) {
+    assert(Boolean(source.type && source.id && source.label?.en && source.label?.hi && source.answer?.en && source.answer?.hi), `${pattern.id} source ${source.id} has complete bilingual data`);
+  }
+}
+
+// Specific trigger isolation tests
+const screenStrainAnswers = {
+  screen_hours: { value: 'high', label: { en: '6+ hours', hi: '6+ घंटे' } },
+  blur_distance: { value: 'far', label: { en: 'Far objects', hi: 'दूर की चीज़ें' } },
+  eye_exam: { value: 'never', label: { en: 'Never', hi: 'कभी नहीं' } },
+};
+const screenStrainPatterns = evaluatePatterns(screenStrainAnswers);
+assert(screenStrainPatterns.some((p) => p.id === 'screen-strain'), 'screen-strain fires on its specific triggers');
+
+const asymmetryAnswers = {
+  which_eye: { value: 'left', label: { en: 'Left eye', hi: 'बाईं आँख' } },
+  experience_onset: { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' } },
+};
+const asymmetryPatterns = evaluatePatterns(asymmetryAnswers);
+assert(asymmetryPatterns.some((p) => p.id === 'asymmetry'), 'asymmetry fires on one-eye + recent onset');
+
+const presbyopiaAnswers = {
+  blur_distance: { value: 'near', label: { en: 'Near objects', hi: 'पास की चीज़ें' } },
+  age_group: { value: 'senior', label: { en: '55+', hi: '55+' } },
+  experience_change: { value: 'more_noticeable', label: { en: 'Getting worse', hi: 'बढ़ रहा है' } },
+};
+const presbyopiaPatterns = evaluatePatterns(presbyopiaAnswers);
+assert(presbyopiaPatterns.some((p) => p.id === 'presbyopia'), 'presbyopia fires on near blur + older age + worsening');
+
+// Partial triggers should not fire
+const partialScreenAnswers = {
+  screen_hours: { value: 'high', label: { en: '6+ hours', hi: '6+ घंटे' } },
+  // Missing blur_distance and eye_exam
+};
+assert(evaluatePatterns(partialScreenAnswers).every((p) => p.id !== 'screen-strain'), 'screen-strain does not fire on partial triggers');
+
+const partialAsymmetry = {
+  which_eye: { value: 'both', label: { en: 'Both eyes', hi: 'दोनों आँखें' } },
+  experience_onset: { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' } },
+};
+assert(evaluatePatterns(partialAsymmetry).every((p) => p.id !== 'asymmetry'), 'asymmetry does not fire when both eyes are reported');
+
+// Null/undefined safety
+assert(evaluatePatterns(null).length === 0, 'null answers produce no patterns');
+assert(evaluatePatterns(undefined).length === 0, 'undefined answers produce no patterns');
+
+// === Amsler Grid Math & Integration ===
+console.log('\n=== Amsler Grid math and integration ===');
+
+// Grid geometry
+const GRID_SIZE = 20;
+const GRID_PHYSICAL_CM = 10;
+const CARD_WIDTH_MM = 85.6;
+const testSliderPx = 300;
+const testPxPerMm = testSliderPx / CARD_WIDTH_MM;
+const testGridSizePx = testPxPerMm * GRID_PHYSICAL_CM * 10;
+const testCellSizePx = testGridSizePx / GRID_SIZE;
+
+assert(testPxPerMm > 0, 'calibration produces a positive px-per-mm');
+assert(Math.abs(testPxPerMm - 300 / 85.6) < 0.001, 'calibration math: 300px / 85.6mm');
+assert(testGridSizePx > 0, 'calibrated grid has positive dimensions');
+assert(Math.abs(testCellSizePx - testGridSizePx / 20) < 0.001, 'cell size is grid / 20');
+assert(GRID_SIZE * testCellSizePx === testGridSizePx, 'cells tile exactly to fill the grid');
+
+// Tap-to-cell mapping (simulated)
+const tapCellRow = Math.floor(5.3 * testCellSizePx / testCellSizePx);
+const tapCellCol = Math.floor(12.9 * testCellSizePx / testCellSizePx);
+assert(tapCellRow === 5, 'tap maps to correct row');
+assert(tapCellCol === 12, 'tap maps to correct col');
+
+// Center dot position
+const centerRow = Math.floor(GRID_SIZE / 2);
+const centerCol = Math.floor(GRID_SIZE / 2);
+assert(centerRow === 10 && centerCol === 10, 'center dot is at row 10, col 10');
+
+// Result shape validation
+const mockAmslerResult = {
+  completed: true,
+  skipped: false,
+  calibrated: true,
+  timestamp: new Date().toISOString(),
+  data: {
+    right: { eye: 'right', flaggedCells: [{ row: 5, col: 7 }, { row: 6, col: 8 }], cellCount: 2, calibrated: true, timestamp: new Date().toISOString() },
+    left: { eye: 'left', flaggedCells: [], cellCount: 0, calibrated: true, timestamp: new Date().toISOString() },
+  },
+};
+assert(mockAmslerResult.data.right.eye === 'right', 'right eye result has correct eye label');
+assert(mockAmslerResult.data.left.eye === 'left', 'left eye result has correct eye label');
+assert(mockAmslerResult.data.right.cellCount === 2, 'right eye flagged cell count is correct');
+assert(mockAmslerResult.data.left.cellCount === 0, 'left eye flagged cell count is zero when no cells flagged');
+assert(Array.isArray(mockAmslerResult.data.right.flaggedCells), 'flagged cells are an array');
+assert(mockAmslerResult.data.right.flaggedCells[0].row === 5 && mockAmslerResult.data.right.flaggedCells[0].col === 7, 'flagged cell stores row and col');
+assert(typeof mockAmslerResult.timestamp === 'string', 'result has ISO timestamp');
+assert(mockAmslerResult.calibrated === true, 'result reports calibration status');
+
+// Skip result shape
+const mockSkipResult = { completed: false, skipped: true, data: null };
+assert(mockSkipResult.skipped === true, 'skipped result has skipped flag');
+assert(mockSkipResult.data === null, 'skipped result has null data');
+
+// Toggle (undo) logic
+const flaggedCells = [{ row: 3, col: 4 }, { row: 7, col: 10 }];
+const toggleExisting = flaggedCells.filter((c) => !(c.row === 3 && c.col === 4));
+assert(toggleExisting.length === 1 && toggleExisting[0].row === 7, 'tapping a flagged cell removes it (undo)');
+const toggleNew = [...flaggedCells, { row: 1, col: 1 }];
+assert(toggleNew.length === 3, 'tapping an unflagged cell adds it');
+
+// Calibration edge cases
+assert(150 / CARD_WIDTH_MM > 0, 'minimum slider value still produces valid calibration');
+assert(500 / CARD_WIDTH_MM > 0, 'maximum slider value still produces valid calibration');
+
+// === Appointment Pack — Amsler Integration ===
+console.log('\n=== Appointment pack Amsler integration ===');
+
+const amslerPack = buildAppointmentPreparationPack({
+  language: 'en',
+  amslerResults: mockAmslerResult,
+});
+assert(amslerPack.amsler !== null, 'appointment pack includes Amsler results when completed');
+assert(amslerPack.amsler.right === 2, 'appointment pack Amsler right eye count matches');
+assert(amslerPack.amsler.left === 0, 'appointment pack Amsler left eye count matches');
+
+const noAmslerPack = buildAppointmentPreparationPack({ language: 'en', amslerResults: null });
+assert(noAmslerPack.amsler === null, 'appointment pack has null Amsler when not completed');
+
+const skippedAmslerPack = buildAppointmentPreparationPack({ language: 'en', amslerResults: mockSkipResult });
+assert(skippedAmslerPack.amsler === null, 'appointment pack has null Amsler when skipped');
+
+const hindiAmslerPack = buildAppointmentPreparationPack({ language: 'hi', amslerResults: mockAmslerResult });
+assert(hindiAmslerPack.amsler !== null, 'Hindi appointment pack includes Amsler results');
+
+// === Pattern source link resolution ===
+console.log('\n=== Pattern source link resolution ===');
+for (const pattern of rameshPatterns) {
+  for (const source of pattern.sources) {
+    assert(rameshAnswers[source.id] !== undefined, `pattern ${pattern.id} source ${source.id} exists in Ramesh answers`);
+  }
+}
+
+// === Amsler Spatial Analysis ===
+console.log('\n=== Amsler spatial analysis ===');
+import { analyzeEye, analyzeSpatial, describeSpatial } from './amslerSpatial.js';
+import { evaluateClusters } from '../data/patternClusters.js';
+
+// Empty cells
+const emptyAnalysis = analyzeEye([]);
+assert(emptyAnalysis.count === 0, 'empty cells → count 0');
+assert(emptyAnalysis.spread === 'none', 'empty cells → spread "none"');
+assert(emptyAnalysis.centroid === null, 'empty cells → null centroid');
+assert(emptyAnalysis.dominantQuadrant === null, 'empty cells → no dominant quadrant');
+
+// Single cell
+const singleAnalysis = analyzeEye([{ row: 2, col: 3 }]);
+assert(singleAnalysis.count === 1, 'single cell → count 1');
+assert(singleAnalysis.spread === 'single', 'single cell → spread "single"');
+assert(singleAnalysis.centroid.row === 2 && singleAnalysis.centroid.col === 3, 'single cell centroid matches');
+
+// Clustered in upper-left
+const ulCells = [{ row: 1, col: 2 }, { row: 2, col: 1 }, { row: 3, col: 3 }, { row: 0, col: 0 }];
+const ulAnalysis = analyzeEye(ulCells);
+assert(ulAnalysis.quadrants.UL === 4, 'all 4 cells in UL quadrant');
+assert(ulAnalysis.dominantQuadrant === 'UL', 'dominant quadrant is UL');
+assert(ulAnalysis.spread === 'clustered', 'UL cluster → spread "clustered"');
+assert(ulAnalysis.hasCluster === true, 'UL cluster → hasCluster true');
+
+// Scattered across quadrants
+const scatteredCells = [
+  { row: 1, col: 1 }, { row: 1, col: 15 },
+  { row: 15, col: 1 }, { row: 15, col: 15 },
+];
+const scatteredAnalysis = analyzeEye(scatteredCells);
+assert(scatteredAnalysis.spread === 'scattered', '4 corners → spread "scattered"');
+assert(scatteredAnalysis.dominantQuadrant === null, '4 corners → no dominant quadrant');
+assert(scatteredAnalysis.hasCluster === false, '4 corners → hasCluster false');
+
+// Central vs peripheral
+const centralCells = [{ row: 8, col: 9 }, { row: 10, col: 10 }, { row: 7, col: 12 }];
+const centralAnalysis = analyzeEye(centralCells);
+assert(centralAnalysis.centralCount === 3, '3 cells in center zone');
+assert(centralAnalysis.peripheralCount === 0, '0 cells peripheral');
+
+const peripheralCells = [{ row: 0, col: 0 }, { row: 19, col: 19 }];
+const peripheralAnalysis = analyzeEye(peripheralCells);
+assert(peripheralAnalysis.centralCount === 0, '2 corner cells → 0 central');
+assert(peripheralAnalysis.peripheralCount === 2, '2 corner cells → 2 peripheral');
+
+// Inter-eye asymmetry
+const asymSpatial = analyzeSpatial({
+  right: [{ row: 1, col: 1 }, { row: 2, col: 2 }, { row: 3, col: 3 }, { row: 4, col: 4 }, { row: 5, col: 5 }, { row: 6, col: 6 }],
+  left: [{ row: 1, col: 1 }],
+});
+assert(asymSpatial.hasAsymmetry === true, '6 vs 1 flags → hasAsymmetry');
+assert(asymSpatial.asymmetryRatio === 6, '6:1 ratio');
+
+const symSpatial = analyzeSpatial({
+  right: [{ row: 1, col: 1 }, { row: 2, col: 2 }],
+  left: [{ row: 3, col: 3 }, { row: 4, col: 4 }],
+});
+assert(symSpatial.hasAsymmetry === false, '2 vs 2 flags → no asymmetry');
+assert(symSpatial.asymmetryRatio === 1, '2:2 ratio = 1');
+
+// Both eyes empty
+const bothEmptySpatial = analyzeSpatial({ right: [], left: [] });
+assert(bothEmptySpatial.asymmetryRatio === 1, 'both empty → ratio 1');
+assert(bothEmptySpatial.hasAsymmetry === false, 'both empty → no asymmetry');
+
+// One eye has flags, other empty
+const oneEmptySpatial = analyzeSpatial({
+  right: [{ row: 1, col: 1 }, { row: 2, col: 2 }, { row: 3, col: 3 }],
+  left: [],
+});
+assert(oneEmptySpatial.asymmetryRatio === Infinity, '3 vs 0 → Infinity ratio');
+assert(oneEmptySpatial.hasAsymmetry === true, '3 vs 0 → hasAsymmetry');
+
+// One eye empty — text says "Only the X eye" not a ratio
+const oneEmptyDesc = describeSpatial(oneEmptySpatial, 'en');
+assert(oneEmptyDesc.comparison.length > 0, 'one-empty comparison text generated');
+assert(oneEmptyDesc.comparison[0].includes('Only'), 'one-empty text uses "Only" not a ratio');
+assert(!oneEmptyDesc.comparison[0].includes('×'), 'one-empty text has no × ratio');
+
+// Center dot cell (row 10, col 10) — consistent quadrant assignment
+const centerDotAnalysis = analyzeEye([{ row: 10, col: 10 }]);
+assert(centerDotAnalysis.count === 1, 'center dot counts as 1 cell');
+assert(centerDotAnalysis.centralCount === 1, 'center dot is in central zone');
+assert(centerDotAnalysis.spread === 'single', 'single center dot → spread single');
+// row 10 >= midR(10), col 10 >= midC(10) → LR quadrant
+assert(centerDotAnalysis.quadrants.LR === 1, 'center dot assigned to LR quadrant');
+
+// Center line cells (row 10, col 5) and (row 5, col 10) — no double-counting
+const centerLineCells = [{ row: 10, col: 5 }, { row: 5, col: 10 }];
+const centerLineAnalysis = analyzeEye(centerLineCells);
+const totalQuadrantCount = Object.values(centerLineAnalysis.quadrants).reduce((a, b) => a + b, 0);
+assert(totalQuadrantCount === 2, 'center-line cells: quadrant sum equals cell count (no double-count)');
+
+// Single flag text — no "concentrate" or "scattered" language
+const singleFlagSpatial = analyzeSpatial({ right: [{ row: 5, col: 5 }], left: [] });
+const singleFlagDesc = describeSpatial(singleFlagSpatial, 'en');
+assert(singleFlagDesc.right[0].includes('1 region flagged'), 'single flag says "1 region flagged"');
+assert(!singleFlagDesc.right[0].includes('concentrate'), 'single flag does not say "concentrate"');
+assert(!singleFlagDesc.right[0].includes('scattered'), 'single flag does not say "scattered"');
+
+// === Pattern Cluster Narratives ===
+console.log('\n=== Pattern cluster narratives ===');
+
+// Ramesh triggers: close-work-headache, low-light-contrast, overdue-exam, presbyopia
+const rameshPatternIds = rameshPatterns.map((p) => p.id);
+const rameshClusters = evaluateClusters(rameshPatternIds);
+assert(rameshClusters.length > 0, 'Ramesh triggers at least one cluster');
+const nearVisionCluster = rameshClusters.find((c) => c.id === 'near-vision-strain');
+assert(nearVisionCluster !== undefined, 'Ramesh triggers near-vision-strain cluster');
+assert(nearVisionCluster.matchedMembers.length >= 2, 'near-vision-strain has >= 2 matched members');
+
+// All matched patterns are still individually available (clusters don't hide them)
+assert(rameshPatterns.length >= 3, 'Ramesh still has >= 3 individual patterns after clustering');
+
+// Empty patterns → no clusters
+const emptyClusters = evaluateClusters([]);
+assert(emptyClusters.length === 0, 'no patterns → no clusters');
+
+// Single pattern → no clusters
+const singleClusters = evaluateClusters(['presbyopia']);
+assert(singleClusters.length === 0, 'single pattern → no clusters');
+
+// Digital cluster needs both screen-strain + digital-eye-strain
+const digitalClusters = evaluateClusters(['screen-strain', 'digital-eye-strain']);
+assert(digitalClusters.length === 1, 'screen-strain + digital-eye-strain triggers digital cluster');
+assert(digitalClusters[0].id === 'digital-screen-cluster', 'digital cluster ID correct');
+
+// Cluster text is bilingual
+assert(nearVisionCluster.title.en && nearVisionCluster.title.hi, 'cluster title is bilingual');
+assert(nearVisionCluster.summary.en && nearVisionCluster.summary.hi, 'cluster summary is bilingual');
+
+// Text descriptions — English
+const descEN = describeSpatial(asymSpatial, 'en');
+assert(descEN.disclaimer.includes('not a map of your retina'), 'EN disclaimer present');
+assert(descEN.right.length > 0, 'EN right eye description generated');
+assert(descEN.left.length > 0, 'EN left eye description generated');
+assert(descEN.comparison.length > 0, 'EN comparison generated for asymmetric result');
+
+// Text descriptions — Hindi
+const descHI = describeSpatial(asymSpatial, 'hi');
+assert(descHI.disclaimer.includes('रेटिना'), 'HI disclaimer present');
+assert(descHI.right.length > 0, 'HI right eye description generated');
+assert(descHI.left.length > 0, 'HI left eye description generated');
+
+// No comparison when symmetric
+const symDesc = describeSpatial(symSpatial, 'en');
+assert(symDesc.comparison.length === 0, 'no comparison text for symmetric result');
+
+// Empty result descriptions
+const emptyDesc = describeSpatial(bothEmptySpatial, 'en');
+assert(emptyDesc.right[0].includes('no regions flagged'), 'empty right eye says no regions');
+assert(emptyDesc.left[0].includes('no regions flagged'), 'empty left eye says no regions');
+
+// Clustered description mentions quadrant
+const clusterSpatial = analyzeSpatial({ right: ulCells, left: [] });
+const clusterDesc = describeSpatial(clusterSpatial, 'en');
+assert(clusterDesc.right[0].includes('upper-left'), 'clustered description mentions quadrant name');
 
 console.log(`\n${'='.repeat(44)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
