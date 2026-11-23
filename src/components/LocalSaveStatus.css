@@ -1,0 +1,22 @@
+.local-save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.local-save-status .material-symbols-outlined { flex: 0 0 auto; font-size: 16px; }
+.local-save-status--saving { border-color: #bfd5f2; background: #eff6ff; color: #174f91; }
+.local-save-status--saved { border-color: #b8d7c5; background: #eff8f2; color: #176044; }
+.local-save-status--error { border-color: #e8c58c; background: #fff8eb; color: #80520b; }
+@media (max-width: 360px) {
+  .local-save-status { align-items: flex-start; border-radius: var(--radius-md); }
+}
