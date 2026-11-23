@@ -256,6 +256,12 @@ check(report.includes('buildAppointmentPreparationPack') && report.includes('set
 check(appointmentPackSource.includes('slice(0, 2)') && appointmentPackSource.includes('slice(0, 3)') && appointmentPackSource.includes('slice(0, 5)'), 'appointment pack enforces two priorities, three discussion prompts and five recent timeline entries');
 check(appointmentPackSource.includes('questionsToAsk') && appointmentPackSource.includes('preparedDate'), 'appointment pack includes participant questions and its preparation date');
 check(appointmentPackComponentSource.includes('Appointment Preparation Pack') && appointmentPackComponentSource.includes('dateTime={entry.dateValue}'), 'print pack has a clear title and semantic timeline dates');
+check(
+  appointmentPackCssSource.includes('repeat(2, minmax(0, 1fr))') &&
+  appointmentPackCssSource.includes('overflow-wrap: anywhere') &&
+  /\.appointment-pack__top-grid,[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/.test(appointmentPackCssSource),
+  'print pack inner grids constrain long text and collapse safely on narrow layouts',
+);
 check(appointmentPackComponentSource.includes('not an eye examination') && appointmentPackCssSource.includes('@media print'), 'print pack states its non-clinical scope and uses print-specific styling');
 check(reportCssSource.includes(':not(.appointment-pack)') && reportCssSource.includes('rpt--brief-print'), 'brief printing isolates the pack rather than shrinking the detailed report');
 
