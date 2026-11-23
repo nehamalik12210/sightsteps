@@ -209,6 +209,21 @@ for (const file of STATIC_COPY_FILES) {
   }
 }
 
+// 6. Guard against known misleading reassurance and Amsler result labels.
+console.log('Checking high-risk report wording...');
+const copyFiles = STATIC_COPY_FILES.map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'));
+const localizedCopy = Object.values(strings)
+  .flatMap((entry) => (entry && typeof entry === 'object' ? [entry.en, entry.hi] : [entry]))
+  .filter((value) => typeof value === 'string')
+  .join('\\n');
+const visibleCopy = [localizedCopy, ...copyFiles].join('\\n').toLowerCase();
+for (const phrase of ['good sign', 'screening complete', 'screening results', 'screening result']) {
+  if (visibleCopy.includes(phrase)) {
+    console.error(`  FAIL: UI copy still contains misleading phrase "${phrase}"`);
+    violations += 1;
+  }
+}
+
 console.log(`\n${'='.repeat(44)}`);
 if (violations > 0) {
   console.error(`Clinical language audit: ${violations} violation(s) found.`);
