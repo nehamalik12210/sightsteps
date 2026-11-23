@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useApp } from '../context/AppContext.jsx';
 import './OfflineStatus.css';
 
 function readOnlineState() {
   return typeof navigator === 'undefined' || navigator.onLine !== false;
 }
 
-export default function OfflineStatus({ language = 'en' }) {
+export default function OfflineStatus() {
+  const { language } = useApp();
   const [isOnline, setIsOnline] = useState(readOnlineState);
 
   useEffect(() => {
