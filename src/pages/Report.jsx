@@ -8,6 +8,7 @@ import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
+import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
 
@@ -20,7 +21,7 @@ export default function Report() {
   const navigate = useNavigate();
   const {
     isHydrated,
-    storageAvailable,
+    saveStatus,
     language,
     answers,
     activities,
@@ -201,12 +202,7 @@ export default function Report() {
           )}
         </section>
 
-        {storageAvailable === false && (
-          <div className="rpt__notice" role="status">
-            <span className="material-symbols-outlined" aria-hidden="true">warning</span>
-            <p>{lang === 'hi' ? 'इस ब्राउज़र में सेशन सेव नहीं हो पा रहा था। इस डिवाइस पर आपका डेटा सुरक्षित रूप से सहेजा नहीं गया हो सकता है।' : 'This browser could not save the session. Your data may not have been stored on this device.'}</p>
-          </div>
-        )}
+        <LocalSaveStatus status={saveStatus} language={lang} />
 
         <div className="rpt__notice">
           <span className="material-symbols-outlined" aria-hidden="true">info</span>
