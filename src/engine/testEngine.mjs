@@ -769,7 +769,7 @@ assert(!singleFlagDesc.right[0].includes('scattered'), 'single flag does not say
 // === Pattern Cluster Narratives ===
 console.log('\n=== Pattern cluster narratives ===');
 
-// Ramesh triggers: close-work-headache, low-light-contrast, overdue-exam, presbyopia
+// Ramesh matches a subset of the defined patterns; outdoor time alone no longer creates a low-light match.
 const rameshPatternIds = rameshPatterns.map((p) => p.id);
 const rameshClusters = evaluateClusters(rameshPatternIds);
 assert(rameshClusters.length > 0, 'Ramesh triggers at least one cluster');
@@ -778,7 +778,7 @@ assert(nearVisionCluster !== undefined, 'Ramesh triggers near-vision-strain clus
 assert(nearVisionCluster.matchedMembers.length >= 2, 'near-vision-strain has >= 2 matched members');
 
 // All matched patterns are still individually available (clusters don't hide them)
-assert(rameshPatterns.length >= 3, 'Ramesh still has >= 3 individual patterns after clustering');
+assert(rameshPatterns.length >= 2, 'Ramesh still has multiple individual patterns after clustering');
 
 // Empty patterns → no clusters
 const emptyClusters = evaluateClusters([]);
