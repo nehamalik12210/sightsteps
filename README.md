@@ -18,7 +18,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 | Theme Component | What It Demands | SightSteps Implementation |
 |---|---|---|
 | **No-Device** | No camera, no specialised hardware, works on ordinary phones/tablets | Browser-based PWA, runs on any phone or tablet with a browser |
-| **Vision Intelligence** | The app must infer or compute something about vision beyond reorganising answers | Pattern detection engine infers 8 clinically meaningful patterns from answer combinations; cluster narratives surface relationships between co-fired patterns; Amsler grid provides calibrated home screening with spatial analysis of flagged regions |
+| **Vision Intelligence** | The app must infer or compute something about vision beyond reorganising answers | Pattern detection engine infers 8 discussion patterns from answer combinations; grouping narratives surface relationships between matched patterns; Amsler self-monitoring activity records participant-flagged grid regions and describes their quadrant distribution |
 | **Accessible Clinical UX** | Bilingual, voice, keyboard, screen-reader, kiosk privacy, clinical credibility | Bilingual EN/HI, TTS, STT, keyboard nav, kiosk mode, clinician brief, clinical language lint, WCAG-minded controls |
 
 ---
@@ -30,8 +30,8 @@ A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of parti
 
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
-### 🔲 Amsler Grid Home Screening
-A calibrated Amsler grid screening activity that participants complete one eye at a time. Uses credit-card calibration (85.6 mm) to render the grid at correct physical size. Results show flagged regions per eye with clear home-screening disclaimers. The Amsler grid is the only screening that adds real signal without diagnostic liability — it is already recommended by optometrists for home use.
+### 🔲 Amsler Grid Self-Monitoring Activity
+An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked on narrow viewports where the calibrated 10 cm grid cannot fit. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
 
 ### 🩺 Clinician Brief
 A one-page, print-optimised summary designed for a clinician's two-minute scan, containing inferred patterns, observation groups, Amsler results, discussion prompts and source references.
@@ -81,7 +81,7 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 4. Complete the guided questions and describe visual experiences noticed.
 5. Identify activities that feel affected and describe the impact.
 6. Optionally try the **direction-awareness interaction** (uncalibrated, does not measure visual acuity).
-7. Optionally try the **Amsler grid home screening** — a calibrated grid that checks for macular changes, one eye at a time.
+7. Optionally try the **Amsler grid self-monitoring activity** — record any grid areas that appear distorted, blurred or missing, one eye at a time. It cannot detect or rule out an eye condition.
 8. Review the **Vision Conversation Map** with inferred patterns, choose conversation priorities, add personal questions, open the clinician brief, and print an Appointment Preparation Pack or the detailed report.
 9. Optionally add dated entries to **My Vision Timeline**.
 10. Optionally record appointment notes and follow-up steps.
@@ -129,7 +129,7 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 | Command | What it does |
 |---|---|
 | `npm run audit` | 2,230+ static project, data and feature checks |
-| `npm test` | 634+ regression tests (rules engine, pattern engine, branching, persistence, routing) |
+| `npm test` | Regression tests for rules, patterns, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -204,7 +204,7 @@ sightsteps/
 │   │   └── testEngine.mjs             # 634+ regression tests
 │   ├── pages/
 │   │   ├── ActivityProfile.jsx        # Everyday activity selection
-│   │   ├── AmslerGrid.jsx             # Calibrated Amsler grid screening
+│   │   ├── AmslerGrid.jsx             # Amsler grid self-monitoring activity
 │   │   ├── AppointmentFollowUp.jsx    # Post-appointment notes
 │   │   ├── Intake.jsx                 # Guided vision questions
 │   │   ├── KioskSetup.jsx             # Shared-device setup
