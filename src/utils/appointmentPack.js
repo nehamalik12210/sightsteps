@@ -1,4 +1,4 @@
-import { formatVisionTimelineDate, sortVisionTimelineEntries } from './visionTimeline.js';
+import { formatVisionTimelineDate, normalizeVisionTimelineEntries } from './visionTimeline.js';
 
 function localized(value, language = 'en') {
   if (value && typeof value === 'object') return value[language] || value.en || '';
@@ -55,7 +55,7 @@ export function buildAppointmentPreparationPack({
       prompt: compactText(localized(point.prompt, language), 190),
     }));
 
-  const orderedTimeline = sortVisionTimelineEntries(timelineEntries)
+  const orderedTimeline = normalizeVisionTimelineEntries(timelineEntries)
     .slice(0, 5)
     .map((entry) => ({
       id: compactText(entry.id, 80),
