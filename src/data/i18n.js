@@ -45,7 +45,7 @@ const strings = {
 
   'patterns.title': { en: 'Patterns Worth Discussing', hi: 'चर्चा के लिए अनुमानित पैटर्न' },
   'patterns.subtitle': { en: 'These patterns are inferred from combinations of your responses. They surface observations you may not have stated directly — framed as discussion points, never conclusions.', hi: 'ये पैटर्न आपके जवाबों के संयोजन से अनुमानित हैं। ये ऐसे अवलोकन सामने लाते हैं जो आपने सीधे नहीं बताए होंगे — चर्चा बिंदुओं के रूप में, कभी निष्कर्ष नहीं।' },
-  'patterns.whySuggesting': { en: 'Why we are suggesting this', hi: 'हम यह क्यों सुझा रहे हैं' },
+  'patterns.whySuggesting': { en: 'Which responses contributed to this pattern?', hi: 'इस पैटर्न में आपके कौन-से जवाब शामिल हैं?' },
   'patterns.noneMatched.title': { en: 'What our pattern engine looks for', hi: 'हमारा पैटर्न इंजन क्या देखता है' },
   'patterns.noneMatched.subtitle': { en: 'None of the combinations defined in SightSteps matched your responses. This does not mean vision concerns are absent: the engine checks only a limited set of patterns and cannot rule out a problem. You can still discuss any experience or concern with an eye-care professional.', hi: 'SightSteps में निर्धारित कोई भी संयोजन आपके जवाबों से मेल नहीं खाया। इसका अर्थ यह नहीं है कि दृष्टि से जुड़ी चिंताएँ नहीं हैं: यह इंजन केवल कुछ सीमित पैटर्न देखता है और किसी समस्या को खारिज नहीं कर सकता। आप अपने किसी भी अनुभव या चिंता पर नेत्र-देखभाल पेशेवर से चर्चा कर सकते हैं।' },
 
