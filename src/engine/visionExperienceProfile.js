@@ -355,9 +355,7 @@ export function buildCompactExperienceSummary(profile, language = 'en', maxLengt
       : `Reported daily-activity impact: ${activityItems.join('; ')}.`);
   }
 
-  if (!parts.length) {
-    return hi ? 'कोई मुख्य अनुभव या गतिविधि-प्रभाव विवरण दर्ज नहीं है।' : 'No main experience or activity-impact details were recorded.';
-  }
+  if (!parts.length) return '';
   return truncateSummary(parts.join(' '), maxLength);
 }
 
