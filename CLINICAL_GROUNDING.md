@@ -1,6 +1,6 @@
 # Clinical Grounding
 
-Every pattern and screening activity in SightSteps is anchored to published clinical guidance. No pattern or activity introduces a novel clinical claim. This document cites the established source for each.
+Every pattern and self-monitoring activity in SightSteps is anchored to published guidance. No pattern or activity introduces a novel clinical claim. This document cites the established source for each.
 
 > [!IMPORTANT]
 > SightSteps operationalises published guidance as discussion prompts. It does not diagnose, screen for specific conditions, or replace professional examination. Every output is framed as "worth discussing with an eye-care professional," never as a conclusion.
