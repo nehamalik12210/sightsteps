@@ -27,7 +27,7 @@ Each pattern infers a clinically meaningful combination from participant-reporte
 - **asymmetry**: One-eye symptoms + recent onset
 - **presbyopia**: Near-vision difficulty + age > 40 + worsening trend
 - **digital-eye-strain**: High screen use + headaches
-- **low-light-contrast**: Low-light difficulty + outdoor exposure + squinting
+- **low-light-contrast**: Night/low-light difficulty + explicitly selected low-light context + squinting
 - **overdue-exam**: No recent exam + multiple reported experiences
 
 **Review question:** Are these pattern descriptions clinically defensible?
@@ -94,7 +94,7 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 | Date | Change | Reason |
 |------|--------|--------|
 | 2026-11-24 | Initial pattern set (8 patterns) created | Phase 1 roadmap |
-| 2026-11-24 | Amsler grid screening added | Phase 2 roadmap |
+| 2026-11-24 | Amsler grid self-monitoring activity added | Phase 2 roadmap |
 | 2026-11-24 | Clinical language lint implemented | Phase 4 roadmap |
 | 2026-11-24 | Clinician Brief component added | Phase 5 roadmap |
 | 2026-11-24 | Export script and review kit created | Phase 3 roadmap |
