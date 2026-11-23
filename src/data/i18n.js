@@ -52,7 +52,7 @@ const strings = {
   'clinicianBrief.title': { en: 'Clinician Brief', hi: 'क्लिनिशियन सारांश' },
   'clinicianBrief.open': { en: 'View clinician brief', hi: 'क्लिनिशियन सारांश देखें' },
 
-  'disclaimer.full': { en: 'SightSteps is not a diagnostic tool. The observations, patterns and screening results below are participant-reported and are intended only to support a conversation with an eye-care professional.', hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्क्रीनिंग परिणाम प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।' },
+  'disclaimer.full': { en: 'SightSteps is not a diagnostic tool. The observations, patterns and activity records below are participant-reported and are intended only to support a conversation with an eye-care professional.', hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और गतिविधि रिकॉर्ड प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।' },
 
   'report.title': { en: 'Your Vision Insights', hi: 'आपकी दृष्टि संबंधी जानकारी' },
   'report.seeWhy': { en: 'See why', hi: 'कारण देखें' },
