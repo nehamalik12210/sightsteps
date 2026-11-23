@@ -10,8 +10,10 @@ import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
 import ClinicianBrief from '../components/ClinicianBrief.jsx';
+import VisionExperienceProfile from '../components/VisionExperienceProfile.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
+import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
 import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
@@ -70,6 +72,10 @@ export default function Report() {
   const sortedTimelineEntries = useMemo(
     () => sortVisionTimelineEntries(visionTimelineEntries || []),
     [visionTimelineEntries],
+  );
+  const experienceProfile = useMemo(
+    () => buildVisionExperienceProfile(answers, visionTimelineEntries || []),
+    [answers, visionTimelineEntries],
   );
 
   // Do not redirect while IndexedDB is still restoring the saved session.
@@ -238,6 +244,14 @@ export default function Report() {
           <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
           <p>{t('disclaimer.full', lang)}</p>
         </div>
+
+        {(experienceProfile.hasReportedExperience || experienceProfile.hasActivityImpact || experienceProfile.hasTimelineEntries) && (
+          <VisionExperienceProfile
+            profile={experienceProfile}
+            answers={answers}
+            language={lang}
+          />
+        )}
 
         {matchedPatterns.length > 0 && (
           <section className="rpt__section rpt__patterns-section" aria-labelledby="rpt-patterns-heading">
