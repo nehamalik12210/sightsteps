@@ -248,7 +248,7 @@ The latest verified build completed with:
 | Static quality audit | **2,240 passed**, 0 failed |
 | Regression test suite | **747 passed**, 0 failed (incl. pattern engine + calibration viewport + Amsler spatial tests) |
 | Clinical language audit | **PASSED** — 0 violations |
-| Vite production build | 92 modules transformed |
+| Vite production build | 93 modules transformed |
 | PWA service worker | 11 precache entries generated |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
