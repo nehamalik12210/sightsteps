@@ -40,14 +40,14 @@ const strings = {
   'vision.title': { en: 'Vision Awareness Activity', hi: 'दृष्टि जागरूकता गतिविधि' },
   'vision.skip': { en: 'Skip this activity', hi: 'यह गतिविधि छोड़ें' },
 
-  'amsler.title': { en: 'Amsler Grid Home Screening', hi: 'एम्सलर ग्रिड होम स्क्रीनिंग' },
-  'amsler.skip': { en: 'Skip this screening', hi: 'यह स्क्रीनिंग छोड़ें' },
+  'amsler.title': { en: 'Amsler Grid Self-Monitoring Activity', hi: 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' },
+  'amsler.skip': { en: 'Skip this activity', hi: 'यह गतिविधि छोड़ें' },
 
   'patterns.title': { en: 'Patterns Worth Discussing', hi: 'चर्चा के लिए अनुमानित पैटर्न' },
   'patterns.subtitle': { en: 'These patterns are inferred from combinations of your responses. They surface observations you may not have stated directly — framed as discussion points, never conclusions.', hi: 'ये पैटर्न आपके जवाबों के संयोजन से अनुमानित हैं। ये ऐसे अवलोकन सामने लाते हैं जो आपने सीधे नहीं बताए होंगे — चर्चा बिंदुओं के रूप में, कभी निष्कर्ष नहीं।' },
   'patterns.whySuggesting': { en: 'Why we are suggesting this', hi: 'हम यह क्यों सुझा रहे हैं' },
   'patterns.noneMatched.title': { en: 'What our pattern engine looks for', hi: 'हमारा पैटर्न इंजन क्या देखता है' },
-  'patterns.noneMatched.subtitle': { en: 'Your responses did not trigger any inferred patterns — which is a good sign. Here is what the engine checks for, so you know the kinds of combinations it evaluates:', hi: 'आपके जवाबों से कोई अनुमानित पैटर्न नहीं मिला — जो एक अच्छा संकेत है। यहाँ बताया गया है कि इंजन किन संयोजनों की जाँच करता है:' },
+  'patterns.noneMatched.subtitle': { en: 'None of the combinations defined in SightSteps matched your responses. This does not mean vision concerns are absent: the engine checks only a limited set of patterns and cannot rule out a problem. You can still discuss any experience or concern with an eye-care professional.', hi: 'SightSteps में निर्धारित कोई भी संयोजन आपके जवाबों से मेल नहीं खाया। इसका अर्थ यह नहीं है कि दृष्टि से जुड़ी चिंताएँ नहीं हैं: यह इंजन केवल कुछ सीमित पैटर्न देखता है और किसी समस्या को खारिज नहीं कर सकता। आप अपने किसी भी अनुभव या चिंता पर नेत्र-देखभाल पेशेवर से चर्चा कर सकते हैं।' },
 
   'clinicianBrief.title': { en: 'Clinician Brief', hi: 'क्लिनिशियन सारांश' },
   'clinicianBrief.open': { en: 'View clinician brief', hi: 'क्लिनिशियन सारांश देखें' },
@@ -81,18 +81,22 @@ const strings = {
   'common.cancel': { en: 'Cancel', hi: 'रद्द करें' },
   'common.yesDelete': { en: 'Yes, delete', hi: 'हाँ, हटाएँ' },
 
-  'amsler.spatial.title': { en: 'Spatial Analysis', hi: 'स्थानिक विश्लेषण' },
+  'amsler.spatial.title': { en: 'Where flagged areas appear on the grid', hi: 'ग्रिड पर चिह्नित क्षेत्रों का स्थान' },
   'amsler.spatial.subtitle': {
     en: 'Where you flagged regions on the grid',
     hi: 'आपने ग्रिड पर कहाँ क्षेत्र चिह्नित किए',
   },
   'amsler.spatial.disclaimer': {
-    en: 'This shows where you flagged regions on the grid — not a map of your retina.',
-    hi: 'यह दर्शाता है कि आपने ग्रिड पर कहाँ क्षेत्र चिह्नित किए — यह आपकी रेटिना का मानचित्र नहीं है।',
+    en: 'This describes only where you flagged areas on this grid. It is not a map of your retina or a clinical interpretation.',
+    hi: 'यह केवल बताता है कि आपने इस ग्रिड पर कहाँ क्षेत्र चिह्नित किए। यह आपकी रेटिना का मानचित्र या चिकित्सकीय व्याख्या नहीं है।',
   },
   'amsler.spatial.noFlags': {
     en: 'No regions flagged.',
     hi: 'कोई क्षेत्र चिह्नित नहीं किया गया।',
+  },
+  'amsler.selfMonitoring.warning': {
+    en: 'No areas flagged does not rule out a vision problem. This activity cannot detect every change. If you notice new distortion, blurred or missing areas, contact an eye-care professional promptly rather than waiting for a routine appointment.',
+    hi: 'कोई क्षेत्र चिह्नित न होना दृष्टि की समस्या को खारिज नहीं करता। यह गतिविधि सभी बदलाव नहीं पकड़ सकती। यदि आपको नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें, तो नियमित अपॉइंटमेंट की प्रतीक्षा किए बिना शीघ्र नेत्र-देखभाल पेशेवर से संपर्क करें।',
   },
   'amsler.spatial.centralZone': {
     en: 'central zone',
