@@ -1,0 +1,269 @@
+/**
+ * Build an explainable, participant-reported everyday vision experience profile.
+ *
+ * This module connects existing questionnaire answers and participant-entered
+ * timeline records. It does not measure visual performance, infer a diagnosis,
+ * score severity or determine clinical urgency.
+ */
+import { getReportedExperienceOptions } from '../data/questions.js';
+import { normalizeVisionTimelineEntries } from '../utils/visionTimeline.js';
+
+const ACTIVITY_LABELS = {
+  screen_work: { en: 'Screen work', hi: 'स्क्रीन पर काम' },
+  reading: { en: 'Reading and study', hi: 'पढ़ाई और अध्ययन' },
+  fine_detail: { en: 'Fine-detail work and crafts', hi: 'बारीक काम और दस्तकारी' },
+  driving: { en: 'Driving and travel', hi: 'ड्राइविंग और यात्रा' },
+  outdoor: { en: 'Outdoor activities', hi: 'बाहरी गतिविधियाँ' },
+  other: { en: 'Other activities', hi: 'अन्य गतिविधियाँ' },
+};
+
+const CONTEXT_LABELS = {
+  near_tasks: { en: 'Reading or other near tasks', hi: 'पढ़ना या पास के काम' },
+  distance_tasks: { en: 'Looking at distant objects', hi: 'दूर की वस्तुएँ देखना' },
+  screens: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' },
+  low_light: { en: 'Low-light situations', hi: 'कम रोशनी की स्थिति' },
+  outdoors: { en: 'Outdoors or bright conditions', hi: 'बाहर या तेज़ रोशनी में' },
+  driving: { en: 'Driving or travelling', hi: 'ड्राइविंग या यात्रा' },
+  varies: { en: 'It varies or has no clear pattern', hi: 'यह अलग-अलग होता है या कोई स्पष्ट पैटर्न नहीं है' },
+};
+
+const IMPACT_LABELS = {
+  takes_longer: { en: 'It takes longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' },
+  discomfort: { en: 'Discomfort', hi: 'असहजता' },
+  avoid_stop: { en: 'Avoiding or stopping the activity', hi: 'गतिविधि टालना या रोकना' },
+  adjustments: { en: 'Adjusting distance, lighting or position', hi: 'दूरी, रोशनी या स्थिति बदलना' },
+  other: { en: 'Another impact', hi: 'अन्य प्रभाव' },
+};
+
+function safeValue(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function localizedLabel(label, fallback = null) {
+  if (typeof label === 'string' && label.trim()) {
+    return { en: label.trim(), hi: label.trim() };
+  }
+  if (label && typeof label === 'object' && !Array.isArray(label)) {
+    const en = safeValue(label.en) || safeValue(label.hi);
+    const hi = safeValue(label.hi) || safeValue(label.en);
+    if (en || hi) return { en: en || hi, hi: hi || en };
+  }
+  return fallback;
+}
+
+function answerLabel(answers, key, fallback = null) {
+  return localizedLabel(answers?.[key]?.label, fallback);
+}
+
+function presentSourceIds(answers, ids) {
+  return ids.filter((id) => (
+    answers?.[id]
+    && answers[id].value !== undefined
+    && answers[id].value !== null
+  ));
+}
+
+function buildMainExperience(answers, reportedExperiences) {
+  const mainId = safeValue(answers?.primary_concern?.value);
+  if (!mainId) return null;
+
+  const selected = reportedExperiences.find((item) => item.value === mainId);
+  // A stale primary selection must not override the participant's current answer.
+  if (!selected) return null;
+
+  const contextValues = Array.isArray(answers?.experience_context?.value)
+    ? answers.experience_context.value.filter((value) => typeof value === 'string')
+    : [];
+  const contexts = contextValues.map((id) => ({
+    id,
+    label: CONTEXT_LABELS[id] || { en: id, hi: id },
+  }));
+  const sources = presentSourceIds(answers, [
+    'primary_concern',
+    mainId,
+    'experience_onset',
+    'experience_change',
+    'experience_frequency',
+    'experience_context',
+    ...(mainId === 'headaches' ? [] : ['which_eye']),
+  ]);
+
+  const mainLabel = localizedLabel(selected.label, answerLabel(answers, mainId));
+  const onset = answerLabel(answers, 'experience_onset');
+  const change = answerLabel(answers, 'experience_change');
+  const frequency = answerLabel(answers, 'experience_frequency');
+  const eye = mainId === 'headaches' ? null : answerLabel(answers, 'which_eye');
+
+  const buildNarrative = (language) => {
+    const label = mainLabel?.[language];
+    if (!label) return '';
+    const parts = [`You selected ${label.toLowerCase()} as the main experience you would like to discuss.`];
+    if (onset?.[language]) parts.push(`You first noticed it ${onset[language].toLowerCase()}.`);
+    if (change?.[language]) parts.push(`You reported that it ${change[language].toLowerCase()}.`);
+    if (frequency?.[language]) parts.push(`You notice it ${frequency[language].toLowerCase()}.`);
+    if (contexts.length) {
+      parts.push(`You selected these situations: ${contexts.map((item) => item.label[language]).join(', ')}.`);
+    }
+    if (eye?.[language]) parts.push(`You said it is noticed in ${eye[language].toLowerCase()}.`);
+    return parts.join(' ');
+  };
+
+  return {
+    id: mainId,
+    label: mainLabel,
+    eye,
+    onset,
+    change,
+    frequency,
+    contexts,
+    sourceIds: sources,
+    narrative: {
+      en: buildNarrative('en'),
+      hi: buildNarrative('hi'),
+    },
+  };
+}
+
+function buildAdditionalExperiences(reportedExperiences, mainId, answers) {
+  return reportedExperiences
+    .filter((item) => item.value !== mainId)
+    .map((item) => ({
+      id: item.value,
+      label: localizedLabel(item.label),
+      answer: answerLabel(answers, item.value, localizedLabel(item.label)),
+      sourceIds: presentSourceIds(answers, [item.value]),
+    }));
+}
+
+function buildActivityImpacts(answers) {
+  const selected = Array.isArray(answers?.affected_activities?.value)
+    ? answers.affected_activities.value
+    : [];
+
+  return selected
+    .filter((activityId) => Object.prototype.hasOwnProperty.call(ACTIVITY_LABELS, activityId))
+    .map((activityId) => {
+      const impactKey = `activity_impact_${activityId}`;
+      const frequencyKey = `activity_impact_frequency_${activityId}`;
+      const rawImpacts = Array.isArray(answers?.[impactKey]?.value)
+        ? answers[impactKey].value.filter((value) => typeof value === 'string')
+        : [];
+      const impacts = rawImpacts
+        .filter((value) => !['none', 'unsure'].includes(value))
+        .map((id) => ({ id, label: IMPACT_LABELS[id] || { en: id, hi: id } }));
+      const noImpactReported = rawImpacts.includes('none');
+      const unsure = rawImpacts.includes('unsure');
+      const impactStatus = impacts.length
+        ? 'reported'
+        : noImpactReported
+          ? 'no_impact_reported'
+          : unsure
+            ? 'unsure'
+            : 'not_recorded';
+      const frequency = answerLabel(answers, frequencyKey);
+      const sources = presentSourceIds(answers, [
+        'affected_activities',
+        impactKey,
+        ...(frequency ? [frequencyKey] : []),
+      ]);
+
+      const summary = {
+        en: impactStatus === 'reported'
+          ? `For ${ACTIVITY_LABELS[activityId].en.toLowerCase()}, you reported: ${impacts.map((item) => item.label.en.toLowerCase()).join(', ')}.${frequency?.en ? ` You notice this impact ${frequency.en.toLowerCase()}.` : ''}`
+          : impactStatus === 'no_impact_reported'
+            ? `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()} and reported no impact for this activity.`
+            : impactStatus === 'unsure'
+              ? `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()} but were unsure how to describe the impact.`
+              : `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()}; no impact details were recorded.`,
+        hi: impactStatus === 'reported'
+          ? `${ACTIVITY_LABELS[activityId].hi} में आपने यह बताया: ${impacts.map((item) => item.label.hi).join(', ')}।${frequency?.hi ? ` आपने यह प्रभाव ${frequency.hi.toLowerCase()} महसूस होने की बात बताई।` : ''}`
+          : impactStatus === 'no_impact_reported'
+            ? `आपने ${ACTIVITY_LABELS[activityId].hi} चुना और बताया कि इस गतिविधि पर कोई प्रभाव महसूस नहीं होता।`
+            : impactStatus === 'unsure'
+              ? `आपने ${ACTIVITY_LABELS[activityId].hi} चुना, लेकिन प्रभाव का वर्णन करने को लेकर अनिश्चितता बताई।`
+              : `आपने ${ACTIVITY_LABELS[activityId].hi} चुना; प्रभाव का विवरण दर्ज नहीं किया गया।`,
+      };
+
+      return {
+        activityId,
+        label: ACTIVITY_LABELS[activityId],
+        impacts,
+        frequency,
+        impactStatus,
+        summary,
+        sourceIds: sources,
+      };
+    });
+}
+
+function buildConnections(mainExperience, activityImpacts) {
+  if (!mainExperience || activityImpacts.length === 0) return null;
+  const activityLabels = activityImpacts.map((item) => item.label);
+  const contexts = mainExperience.contexts;
+
+  return {
+    contextCount: contexts.length,
+    activityCount: activityImpacts.length,
+    sourceIds: [...new Set([
+      ...mainExperience.sourceIds,
+      ...activityImpacts.flatMap((item) => item.sourceIds),
+    ])],
+    narrative: {
+      en: [
+        contexts.length
+          ? `When describing ${mainExperience.label.en.toLowerCase()}, you selected ${contexts.map((item) => item.label.en).join(', ')} as situations where you notice it.`
+          : '',
+        `You also identified ${activityLabels.map((item) => item.en.toLowerCase()).join(', ')} as everyday activities that feel affected by the experience you reported.`,
+      ].filter(Boolean).join(' '),
+      hi: [
+        contexts.length
+          ? `${mainExperience.label.hi} के बारे में बताते हुए, आपने ${contexts.map((item) => item.label.hi).join(', ')} को ऐसी परिस्थितियों के रूप में चुना जहाँ यह महसूस होता है।`
+          : '',
+        `आपने ${activityLabels.map((item) => item.hi).join(', ')} को ऐसी रोज़मर्रा की गतिविधियों के रूप में भी चुना जो आपके बताए अनुभव से प्रभावित महसूस होती हैं।`,
+      ].filter(Boolean).join(' '),
+    },
+  };
+}
+
+/**
+ * @param {object} answers Existing questionnaire answers from AppContext.
+ * @param {Array} timelineEntries Participant-authored timeline entries.
+ * @returns {object} Bilingual, traceable profile with no clinical score.
+ */
+export function buildVisionExperienceProfile(answers = {}, timelineEntries = []) {
+  const safeAnswers = answers && typeof answers === 'object' && !Array.isArray(answers)
+    ? answers
+    : {};
+  const reportedExperiences = getReportedExperienceOptions(safeAnswers);
+  const mainId = safeValue(safeAnswers.primary_concern?.value);
+  const mainExperience = buildMainExperience(safeAnswers, reportedExperiences);
+  const activityImpacts = buildActivityImpacts(safeAnswers);
+  const timeline = normalizeVisionTimelineEntries(timelineEntries);
+  const mainExperienceTimelineEntries = mainId
+    ? timeline.filter((entry) => entry.experienceId === mainId)
+    : [];
+
+  return {
+    mainExperience,
+    additionalExperiences: buildAdditionalExperiences(reportedExperiences, mainId, safeAnswers),
+    activityImpacts,
+    connections: buildConnections(mainExperience, activityImpacts),
+    timeline: {
+      entries: timeline,
+      totalEntries: timeline.length,
+      mainExperienceEntryIds: mainExperienceTimelineEntries.map((entry) => entry.id),
+      mainExperienceEntryCount: mainExperienceTimelineEntries.length,
+    },
+    hasReportedExperience: reportedExperiences.length > 0,
+    hasActivityImpact: activityImpacts.length > 0,
+    hasTimelineEntries: timeline.length > 0,
+    limitations: {
+      participantReportedOnly: true,
+      usesClinicalScoring: false,
+      measuresVisualPerformance: false,
+      establishesDiagnosis: false,
+    },
+  };
+}
+
+export default buildVisionExperienceProfile;
