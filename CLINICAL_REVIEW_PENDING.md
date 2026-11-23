@@ -36,7 +36,7 @@ Each pattern infers a clinically meaningful combination from participant-reporte
 The activity records only regions a participant manually flags; it must not be described as a diagnostic test or as ruling out disease. Key points for review:
 - No flagged regions must never be presented as a normal or reassuring result.
 - New distortion, blurred or missing areas should prompt advice to contact an eye-care professional promptly rather than wait for a routine appointment.
-- Calibration uses an 85.6 mm standard card to target a 100 mm grid; the activity blocks calibration on narrow viewports.
+- Calibration uses an 85.6 mm standard card to target a 100 mm grid; the activity blocks calibration unless the complete square fits both visible viewport dimensions with room for controls, including wide but short landscape-phone screens.
 - The center marker is positioned at the exact geometric center of the grid.
 - Participants cover one eye at a time (right eye first, then left).
 - Physical calibration, device fit, browser zoom, display density, viewing distance and tap accuracy have not yet been independently validated across real devices.
