@@ -1,4 +1,5 @@
 import { formatVisionTimelineDate, normalizeVisionTimelineEntries } from './visionTimeline.js';
+import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
 
 function localized(value, language = 'en') {
   if (value && typeof value === 'object') return value[language] || value.en || '';
@@ -23,6 +24,7 @@ export function buildAppointmentPreparationPack({
   discussionPoints = [],
   questionsToAsk = '',
   timelineEntries = [],
+  amslerResults = null,
   now = new Date(),
 } = {}) {
   const locale = language === 'hi' ? 'hi-IN' : 'en-IN';
@@ -67,6 +69,27 @@ export function buildAppointmentPreparationPack({
       note: compactText(entry.impact, 96),
     }));
 
+  const safeAmsler = amslerResults?.completed && amslerResults.data
+    ? {
+        right: amslerResults.data.right?.cellCount ?? amslerResults.data.right?.flaggedCells?.length ?? 0,
+        left: amslerResults.data.left?.cellCount ?? amslerResults.data.left?.flaggedCells?.length ?? 0,
+        calibrated: amslerResults.calibrated ?? false,
+      }
+    : null;
+
+  // Spatial analysis for the prep pack
+  let amslerSpatialText = null;
+  if (safeAmsler && amslerResults.data) {
+    const flagged = {
+      right: amslerResults.data.right?.flaggedCells || [],
+      left: amslerResults.data.left?.flaggedCells || [],
+    };
+    if (flagged.right.length > 0 || flagged.left.length > 0) {
+      const spatial = analyzeSpatial(flagged);
+      amslerSpatialText = describeSpatial(spatial, language);
+    }
+  }
+
   return {
     preparedDate,
     priorities: safePriorities,
@@ -74,6 +97,8 @@ export function buildAppointmentPreparationPack({
     discussionPoints: safeDiscussionPoints,
     questionsToAsk: compactText(questionsToAsk, 480),
     timelineEntries: orderedTimeline,
+    amsler: safeAmsler,
+    amslerSpatial: amslerSpatialText,
     language: language === 'hi' ? 'hi' : 'en',
   };
 }
