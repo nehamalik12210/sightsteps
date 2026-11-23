@@ -1,0 +1,104 @@
+# Clinical Review Record
+
+## Review Status
+**Status:** Expert review is planned.
+
+In the absence of a completed review, every pattern and the Amsler activity is anchored to published clinical guidance — see [CLINICAL_GROUNDING.md](CLINICAL_GROUNDING.md). No pattern or activity introduces a novel clinical claim.
+
+**Last updated:** 2026-11-24
+
+## Reviewer Information
+Formal clinical review should be conducted by a licensed optometrist or ophthalmologist before public deployment.
+
+| Field | Value |
+|---|---|
+| Reviewer name | _To be completed_ |
+| Credentials | _Licensed optometrist / ophthalmologist_ |
+| Review date | _To be completed_ |
+| Contact | _To be completed_ |
+
+## Content Requiring Review
+
+### 1. Pattern Descriptions (8 patterns in `src/data/patterns.js`)
+Each pattern infers a clinically meaningful combination from participant-reported answers:
+- **screen-strain**: Screen work + blurred distance vision + infrequent eye exams
+- **night-vision**: Low-light difficulty + driving context + age > 40
+- **close-work-headache**: Headaches + close work + squinting
+- **asymmetry**: One-eye symptoms + recent onset
+- **presbyopia**: Near-vision difficulty + age > 40 + worsening trend
+- **digital-eye-strain**: High screen use + headaches
+- **low-light-contrast**: Low-light difficulty + outdoor exposure + squinting
+- **overdue-exam**: No recent exam + multiple reported experiences
+
+**Review question:** Are these pattern descriptions clinically defensible?
+
+### 2. Amsler Grid Framing (`src/pages/AmslerGrid.jsx`)
+The Amsler grid is presented as a home screening activity. Key framing:
+- "This is a home screening activity, not a diagnosis."
+- "Show results to your optometrist at your next visit."
+- Calibration step uses credit-card width measurement (85.6 mm).
+- Results show flagged regions per eye with explicit disclaimers.
+- Participants cover one eye at a time (right eye first, then left).
+
+**Review question:** Does the Amsler framing match how optometrists instruct patients?
+
+### 3. Discussion Prompts (all generated output)
+Every pattern and discussion point uses non-diagnostic language:
+- "Your responses suggest..." (never "You have...")
+- "Worth discussing with an eye-care professional" (never "You need treatment")
+- All output passes the clinical language lint (`scripts/clinical-language-audit.mjs`)
+
+**Review question:** Are any prompts or patterns misleading, redundant, or alarming? Would you reword any?
+
+## Review Kit
+
+To prepare a review package for the clinical expert:
+
+### Step 1: Generate the export
+```bash
+node scripts/export-prompts.mjs
+```
+This creates `exports/clinical-review-export.txt` containing:
+- All 8 pattern descriptions (EN + HI)
+- Pattern engine output for the demo persona (Ramesh, 42, tailor)
+- All generated discussion prompts (EN + HI)
+- All follow-up notes (EN + HI)
+- Amsler grid wording at every touchpoint (EN + HI)
+- Clinician brief wording (EN + HI)
+- Key i18n disclaimer strings
+
+### Step 2: Run the demo
+```bash
+npm run dev
+```
+Open the app and use "Explore Ramesh's demo" to walk through the full journey. The demo uses a pre-scripted Hindi-speaking persona.
+
+### Step 3: Send the reviewer
+1. The exported `exports/clinical-review-export.txt` file
+2. A link to the running demo (or deployed app)
+3. These three review questions:
+   - **Are the pattern descriptions clinically defensible?**
+   - **Does the Amsler framing match how you instruct patients?**
+   - **Are any prompts or patterns misleading, redundant, or alarming? Would you reword any?**
+
+### Step 4: Record feedback
+Update the "Reviewer Feedback" section below with the reviewer's responses. Apply accepted changes to `patterns.js`, `questions.js`, `ruleEngine.js`, and Amsler wording. Document any changes or justified no-changes in the Changes Log.
+
+## Automated Safeguards
+- **Clinical language lint** (`npm run clinical-lint`): Scans all patterns, i18n strings, and engine output for forbidden diagnostic phrases. Fails CI on violation.
+- **Disclaimer constant**: Rendered at the top of Detailed Report, Preparation Pack, Clinician Brief, Amsler activity page, and Amsler result.
+- **Pattern engine guardrail**: Patterns require ≥2 satisfied source links before they appear. No pattern fires on empty or partial answers.
+
+## Changes Log
+| Date | Change | Reason |
+|------|--------|--------|
+| 2026-11-24 | Initial pattern set (8 patterns) created | Phase 1 roadmap |
+| 2026-11-24 | Amsler grid screening added | Phase 2 roadmap |
+| 2026-11-24 | Clinical language lint implemented | Phase 4 roadmap |
+| 2026-11-24 | Clinician Brief component added | Phase 5 roadmap |
+| 2026-11-24 | Export script and review kit created | Phase 3 roadmap |
+| 2026-11-24 | Report integrated: patterns, Amsler, clinician brief | Integration |
+| 2026-11-24 | README updated with new features | Phase 6 hygiene |
+
+## Reviewer Feedback
+_To be completed after formal clinical review._
