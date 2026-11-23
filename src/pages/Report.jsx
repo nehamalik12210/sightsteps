@@ -124,6 +124,7 @@ export default function Report() {
         questionsToAsk,
         timelineEntries: sortedTimelineEntries,
         amslerResults,
+        experienceProfile,
         now: new Date(),
       }));
     } else {
