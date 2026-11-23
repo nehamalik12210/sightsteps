@@ -14,6 +14,15 @@ import './AmslerGrid.css';
 
 const GRID_SIZE = 20;
 
+function getViewportMetrics() {
+  if (typeof window === 'undefined') return { width: 0, height: 0 };
+  const viewport = window.visualViewport;
+  return {
+    width: Math.floor(viewport?.width || window.innerWidth || 0),
+    height: Math.floor(viewport?.height || window.innerHeight || 0),
+  };
+}
+
 function AmslerGrid() {
   const navigate = useNavigate();
   const { language, setAmslerResults, amslerResults } = useApp();
@@ -29,16 +38,22 @@ function AmslerGrid() {
   const sliderRef = useRef(null);
 
   const [sliderWidthPx, setSliderWidthPx] = useState(300);
-  const [viewportWidthPx, setViewportWidthPx] = useState(() => (typeof window === 'undefined' ? 0 : window.innerWidth));
+  const [viewportMetrics, setViewportMetrics] = useState(getViewportMetrics);
+  const viewportWidthPx = viewportMetrics.width;
+  const viewportHeightPx = viewportMetrics.height;
 
   useEffect(() => {
-    const updateViewportWidth = () => setViewportWidthPx(window.innerWidth);
-    window.addEventListener('resize', updateViewportWidth);
-    return () => window.removeEventListener('resize', updateViewportWidth);
+    const updateViewportMetrics = () => setViewportMetrics(getViewportMetrics());
+    window.addEventListener('resize', updateViewportMetrics);
+    window.visualViewport?.addEventListener('resize', updateViewportMetrics);
+    return () => {
+      window.removeEventListener('resize', updateViewportMetrics);
+      window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
+    };
   }, []);
 
   const maxSliderWidthPx = getMaxCalibrationSliderWidth(viewportWidthPx);
-  const canCalibrate = canCalibrateAmsler(viewportWidthPx, sliderWidthPx);
+  const canCalibrate = canCalibrateAmsler(viewportWidthPx, viewportHeightPx, sliderWidthPx);
 
   useEffect(() => {
     setSliderWidthPx((current) => Math.min(current, maxSliderWidthPx));
@@ -207,16 +222,18 @@ function AmslerGrid() {
                 min="150"
                 max={maxSliderWidthPx}
                 value={sliderWidthPx}
-                disabled={viewportWidthPx < 600}
+                disabled={!canCalibrate}
                 onChange={(e) => setSliderWidthPx(Number(e.target.value))}
                 aria-label={lang === 'hi' ? 'कैलिब्रेशन स्लाइडर' : 'Calibration slider'}
               />
             </div>
-            {viewportWidthPx < 600 ? (
-              <p className="amsler__calibration-warning" role="status">{lang === 'hi' ? 'कैलिब्रेशन के लिए स्क्रीन बहुत संकरी है। फ़ोन को लैंडस्केप में घुमाएँ या बड़ी स्क्रीन का उपयोग करें।' : 'This screen is too narrow for calibration. Rotate your phone to landscape or use a larger display.'}</p>
-            ) : !canCalibrate ? (
-              <p className="amsler__calibration-warning" role="status">{lang === 'hi' ? 'कैलिब्रेटेड 10 cm ग्रिड इस स्क्रीन पर फिट नहीं होगा। ग्रिड को छोटा न करें; बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें।' : 'The calibrated 10 cm grid will not fit this screen. Do not shrink it; use a larger display or skip the activity.'}</p>
-            ) : null}
+            {!canCalibrate && (
+              <p className="amsler__calibration-warning" role="status">
+                {lang === 'hi'
+                  ? 'पूरा 10 cm ग्रिड स्क्रीन की चौड़ाई और ऊँचाई दोनों में, ऊपर के नियंत्रणों के लिए जगह छोड़कर, एक साथ दिखना चाहिए। टैबलेट या बड़ी स्क्रीन का उपयोग करें; ग्रिड को छोटा न करें।'
+                  : 'The complete 10 cm square must fit within both the visible screen width and height, with room for the controls. Use a tablet or larger display; do not shrink the grid.'}
+              </p>
+            )}
           </div>
 
           <div className="amsler__intro-actions">
@@ -317,7 +334,7 @@ function AmslerGrid() {
             <p className="amsler__calibration-warning" role="status">
               {lang === 'hi'
                 ? 'स्क्रीन की चौड़ाई बदल गई है। ग्रिड को फिर से फिट करने के लिए फ़ोन को लैंडस्केप में घुमाएँ या बड़ी स्क्रीन का उपयोग करें। तब तक आगे नहीं बढ़ सकते।'
-                : 'The screen width changed. Rotate back to landscape or use a larger display so the calibrated grid fits again. You cannot continue until it fits.'}
+                : 'The visible screen size changed. The full calibrated square no longer fits in both directions. Use a larger display; you cannot continue until it fits.'}
             </p>
           )}
           <p className="amsler__flagged-count" aria-live="polite">
@@ -361,7 +378,7 @@ function AmslerGrid() {
       </header>
       <div className="amsler__content animate-fade-in">
         <div className="amsler__results-header">
-          <span className="material-symbols-outlined amsler__results-check" aria-hidden="true">assignment_turned_in</span>
+          <span className="material-symbols-outlined amsler__results-icon" aria-hidden="true">grid_on</span>
           <h1>{lang === 'hi' ? 'गतिविधि पूरी हुई' : 'Activity Complete'}</h1>
         </div>
 
