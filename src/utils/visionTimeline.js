@@ -84,13 +84,20 @@ export function normalizeVisionTimelineEntries(entries) {
       && entry.experienceLabel
     ));
 
-  return sortVisionTimelineEntries(normalized).slice(0, MAX_VISION_TIMELINE_ENTRIES);
+  const seenIds = new Set();
+  const uniqueNewestFirst = sortVisionTimelineEntries(normalized).filter((entry) => {
+    if (seenIds.has(entry.id)) return false;
+    seenIds.add(entry.id);
+    return true;
+  });
+
+  return uniqueNewestFirst.slice(0, MAX_VISION_TIMELINE_ENTRIES);
 }
 
 /** Sort newest calendar date/time first without changing the caller's array. */
 export function sortVisionTimelineEntries(entries) {
   if (!Array.isArray(entries)) return [];
-  return [...entries].sort((a, b) => {
+  return entries.filter((entry) => entry && typeof entry === 'object' && !Array.isArray(entry)).sort((a, b) => {
     const dateOrder = String((b && b.date) || '').localeCompare(String((a && a.date) || ''));
     if (dateOrder !== 0) return dateOrder;
     const timeOrder = String((b && b.time) || '').localeCompare(String((a && a.time) || ''));
