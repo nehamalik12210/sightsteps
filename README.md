@@ -249,7 +249,7 @@ The latest verified build completed with:
 | Check | Result |
 |---|---|
 | Static quality audit | **2,387 passed**, 0 failed |
-| Regression test suite | **781 passed**, 0 failed (incl. profile synthesis, two-dimensional calibration fit, pattern engine and Amsler spatial tests) |
+| Regression test suite | **785 passed**, 0 failed (incl. profile synthesis, appointment-pack integration, two-dimensional calibration fit, pattern engine and Amsler spatial tests) |
 | Clinical language audit | **PASSED** — 0 violations |
 | Vite production build | 96 modules transformed |
 | PWA service worker | 11 precache entries generated |
