@@ -291,6 +291,7 @@ check(reportCssSource.includes(':not(.appointment-pack)') && reportCssSource.inc
 check(accessibilityControlsSource.includes('href="#main-content"') && accessibilityControlsSource.includes('Skip to main content'), 'keyboard users can skip directly to the page main content');
 check(accessibilityControlsSource.includes('sightsteps.display-preferences.v1') && accessibilityControlsSource.includes('localStorage'), 'display preferences persist locally and fail safely when storage is unavailable');
 check(accessibilityControlsSource.includes('aria-pressed') && accessibilityControlsSource.includes('aria-labelledby'), 'display settings expose their state and labelled control group');
+check(accessibilityControlsSource.includes("addEventListener('pointerdown', handleOutsidePointer)") && accessibilityControlsSource.includes("detailsRef.current.contains(event.target)"), 'accessibility settings close when a user taps outside the panel');
 check(accessibilityControlsCssSource.includes('data-a11y-contrast') && accessibilityControlsCssSource.includes('data-a11y-targets') && accessibilityControlsCssSource.includes('data-a11y-motion'), 'display settings provide contrast, larger targets and reduced-motion modes');
 check(baseCss.includes('var(--a11y-scale') && accessCss.includes('data-a11y-scale'), 'global typography can scale while preserving responsive rem sizing');
 check(appSource.includes('RouteFocusManager') && appSource.includes("getElementById('main-content')?.focus"), 'route changes move keyboard focus to the new page main landmark');
