@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
+import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import {
   createVisionTimelineEntryId,
   formatVisionTimelineDate,
@@ -59,7 +60,7 @@ export default function VisionTimeline() {
     answers,
     visionTimelineEntries,
     setVisionTimelineEntries,
-    storageAvailable,
+    saveStatus,
     kioskMode,
   } = useApp();
   const lang = language || 'en';
@@ -187,7 +188,7 @@ export default function VisionTimeline() {
         </div>
 
         {kioskMode && <p className="vti__notice" role="status">{lang === 'hi' ? 'साझा टैबलेट मोड: निष्क्रियता के बाद यह सेशन साफ़ हो जाएगा।' : 'Shared tablet mode: this session will be cleared after inactivity.'}</p>}
-        {storageAvailable === false && <p className="vti__notice" role="status">{lang === 'hi' ? 'स्थानीय स्टोरेज उपलब्ध नहीं है। रीफ़्रेश करने पर ये नोट खो सकते हैं।' : 'Local storage is unavailable. These notes may be lost if you refresh.'}</p>}
+        <LocalSaveStatus status={saveStatus} language={lang} />
 
         <form className="vti__editor" onSubmit={handleSubmit} aria-labelledby="vti-editor-heading">
           <div className="vti__editor-head">
