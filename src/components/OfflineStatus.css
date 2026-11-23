@@ -1,0 +1,17 @@
+.offline-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px max(16px, env(safe-area-inset-right)) 9px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid #e3c58f;
+  background: #fff7e8;
+  color: #704b0d;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+.offline-status .material-symbols-outlined { flex: 0 0 auto; margin-top: 1px; font-size: 18px; }
+.offline-status p { width: min(100%, 760px); }
+@media print { .offline-status { display: none !important; } }
