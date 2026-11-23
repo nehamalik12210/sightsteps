@@ -742,7 +742,7 @@ export default function Report() {
                 <h3>{lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h3>
                 <p>{lang === 'hi'
                   ? 'एक पृष्ठ का प्रिंट-अनुकूल सारांश जिसमें अनुमानित पैटर्न, अवलोकन, स्क्रीनिंग परिणाम और चर्चा विषय हैं।'
-                  : 'A one-page print-friendly summary with inferred patterns, observations, screening results and discussion topics.'}</p>
+                  : 'A one-page print-friendly summary with inferred patterns, participant observations, the Amsler activity record and discussion topics.'}</p>
               </div>
             </div>
             <button type="button" className="btn btn--outline btn--full" onClick={() => setShowClinicianBrief(true)}>
