@@ -9,7 +9,7 @@
  */
 
 const GRID_SIZE = 20;
-const CENTER_ZONE = { min: 7, max: 12 }; // rows/cols 7-12 = central 6×6
+const MIDDLE_GRID_ZONE = { min: 7, max: 12 }; // middle 6×6 grid area; not an anatomical region
 
 /**
  * Determine which quadrant a cell falls in.
@@ -28,8 +28,8 @@ function getQuadrant(row, col) {
  * Check if a cell is in the central zone (roughly the foveal area on the grid).
  */
 function isCentral(row, col) {
-  return row >= CENTER_ZONE.min && row <= CENTER_ZONE.max &&
-         col >= CENTER_ZONE.min && col <= CENTER_ZONE.max;
+  return row >= MIDDLE_GRID_ZONE.min && row <= MIDDLE_GRID_ZONE.max &&
+         col >= MIDDLE_GRID_ZONE.min && col <= MIDDLE_GRID_ZONE.max;
 }
 
 /**
@@ -179,8 +179,8 @@ export function describeSpatial(spatial, lang = 'en') {
 
     if (analysis.count > 0 && analysis.centralCount > 0) {
       lines.push(lang === 'hi'
-        ? `${analysis.centralCount} चिह्नित क्षेत्र केंद्रीय ज़ोन में हैं।`
-        : `${analysis.centralCount} flagged region${analysis.centralCount > 1 ? 's are' : ' is'} in the central zone.`);
+        ? `${analysis.centralCount} चिह्नित क्षेत्र इस ग्रिड के मध्य वाले हिस्से में हैं।`
+        : `${analysis.centralCount} flagged region${analysis.centralCount > 1 ? 's are' : ' is'} in the middle area of this grid.`);
     }
 
     result[eye] = lines;
