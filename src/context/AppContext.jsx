@@ -15,6 +15,7 @@ const AppContext = createContext(null);
 const initialState = {
   isHydrated: false,
   storageAvailable: null,
+  saveStatus: 'idle',
   language: null,
   consentGiven: false,
   isDemo: false,
@@ -64,6 +65,16 @@ function appReducer(state, action) {
 
     case 'KIOSK_CLEANUP_FAILED':
       return { ...initialState, isHydrated: true, storageAvailable: false, kioskCleanupFailed: true };
+
+    case 'SAVE_STARTED':
+      return state.saveStatus === 'saving' ? state : { ...state, saveStatus: 'saving' };
+
+    case 'SAVE_FINISHED':
+      return {
+        ...state,
+        storageAvailable: Boolean(action.payload),
+        saveStatus: action.payload ? 'saved' : 'error',
+      };
 
     case 'SET_STORAGE_STATUS':
       return state.storageAvailable === action.payload
@@ -234,8 +245,9 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!state.isHydrated || !state.sessionId || resettingRef.current) return undefined;
     let active = true;
+    dispatch({ type: 'SAVE_STARTED' });
     saveSession(state).then((success) => {
-      if (active) dispatch({ type: 'SET_STORAGE_STATUS', payload: success });
+      if (active) dispatch({ type: 'SAVE_FINISHED', payload: success });
     });
     return () => { active = false; };
   }, [
