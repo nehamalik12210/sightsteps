@@ -51,12 +51,12 @@ export default function VoiceNoteField({
         setStatus(language === 'hi' ? 'सुन रहा है…' : 'Listening…');
       };
       recognition.onresult = (event) => {
-        receivedResult = true;
         const transcript = Array.from(event.results || [])
           .map((result) => result?.[0]?.transcript || '')
           .join(' ')
           .trim();
         if (transcript) {
+          receivedResult = true;
           // Use the latest text, not the value captured when recognition began.
           const next = [valueRef.current.trim(), transcript].filter(Boolean).join(' ');
           const limited = next.slice(0, maxLength);
