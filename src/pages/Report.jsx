@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
+import { evaluatePatterns } from '../engine/patternEngine.js';
+import { evaluateClusters } from '../data/patternClusters.js';
+import patternDefinitions from '../data/patterns.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
+import ClinicianBrief from '../components/ClinicianBrief.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
@@ -37,6 +41,7 @@ export default function Report() {
     questionsToAsk,
     assistedCompletion,
     kioskMode,
+    amslerResults,
     setDiscussionPriorities,
     setQuestionsToAsk,
   } = useApp();
@@ -47,6 +52,14 @@ export default function Report() {
   const [printMode, setPrintMode] = useState('detail');
   const [appointmentPack, setAppointmentPack] = useState(null);
   const [sessionActionError, setSessionActionError] = useState('');
+  const [showClinicianBrief, setShowClinicianBrief] = useState(false);
+  const [expandedPatterns, setExpandedPatterns] = useState({});
+
+  const matchedPatterns = useMemo(() => evaluatePatterns(answers), [answers]);
+  const matchedClusters = useMemo(
+    () => evaluateClusters(matchedPatterns.map((p) => p.id)),
+    [matchedPatterns]
+  );
 
   const report = useMemo(() => evaluateAnswers(answers, {
     activities,
@@ -104,6 +117,7 @@ export default function Report() {
         discussionPoints: orderedDiscussionPoints.slice(0, 3),
         questionsToAsk,
         timelineEntries: sortedTimelineEntries,
+        amslerResults,
         now: new Date(),
       }));
     } else {
@@ -218,6 +232,135 @@ export default function Report() {
             <span className="material-symbols-outlined" aria-hidden="true">record_voice_over</span>
             <p>{lang === 'hi' ? 'इस प्रश्नावली को पूरा करने में किसी सहायक ने प्रतिभागी की मदद की। जवाब प्रतिभागी के बताए अनुसार दर्ज किए गए।' : 'Someone assisted the participant in completing this questionnaire. Responses were recorded as provided by the participant.'}</p>
           </div>
+        )}
+
+        <div className="rpt__notice rpt__notice--disclaimer">
+          <span className="material-symbols-outlined" aria-hidden="true">verified_user</span>
+          <p>{t('disclaimer.full', lang)}</p>
+        </div>
+
+        {matchedPatterns.length > 0 && (
+          <section className="rpt__section rpt__patterns-section" aria-labelledby="rpt-patterns-heading">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'विश्लेषण' : 'ANALYSIS'}</p>
+                <h2 id="rpt-patterns-heading" className="rpt__sec-title">{t('patterns.title', lang)}</h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">psychology</span>
+            </div>
+            <p className="rpt__sec-intro">{t('patterns.subtitle', lang)}</p>
+            {matchedClusters.length > 0 && (
+              <div className="rpt__clusters">
+                {matchedClusters.map((cluster) => (
+                  <div key={cluster.id} className="rpt__cluster-card">
+                    <span className="material-symbols-outlined" aria-hidden="true">{cluster.icon}</span>
+                    <div>
+                      <strong>{localized(cluster.title, lang)}</strong>
+                      <p>{localized(cluster.summary, lang)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="rpt__patterns-list">
+              {matchedPatterns.map((pattern) => {
+                const isExpanded = expandedPatterns[pattern.id] ?? false;
+                return (
+                  <article key={pattern.id} className="rpt__pattern-card">
+                    <div className="rpt__pattern-head">
+                      <div className="rpt__pattern-icon-box">
+                        <span className="material-symbols-outlined" aria-hidden="true">{pattern.icon}</span>
+                      </div>
+                      <div className="rpt__pattern-info">
+                        <h3 className="rpt__pattern-title">{localized(pattern.title, lang)}</h3>
+                        <p className="rpt__pattern-desc">{localized(pattern.description, lang)}</p>
+                      </div>
+                    </div>
+                    <div className="rpt__discuss-prompt">
+                      <span className="material-symbols-outlined" aria-hidden="true">chat</span>
+                      <p>{localized(pattern.discussionPrompt, lang)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="rpt__pattern-expand-btn"
+                      onClick={() => setExpandedPatterns((prev) => ({ ...prev, [pattern.id]: !prev[pattern.id] }))}
+                      aria-expanded={isExpanded}
+                    >
+                      <span>{isExpanded ? (lang === 'hi' ? 'छिपाएँ' : 'Hide') : (lang === 'hi' ? 'हम यह क्यों सुझा रहे हैं' : 'Why we are suggesting this')}</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">{isExpanded ? 'expand_less' : 'expand_more'}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="rpt__pattern-sources">
+                        {pattern.sources.map((source) => (
+                          <p key={source.id} className="rpt__pattern-source-item">
+                            <strong>{localized(source.label, lang)}:</strong> {localized(source.answer, lang)}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {matchedPatterns.length === 0 && (
+          <section className="rpt__section rpt__patterns-section" aria-labelledby="rpt-patterns-zero-heading">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'विश्लेषण' : 'ANALYSIS'}</p>
+                <h2 id="rpt-patterns-zero-heading" className="rpt__sec-title">{t('patterns.noneMatched.title', lang)}</h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">psychology</span>
+            </div>
+            <p className="rpt__sec-intro">{t('patterns.noneMatched.subtitle', lang)}</p>
+            <div className="rpt__patterns-list">
+              {patternDefinitions.map((pattern) => (
+                <article key={pattern.id} className="rpt__pattern-card rpt__pattern-card--inactive">
+                  <div className="rpt__pattern-head">
+                    <div className="rpt__pattern-icon-box">
+                      <span className="material-symbols-outlined" aria-hidden="true">{pattern.icon}</span>
+                    </div>
+                    <div className="rpt__pattern-info">
+                      <h3 className="rpt__pattern-title">{localized(pattern.title, lang)}</h3>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {amslerResults?.completed && amslerResults.data && (
+          <section className="rpt__section rpt__amsler-section" aria-labelledby="rpt-amsler-heading">
+            <div className="rpt__sec-head">
+              <div>
+                <p className="rpt__kicker">{lang === 'hi' ? 'होम स्क्रीनिंग' : 'HOME SCREENING'}</p>
+                <h2 id="rpt-amsler-heading" className="rpt__sec-title">{lang === 'hi' ? 'एम्सलर ग्रिड स्क्रीनिंग परिणाम' : 'Amsler Grid Screening Results'}</h2>
+              </div>
+              <span className="material-symbols-outlined rpt__sec-icon" aria-hidden="true">grid_on</span>
+            </div>
+            <div className="rpt__amsler-grid">
+              {['right', 'left'].map((eye) => {
+                const eyeData = amslerResults.data[eye];
+                const count = eyeData?.cellCount || (eyeData?.flaggedCells?.length ?? 0);
+                return (
+                  <div key={eye} className="rpt__amsler-eye-card">
+                    <span className="rpt__amsler-eye-label">{eye === 'right' ? (lang === 'hi' ? 'दाईं आँख' : 'Right Eye') : (lang === 'hi' ? 'बाईं आँख' : 'Left Eye')}</span>
+                    <strong className="rpt__amsler-eye-count">{count}</strong>
+                    <span className="rpt__amsler-eye-caption">{lang === 'hi' ? 'क्षेत्र चिह्नित' : 'regions flagged'}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="rpt__inline-note">
+              <span className="material-symbols-outlined" aria-hidden="true">info</span>
+              <p>{lang === 'hi'
+                ? 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया। अपनी अगली मुलाक़ात में अपने ऑप्टोमेट्रिस्ट को यह दिखाएँ।'
+                : 'This is a home screening result, not a diagnosis. Participant used a calibrated grid on a phone/tablet screen. Show this to your optometrist at your next visit.'}</p>
+            </div>
+          </section>
         )}
 
         <section className="rpt__section rpt__print-summary" aria-labelledby="rpt-summary-priorities">
@@ -591,6 +734,24 @@ export default function Report() {
 
         {appointmentPack && <AppointmentPreparationPack pack={appointmentPack} language={lang} />}
 
+        <section className="rpt__clinician-section">
+          <div className="rpt__clinician-card">
+            <div className="rpt__clinician-copy">
+              <span className="material-symbols-outlined rpt__clinician-icon" aria-hidden="true">clinical_notes</span>
+              <div>
+                <h3>{lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h3>
+                <p>{lang === 'hi'
+                  ? 'एक पृष्ठ का प्रिंट-अनुकूल सारांश जिसमें अनुमानित पैटर्न, अवलोकन, स्क्रीनिंग परिणाम और चर्चा विषय हैं।'
+                  : 'A one-page print-friendly summary with inferred patterns, observations, screening results and discussion topics.'}</p>
+              </div>
+            </div>
+            <button type="button" className="btn btn--outline btn--full" onClick={() => setShowClinicianBrief(true)}>
+              <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+              {t('clinicianBrief.open', lang)}
+            </button>
+          </div>
+        </section>
+
         <section className="rpt__export-section" aria-labelledby="rpt-export-heading">
           <div className="rpt__export-card">
             <div className="rpt__export-copy">
@@ -654,6 +815,7 @@ export default function Report() {
           </div>
         </section>
       </main>
+      {showClinicianBrief && <ClinicianBrief onClose={() => setShowClinicianBrief(false)} />}
     </div>
   );
 }
