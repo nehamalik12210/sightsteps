@@ -219,6 +219,7 @@ check(appSource.includes('path="/timeline"') && appSource.includes('VisionTimeli
 check(contextSource.includes('visionTimelineEntries') && contextSource.includes('setVisionTimelineEntries'), 'timeline is part of shared application state');
 check(storageSource.includes('visionTimelineEntries') && storageSource.includes('schemaVersion: 4'), 'timeline entries persist in the versioned local session record');
 check(timelineUtilitySource.includes('normalizeVisionTimelineEntries') && timelineUtilitySource.includes('MAX_VISION_TIMELINE_ENTRIES'), 'timeline data is sanitized and record count is bounded');
+check(/const seenIds = new Set\(\)/.test(timelineUtilitySource) && /normalizeVisionTimelineEntries\(timelineEntries\)/.test(appointmentPackSource), 'timeline IDs are deduplicated before they enter the report or appointment pack');
 check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineUtilitySource.includes('futureDate'), 'timeline validation rejects invalid and future dates');
 check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
 check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
