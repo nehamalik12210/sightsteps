@@ -124,7 +124,7 @@ export default function VisionActivity() {
     return (
       <main className="va" id="main-content" tabIndex="-1">
         <header className="va__topbar">
-          <button className="va__back-btn" type="button" onClick={() => navigate(-1)} aria-label={t('common.back', lang)}>
+          <button className="va__back-btn" type="button" onClick={() => navigate('/intake', { replace: true })} aria-label={t('common.back', lang)}>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
           <span className="va__topbar-title">{t('vision.title', lang)}</span>
