@@ -135,12 +135,12 @@ section('6. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
   'Main disclaimer': {
-    en: 'SightSteps is not a diagnostic tool. The observations, patterns and screening results below are participant-reported and are intended only to support a conversation with an eye-care professional.',
-    hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्क्रीनिंग परिणाम प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
+    en: 'SightSteps is not a diagnostic tool. The observations, patterns and self-monitoring activity records below are participant-reported and are intended only to support a conversation with an eye-care professional.',
+    hi: 'SightSteps एक निदान उपकरण नहीं है। नीचे दिए गए अवलोकन, पैटर्न और स्व-निगरानी गतिविधि के रिकॉर्ड प्रतिभागी द्वारा बताए गए हैं और केवल नेत्र देखभाल पेशेवर के साथ बातचीत को सहायता देने के लिए हैं।',
   },
   'Amsler note in clinician brief': {
     en: 'Participant-entered grid observations — not a clinical test result. A blank grid does not rule out a vision problem.',
-    hi: 'होम स्क्रीनिंग परिणाम — निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया।',
+    hi: 'प्रतिभागी द्वारा ग्रिड पर चिह्नित क्षेत्र — यह चिकित्सकीय परीक्षण का परिणाम नहीं है। खाली ग्रिड दृष्टि की समस्या को खारिज नहीं करता।',
   },
 };
 
