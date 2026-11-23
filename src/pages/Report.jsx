@@ -7,6 +7,7 @@ import { getReportedExperienceOptions } from '../data/questions.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
+import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
 
@@ -134,7 +135,10 @@ export default function Report() {
     && Boolean(visionResults?.data?.right);
   const hasFollowUp = report.followUpNotes.length > 0;
   const reportedConcerns = getReportedExperienceOptions(answers);
-  const selectedPriorities = Array.isArray(discussionPriorities) ? discussionPriorities : [];
+  const selectedPriorities = normalizeDiscussionPriorities(
+    discussionPriorities,
+    reportedConcerns.map((concern) => concern.value),
+  );
   const hasAppointmentNotes = Boolean(appointmentFollowUp?.appointmentDate || appointmentFollowUp?.professionalNotes || appointmentFollowUp?.followUpPlan || appointmentFollowUp?.nextAppointmentDate);
   const hasDiscussion = report.discussionPoints.length > 0;
   const orderedDiscussionPoints = [...report.discussionPoints].sort((a, b) => {
