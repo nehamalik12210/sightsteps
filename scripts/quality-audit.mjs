@@ -174,6 +174,7 @@ check(/speechSynthesis/.test(intake) && /currentOptions\.map/.test(intake), 'que
 check(/\/follow-up/.test(appSource) && /\/kiosk/.test(appSource), 'appointment follow-up and kiosk routes are registered');
 check(/RouteGuard/.test(appSource) && /getProtectedRouteRedirect/.test(appSource) && /requireIntake/.test(appSource), 'deep links require a valid session and completed journey stages');
 check(/path="\*"/.test(appSource) && /Navigate to="\/" replace/.test(appSource), 'unknown application routes return safely to Landing');
+check(/navigate\('\/intake', \{ replace: true \}\)/.test(vision), 'direction activity back navigation returns to the questionnaire even after a direct visit or refresh');
 check(/getBackNavigationAnswerIds/.test(read('src/utils/sessionRouting.js')) && /getBackNavigationAnswerIds\(visibleQuestions, currentQuestion.id, answers\)/.test(intake), 'questionnaire backtracking clears downstream answers without wiping earlier work');
 check(/clearAllSessions\(\)/.test(contextSource) && /if \(!cleared\) return false;/.test(contextSource), 'app reset preserves in-memory state when local deletion fails');
 check(/resettingRef = useRef\(false\)/.test(contextSource) && /resettingRef\.current\) return undefined;/.test(contextSource), 'autosaves are blocked while session deletion is in progress');
