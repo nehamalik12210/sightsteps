@@ -85,6 +85,25 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
         )}
       </section>
 
+      {pack.amsler && (
+        <section className="appointment-pack__section" aria-labelledby="appointment-pack-amsler">
+          <h2 id="appointment-pack-amsler">{hi ? 'एम्सलर ग्रिड होम स्क्रीनिंग' : 'Amsler Grid Home Screening'}</h2>
+          <div className="appointment-pack__amsler-grid">
+            <p><strong>{hi ? 'दाईं आँख:' : 'Right eye:'}</strong> {pack.amsler.right} {hi ? 'क्षेत्र चिह्नित' : 'regions flagged'}</p>
+            <p><strong>{hi ? 'बाईं आँख:' : 'Left eye:'}</strong> {pack.amsler.left} {hi ? 'क्षेत्र चिह्नित' : 'regions flagged'}</p>
+          </div>
+          {pack.amslerSpatial && (
+            <div className="appointment-pack__amsler-spatial">
+              {pack.amslerSpatial.right.map((line, i) => <p key={`r${i}`}>{line}</p>)}
+              {pack.amslerSpatial.left.map((line, i) => <p key={`l${i}`}>{line}</p>)}
+              {pack.amslerSpatial.comparison.map((line, i) => <p key={`c${i}`} className="appointment-pack__spatial-highlight">{line}</p>)}
+              <p className="appointment-pack__spatial-disclaimer">{pack.amslerSpatial.disclaimer}</p>
+            </div>
+          )}
+          <p className="appointment-pack__context">{hi ? 'होम स्क्रीनिंग परिणाम — निदान नहीं। ये परिणाम अपने ऑप्टोमेट्रिस्ट को दिखाएँ।' : 'Home screening result — not a diagnosis. Show these results to your optometrist.'}</p>
+        </section>
+      )}
+
       <footer className="appointment-pack__footer">
         {hi
           ? 'यह पैक केवल आपकी स्वयं बताई गई जानकारी और बातचीत के विषयों को व्यवस्थित करता है। यह आँखों की जाँच, निदान, तात्कालिकता का आकलन या प्रिस्क्रिप्शन नहीं है।'
