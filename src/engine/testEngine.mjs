@@ -628,12 +628,42 @@ assert(toggleNew.length === 3, 'tapping an unflagged cell adds it');
 assert(150 / CARD_WIDTH_MM > 0, 'minimum slider value still produces valid calibration');
 assert(500 / CARD_WIDTH_MM > 0, 'maximum slider value still produces valid calibration');
 assert(Math.abs(calculateGridSizePx(300) - testGridSizePx) < 0.001, 'shared grid-size helper matches 10cm calibration math');
-assert(canCalibrateAmsler(600, getMaxCalibrationSliderWidth(600)), '600px viewport fits the maximum allowed calibrated grid');
-assert(!canCalibrateAmsler(599, getMaxCalibrationSliderWidth(599)), 'narrow viewports cannot start Amsler calibration');
-assert(!canCalibrateAmsler(600, 500), 'calibration is blocked when the full grid would overflow');
-assert(doesCalibratedGridFit(600, 568), 'calibrated grid fits when viewport includes the 32px margin');
-assert(!doesCalibratedGridFit(599, 568), 'grid no longer fits after the viewport narrows');
-assert(!doesCalibratedGridFit(Number.NaN, 300), 'invalid viewport measurements fail closed');
+assert(
+  canCalibrateAmsler(600, 800, getMaxCalibrationSliderWidth(600)),
+  '600x800 viewport fits the maximum allowed calibrated grid in both dimensions'
+);
+assert(
+  !canCalibrateAmsler(599, 900, getMaxCalibrationSliderWidth(599)),
+  'narrow viewports cannot start Amsler calibration'
+);
+assert(
+  !canCalibrateAmsler(600, 650, getMaxCalibrationSliderWidth(600)),
+  'portrait viewport is blocked when calibrated grid plus controls do not fit vertically'
+);
+assert(
+  !canCalibrateAmsler(850, 390, getMaxCalibrationSliderWidth(850)),
+  'landscape phone viewport is blocked even when width fits but height does not'
+);
+assert(
+  !canCalibrateAmsler(600, 800, 500),
+  'calibration is blocked when the full grid would overflow horizontally'
+);
+assert(
+  doesCalibratedGridFit(600, 800, 568),
+  'calibrated grid fits when viewport includes width margin and vertical control reserve'
+);
+assert(
+  !doesCalibratedGridFit(900, 650, 568),
+  'grid is blocked when viewport height cannot fit square plus controls'
+);
+assert(
+  !doesCalibratedGridFit(599, 800, 568),
+  'grid no longer fits when viewport width narrows'
+);
+assert(
+  !doesCalibratedGridFit(Number.NaN, 800, 300),
+  'invalid viewport measurements fail closed'
+);
 
 // === Appointment Pack — Amsler Integration ===
 console.log('\n=== Appointment pack Amsler integration ===');
