@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
+import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import './AppointmentFollowUp.css';
 
 export default function AppointmentFollowUp() {
   const navigate = useNavigate();
-  const { language, appointmentFollowUp, setAppointmentFollowUp, storageAvailable, kioskMode } = useApp();
+  const { language, appointmentFollowUp, setAppointmentFollowUp, saveStatus, kioskMode } = useApp();
   const lang = language || 'en';
   const values = appointmentFollowUp || {};
   const update = (key, value) => setAppointmentFollowUp({ [key]: value });
@@ -23,7 +24,7 @@ export default function AppointmentFollowUp() {
         <p className="afu__intro">{lang === 'hi'
           ? 'अपनी अपॉइंटमेंट में हुई बातचीत और बताए गए अगले कदम अपने शब्दों में दर्ज करें। यह रिकॉर्ड स्वयं बताई गई जानकारी है।'
           : 'Record what was discussed at your appointment and any next steps you were given. This is your own account, not a clinical record.'}</p>
-        {storageAvailable === false && <p className="afu__warning" role="status">{lang === 'hi' ? 'स्थानीय स्टोरेज उपलब्ध नहीं है; ये नोट रीफ़्रेश करने पर खो सकते हैं।' : 'Local storage is unavailable. These notes may be lost if you refresh.'}</p>}
+        <LocalSaveStatus status={saveStatus} language={lang} />
 
         <div className="afu__field">
           <label htmlFor="afu-date">{lang === 'hi' ? 'अपॉइंटमेंट की तारीख' : 'Appointment date'}</label>
