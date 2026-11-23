@@ -154,12 +154,12 @@ const patterns = [
   {
     id: 'low-light-contrast',
     title: {
-      en: 'Contrast sensitivity changes',
-      hi: 'कंट्रास्ट संवेदनशीलता में बदलाव',
+      en: 'Low-light vision experiences',
+      hi: 'कम रोशनी में दृष्टि के अनुभव',
     },
     description: {
-      en: 'You reported difficulty in low-light situations and squinting to see clearly in those situations. You may wish to describe these specific experiences to an eye-care professional.',
-      hi: 'आपने कम रोशनी की स्थितियों में कठिनाई और उन स्थितियों में स्पष्ट देखने के लिए आँखें सिकोड़ने की बात बताई। आप इन विशेष अनुभवों के बारे में नेत्र-देखभाल पेशेवर को बता सकते हैं।',
+      en: 'You reported difficulty seeing in low-light situations and squinting in those situations. These are experiences to describe to an eye-care professional; they do not identify a cause.',
+      hi: 'आपने कम रोशनी की स्थितियों में देखने में कठिनाई और उन स्थितियों में आँखें सिकोड़ने की बात बताई। इन अनुभवों के बारे में नेत्र-देखभाल पेशेवर को बताएँ; ये अपने आप किसी कारण की पहचान नहीं करते।',
     },
     discussionPrompt: {
       en: 'You may want to describe when the low-light difficulty and squinting occur, and ask what kind of eye examination is appropriate.',
