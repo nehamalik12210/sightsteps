@@ -109,7 +109,7 @@
 - Added shared resolvePatternSourceKeys logic in src/engine/patternEngine.js; runtime pattern evaluation and the clinical-review exporter now use the same resolver. The exporter labels function-based keys as resolved for the scripted Ramesh answers.
 - Added a regression assertion for source-key resolution across every pattern definition.
 - Source commits: 9fa332a13135b6bc35cf280406cdbcac34e706bd, d82f18a094a44ac49274884df11c471c13b2aef1, 7224c5c8b59a402a8e7fbc97893a55fc00914f0d.
-- Verified on exact main revision ae31b03...: 961 engine tests, 2,524 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules), and review export completed (965 lines reported by the exporter; 8 patterns, 4 Ramesh matches, 10 discussion prompts, 2 follow-up notes).
+- Verified on exact main revision ae31b03... before the final cluster-copy audit correction; the final complete rerun is recorded in Change 16.: 961 engine tests, 2,524 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules), and review export completed (965 lines reported by the exporter; 8 patterns, 4 Ramesh matches, 10 discussion prompts, 2 follow-up notes).
 - Vercel has not deployed this source revision: the current status check reports a build-rate-limit. The latest READY production deployment remains the older 92a4d0da... revision. Browser rendering, print preview, real-device and independent clinical review remain outstanding.
 
 ### Change 16 — Near-vision cluster wording aligned with clinical-language audit
