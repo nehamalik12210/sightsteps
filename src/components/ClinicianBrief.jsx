@@ -36,6 +36,7 @@ export default function ClinicianBrief({ onClose }) {
     participantNote,
     amslerResults,
     visionTimelineEntries,
+    conversationReview,
     isDemo,
     demoPersona,
   } = useApp();
@@ -104,6 +105,23 @@ export default function ClinicianBrief({ onClose }) {
             verbosity="brief"
             language={lang}
           />
+        )}
+
+        {(conversationReview?.confirmed || conversationReview?.correction) && (
+          <section className="clinician-brief__section clinician-brief__participant-review">
+            <h2>
+              <span className="material-symbols-outlined" aria-hidden="true">fact_check</span>
+              {lang === 'hi' ? 'प्रतिभागी की समीक्षा' : 'Participant review'}
+            </h2>
+            <p>
+              {conversationReview.confirmed
+                ? (lang === 'hi' ? 'प्रतिभागी ने पुष्टि की कि सारांश उनकी बताई बात को दर्शाता है।' : 'The participant confirmed that the summary reflects what they wanted to share.')
+                : (lang === 'hi' ? 'प्रतिभागी ने सारांश की पुष्टि नहीं की।' : 'The participant has not confirmed the summary.')}
+            </p>
+            {conversationReview.correction && (
+              <blockquote>{conversationReview.correction}</blockquote>
+            )}
+          </section>
         )}
 
         {experienceProfile.timeline.entries.length > 0 && (
