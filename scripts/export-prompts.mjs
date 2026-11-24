@@ -30,7 +30,14 @@ function loc(value, lang) {
   return value ?? '';
 }
 
-const lines = [];
+const lines = [
+  'SIGHTSTEPS — CLINICAL REVIEW DRAFT',
+  '[EN] Document status: Draft for independent clinical review only. This export is not a diagnosis, clinical test result or prescription.',
+  '[HI] दस्तावेज़ की स्थिति: केवल स्वतंत्र चिकित्सकीय समीक्षा के लिए मसौदा। यह निदान, चिकित्सकीय परीक्षण का परिणाम या प्रिस्क्रिप्शन नहीं है।',
+  '[EN] Demo-data notice: The Ramesh profile and its matched patterns/discussion prompts are based on scripted demo data, not a real participant record.',
+  '[HI] डेमो डेटा सूचना: रमेश की प्रोफ़ाइल, उससे मेल खाते पैटर्न और चर्चा के विषय निर्धारित डेमो डेटा पर आधारित हैं, किसी वास्तविक प्रतिभागी के रिकॉर्ड पर नहीं।',
+  '',
+];
 function section(title) { lines.push('', `${'═'.repeat(60)}`, `  ${title}`, `${'═'.repeat(60)}`, ''); }
 function sub(title) { lines.push('', `── ${title} ${'─'.repeat(Math.max(0, 50 - title.length))}`, ''); }
 function row(label, en, hi) {
