@@ -445,8 +445,14 @@ export function getVisibleQuestions(answers = {}, activities = []) {
   const additionalExperienceQuestions = buildAdditionalExperienceQuestions(answers);
   if (additionalExperienceQuestions.length) {
     const anchorIndex = visible.findIndex((question) => question.id === 'which_eye');
-    const fallbackIndex = visible.findIndex((question) => question.id === 'experience_frequency');
-    const insertionIndex = (anchorIndex >= 0 ? anchorIndex : fallbackIndex) + 1;
+    const contextIndex = visible.findIndex((question) => question.id === 'experience_context');
+    const frequencyIndex = visible.findIndex((question) => question.id === 'experience_frequency');
+    const insertionAnchor = anchorIndex >= 0
+      ? anchorIndex
+      : contextIndex >= 0
+        ? contextIndex
+        : frequencyIndex;
+    const insertionIndex = insertionAnchor + 1;
     if (insertionIndex > 0) visible.splice(insertionIndex, 0, ...additionalExperienceQuestions);
   }
   const affected = Array.isArray(answers.affected_activities?.value) ? answers.affected_activities.value : [];
