@@ -26,7 +26,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 ## Key Features
 
 ### 🧠 Pattern Detection Engine
-A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of participant answers to infer clinically meaningful observations the participant did not explicitly state — such as screen-related strain, presbyopia-related changes, or asymmetric symptoms. When multiple patterns co-fire, cluster narratives surface relationships between them. Every inference is framed as a discussion prompt with traceable participant-answer inputs, never a conclusion.
+A pattern engine (`src/engine/patternEngine.js`) evaluates predefined combinations of participant-reported answers and links each discussion prompt to the exact source responses. Pattern groupings organise overlapping matches; they are not independent confirmations, causal explanations or diagnoses.
 
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
@@ -190,7 +190,7 @@ sightsteps/
 ├── scripts/
 │   ├── clinical-language-audit.mjs   # Forbidden-phrase scanner (CI gate)
 │   ├── export-prompts.mjs            # Clinical review export generator
-│   └── quality-audit.mjs             # Static quality and dynamic-import checks (2,522)
+│   └── quality-audit.mjs             # Static quality and dynamic-import checks (2,524)
 ├── src/
 │   ├── components/
 │   │   ├── AccessibilityControls.jsx  # Text size, contrast, motion, touch targets
@@ -211,7 +211,7 @@ sightsteps/
 │   ├── engine/
 │   │   ├── patternEngine.js           # Pattern detection / inference engine
 │   │   ├── ruleEngine.js              # Deterministic rules engine
-│   │   └── testEngine.mjs             # Engine and utility regression tests (849)
+│   │   └── testEngine.mjs             # Engine and utility regression tests (961)
 │   ├── pages/
 │   │   ├── ActivityProfile.jsx        # Everyday activity selection
 │   │   ├── AmslerGrid.jsx             # Amsler grid self-monitoring activity
@@ -255,8 +255,8 @@ The latest exact-source verification completed on main commit ae31b03c81475ab1ba
 
 | Check | Result |
 |---|---|
-| Static quality audit | **2,522 passed**, 0 failed |
-| Regression test suite | **849 passed**, 0 failed (incl. custom “Other” activity source traceability in rule-engine topics, experience-profile source IDs and localized appointment-pack provenance) |
+| Static quality audit | **2,524 passed**, 0 failed |
+| Regression test suite | **961 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
 | Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
 | Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (105.99 kB gzip) |
 | Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.60 kB (33.13 kB gzip) |
@@ -268,7 +268,7 @@ These checks cover source structure, data validation, routing, persistence, patt
 
 The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
 
-Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 344.80 kB minified (105.91 kB gzip); the largest route chunk is the Report page at 147.38 kB (32.22 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
+Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.60 kB (33.13 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
 ---
 
