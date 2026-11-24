@@ -378,3 +378,24 @@ export function getProgress(answers = {}, activities = []) {
     fraction: visible.length ? answered / visible.length : 0,
   };
 }
+
+/**
+ * Progress for the question currently displayed in the questionnaire.
+ * The count, percentage label, progress-bar width and ARIA value must all use
+ * this same current-position calculation (rather than answered-answer count).
+ */
+export function getQuestionPositionProgress(visibleQuestions = [], currentQuestionId = '') {
+  const questions = Array.isArray(visibleQuestions) ? visibleQuestions : [];
+  const total = questions.length;
+  if (!total || !currentQuestionId) return { current: 0, total, percent: 0 };
+
+  const index = questions.findIndex((question) => question?.id === currentQuestionId);
+  if (index < 0) return { current: 0, total, percent: 0 };
+
+  const current = index + 1;
+  return {
+    current,
+    total,
+    percent: Math.round((current / total) * 100),
+  };
+}
