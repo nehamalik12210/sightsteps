@@ -5,7 +5,7 @@
  */
 
 import { evaluateAnswers } from './ruleEngine.js';
-import { getBackNavigationAnswerIds, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
+import { getBackNavigationAnswerIds, getAmslerReturnPath, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
 import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
@@ -15,6 +15,7 @@ import rameshPersona from '../data/demoPersona.js';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
+import { buildDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { evaluatePatterns } from './patternEngine.js';
 import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
 import {
@@ -300,6 +301,17 @@ const reportedOptions = getVisibleQuestions({ blurred_vision: { value: 'yes' }, 
 assert(reportedOptions.length === 1 && reportedOptions[0].value === 'blurred_vision', 'main concern choices are limited to experiences the participant reported');
 const headacheFollowUps = getVisibleQuestions({ headaches: { value: 'sometimes' }, primary_concern: { value: 'headaches' } });
 assert(headacheFollowUps.some((question) => question.id === 'affected_activities'), 'affected-activity question is shown after a main concern is selected');
+
+const savedDirectionResult = { completed: true, skipped: false, data: { activityType: 'direction-awareness' } };
+assert(getAmslerReturnPath(savedDirectionResult) === '/report', 'Amsler returns to the report after a completed E activity');
+assert(getAmslerReturnPath({ skipped: true }) === '/report', 'Amsler returns to the report after a skipped E activity');
+assert(getAmslerReturnPath(null) === '/vision', 'Amsler returns to the E activity when it was opened before E completion');
+assert(getAmslerReturnPath({ completed: true, data: { activityType: 'other' } }) === '/vision', 'Amsler does not treat unrelated activity results as E-test completion');
+const directionResultFixture = buildDirectionAwarenessResult({ left: [{ correct: true }, { correct: false }], right: [{ correct: true }] });
+assert(directionResultFixture.completed === true && directionResultFixture.data.activityType === 'direction-awareness', 'direction result builder marks the E activity as completed');
+assert(directionResultFixture.data.left.correct === 1 && directionResultFixture.data.left.total === 2, 'direction result builder preserves left-round counts and trials');
+assert(directionResultFixture.data.right.correct === 1 && directionResultFixture.data.right.total === 1, 'direction result builder preserves right-round counts and trials');
+assert(buildDirectionAwarenessResult({}).data.left.total === 0 && buildDirectionAwarenessResult({}).data.right.total === 0, 'direction result builder safely handles empty round data');
 
 console.log('\n=== Resume routing regressions ===');
 assert(getResumePath({ activities: [], primaryActivity: null, answers: {} }) === '/activities', 'new session resumes at activity profile');
