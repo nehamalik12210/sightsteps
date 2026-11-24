@@ -3,7 +3,7 @@
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
 **Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
 **Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
-**Latest verified source commit (isolated checks):** `ae31b03c81475ab1ba022986493719eefb6abd74`  
+**Latest verified source commit (isolated checks):** `7224c5c8b59a402a8e7fbc97893a55fc00914f0d`  
 **Latest verified production deployment:** `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (READY; `main`; commit `92a4d0da...`; production alias `https://sightsteps.vercel.app`; contains the verified app code from `5d964fc5...`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
@@ -44,7 +44,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - npm test: **961 passed, 0 failed**.
 - npm run audit: **2,524 passed, 0 failed**.
 - npm run clinical-lint: passed; **22 JSX files / 2,629 copy fragments**, no violations.
-- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (105.99 kB gzip)**; Report chunk **151.60 kB (33.13 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.14 KiB)**. The build reruns the three checks above.
+- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (105.99 kB gzip)**; Report chunk **151.72 kB (33.16 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.26 KiB)**. The build reruns the three checks above.
 - npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
 
 **Deployment status:** the latest READY production deployment remains dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb, commit 92a4d0da..., which contains earlier application code through 5d964fc5.... The latest main source commit ae31b03... has not been deployed. Its Vercel status check currently reports build-rate-limit; do not treat that provider status as a passing deployment. An earlier build attempt at af2f541... did execute tests and failed on stale Ramesh cluster assertions; those assertions were corrected and the current exact source passed the checks listed above in the isolated sandbox.
