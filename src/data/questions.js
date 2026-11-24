@@ -27,7 +27,7 @@ const questions = [
   },
   {
     id: 'headaches',
-    text: { en: 'Do you get headaches, especially after reading or screen use?', hi: 'क्या आपको सिरदर्द होता है, खासकर पढ़ने या स्क्रीन देखने के बाद?' },
+    text: { en: 'How often do you get headaches?', hi: 'आपको कितनी बार सिरदर्द होता है?' },
     type: 'single', category: 'refractive',
     options: [
       { value: 'often', label: { en: 'Often', hi: 'अक्सर' }, icon: 'sentiment_very_dissatisfied' },
@@ -67,7 +67,7 @@ const questions = [
   },
   {
     id: 'close_work',
-    text: { en: 'Do you do close-up work like reading, sewing, or crafts?', hi: 'क्या आप पास का काम करते हैं जैसे पढ़ना, सिलाई या दस्तकारी?' },
+    text: { en: 'How often do you spend extended periods doing close-up work?', hi: 'आप कितनी बार लंबे समय तक पास से देखने वाला काम करते हैं?' },
     type: 'single', category: 'lifestyle',
     options: [
       { value: 'daily', label: { en: 'Daily, for hours', hi: 'रोज़, कई घंटे' }, icon: 'draw' },
@@ -155,7 +155,7 @@ const questions = [
     id: 'experience_frequency',
     text: { en: 'How often do you notice the main vision experience you want to discuss?', hi: 'जिस मुख्य दृष्टि अनुभव पर आप बात करना चाहते हैं, वह कितनी बार होता है?' },
     type: 'single', category: 'refractive',
-    showIf: (answers) => Boolean(answers.primary_concern?.value),
+    showIf: (answers) => Boolean(answers.primary_concern?.value) && answers.primary_concern.value !== 'headaches',
     options: [
       { value: 'daily', label: { en: 'Every day', hi: 'रोज़' }, icon: 'today' },
       { value: 'weekly', label: { en: 'A few times a week', hi: 'हफ़्ते में कुछ बार' }, icon: 'date_range' },
@@ -275,7 +275,7 @@ const IMPACT_FREQUENCY_OPTIONS = [
 const IMPACT_OPTIONS = [
   { value: 'takes_longer', label: { en: 'It takes me longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' }, icon: 'schedule' },
   { value: 'discomfort', label: { en: 'I feel discomfort', hi: 'मुझे असहजता महसूस होती है' }, icon: 'sentiment_dissatisfied' },
-  { value: 'avoid_stop', label: { en: 'I sometimes avoid or stop the activity', hi: 'मैं कभी-कभी गतिविधि टालता/रोकता हूँ' }, icon: 'pause_circle' },
+  { value: 'avoid_stop', label: { en: 'I avoid or stop the activity', hi: 'मैं गतिविधि टालता/रोकता हूँ' }, icon: 'pause_circle' },
   { value: 'adjustments', label: { en: 'I need to adjust distance, lighting or position', hi: 'मुझे दूरी, रोशनी या स्थिति बदलनी पड़ती है' }, icon: 'tune' },
   { value: 'other', label: { en: 'Something else', hi: 'कुछ और' }, icon: 'more_horiz' },
   { value: 'none', label: { en: 'Actually, I do not notice an impact', hi: 'वास्तव में, मुझे कोई प्रभाव महसूस नहीं होता' }, icon: 'check_circle' },
@@ -302,6 +302,18 @@ export function getReportedExperienceOptions(answers = {}) {
   return Object.entries(EXPERIENCE_ANSWER_VALUES)
     .filter(([id, values]) => values.includes(answers[id]?.value))
     .map(([id]) => ({ value: id, label: labels[id], icon: questions.find((q) => q.id === id)?.options?.[0]?.icon || 'visibility' }));
+}
+
+const EXPERIENCE_CONTEXT_EXCLUSIONS = {
+  // Blur distance is already captured by the dedicated near/far question.
+  blurred_vision: ['near_tasks', 'distance_tasks'],
+  // The initial night-vision response already establishes the low-light context.
+  night_vision: ['low_light'],
+};
+
+function getExperienceContextOptions(experienceId, options) {
+  const excluded = EXPERIENCE_CONTEXT_EXCLUSIONS[experienceId] || [];
+  return options.filter((option) => !excluded.includes(option.value));
 }
 
 const ADDITIONAL_CONCERN_EXCLUSIONS = [
@@ -341,8 +353,8 @@ function buildAdditionalExperienceQuestions(answers = {}) {
     });
     return [
       detail('onset', 'When did you first notice', 'आपने इसे पहली बार कब महसूस किया?', 'single', onsetOptions),
-      detail('frequency', 'How often do you notice', 'यह कितनी बार महसूस होता है?', 'single', frequencyOptions),
-      detail('context', 'In which situations do you notice', 'किन परिस्थितियों में यह महसूस होता है? सभी लागू विकल्प चुनें।', 'multi', contextOptions),
+      ...(experienceId === 'headaches' ? [] : [detail('frequency', 'How often do you notice', 'यह कितनी बार महसूस होता है?', 'single', frequencyOptions)]),
+      detail('context', 'In which situations do you notice', 'किन परिस्थितियों में यह महसूस होता है? सभी लागू विकल्प चुनें।', 'multi', getExperienceContextOptions(experienceId, contextOptions)),
       ...(experienceId === 'headaches' ? [] : [detail('eye', 'Where do you notice', 'यह किस आँख में महसूस होता है?', 'single', eyeOptions)]),
     ];
   });
@@ -417,6 +429,14 @@ export function getVisibleQuestions(answers = {}, activities = []) {
   const visible = questions.filter((question) => !question.showIf || question.showIf(answers)).map((question) => ({ ...question, options: [...(question.options || [])] }));
   const primaryIndex = visible.findIndex((question) => question.id === 'primary_concern');
   if (primaryIndex >= 0) visible[primaryIndex] = { ...visible[primaryIndex], options: getReportedExperienceOptions(answers) };
+  const mainContextIndex = visible.findIndex((question) => question.id === 'experience_context');
+  if (mainContextIndex >= 0) {
+    const experienceId = answers.primary_concern?.value;
+    visible[mainContextIndex] = {
+      ...visible[mainContextIndex],
+      options: getExperienceContextOptions(experienceId, visible[mainContextIndex].options),
+    };
+  }
   const additionalIndex = visible.findIndex((question) => question.id === 'additional_concerns');
   if (additionalIndex >= 0) {
     const additionalOptions = getReportedExperienceOptions(answers).filter((item) => item.value !== answers.primary_concern?.value);
