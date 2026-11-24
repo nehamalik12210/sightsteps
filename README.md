@@ -18,7 +18,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 | Theme Component | What It Demands | SightSteps Implementation |
 |---|---|---|
 | **No-Device** | No camera, no specialised hardware, works on ordinary phones/tablets | Browser-based PWA, runs on any phone or tablet with a browser |
-| **Vision Intelligence** | The app must infer or compute something about vision beyond reorganising answers | Pattern detection engine infers 8 discussion patterns from answer combinations; grouping narratives surface relationships between matched patterns; Amsler self-monitoring activity records participant-flagged grid regions and describes their quadrant distribution |
+| **Vision Intelligence** | The app must infer or compute something about vision beyond reorganising answers | Pattern engine organises 8 predefined discussion patterns from participant answers; grouping narratives organise related matches; Amsler self-monitoring activity records participant-flagged grid regions and describes their quadrant distribution |
 | **Accessible Clinical UX** | Bilingual, voice, keyboard, screen-reader, kiosk privacy, clinical credibility | Bilingual EN/HI, TTS, STT, keyboard nav, kiosk mode, clinician brief, clinical language lint, WCAG-minded controls |
 
 ---
@@ -43,7 +43,7 @@ Before using the report, participants can confirm that the Conversation Map refl
 An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked unless the calibrated 10 cm square fits within both visible viewport dimensions with reserved space for controls. Wide but short landscape-phone viewports are blocked. This screen-fit guard does not validate physical display calibration. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
 
 ### 🩺 Clinician Brief
-A compact, print-optimised summary designed for a clinician's two-minute scan, containing inferred patterns, observation groups, Amsler results, discussion prompts and source references. Actual page count remains subject to browser print-preview validation.
+A compact, print-optimised summary designed for a clinician's two-minute scan, containing matched discussion patterns, observation groups, Amsler results, discussion prompts and source references. Actual page count remains subject to browser print-preview validation.
 
 ### 🌐 Bilingual Journey
 Full English and Hindi support across onboarding, questions, patterns, discussion prompts, Amsler wording, clinician brief, and report content.
@@ -60,7 +60,7 @@ Dedicated participant flow with a five-minute inactivity timeout and session cle
 
 ### 📋 Two Report Formats
 - **Appointment Preparation Pack** — Compact printable summary with personal priorities, questions, up to three discussion prompts and the five most recent timeline entries; actual page count still requires browser print-preview validation
-- **Detailed Report** — Full observations, inferred patterns, Amsler results, complete participant-recorded timeline, and source references
+- **Detailed Report** — Full observations, matched discussion patterns, Amsler results, complete participant-recorded timeline, and source references
 
 ### 📅 My Vision Timeline
 Participants can record dated experiences, approximate times, activity context and personal notes. Entries can be edited or deleted and are stored with the local session.
@@ -111,7 +111,7 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 | PWA | vite-plugin-pwa, web app manifest & service worker |
 | Voice | Browser Web Speech APIs where available |
 
-The rules engine turns recorded answers into observation groups, activity context and discussion prompts. The pattern engine evaluates answer combinations to surface inferred observations. Both retain references to their source questions so the report can explain where each point came from. Neither uses a generative medical model or infers a diagnosis.
+The rules engine turns recorded answers into observation groups, activity context and discussion prompts. The pattern engine evaluates answer combinations to surface predefined discussion groupings. Both retain references to their source questions so the report can explain where each point came from. Neither uses a generative medical model or infers a diagnosis.
 
 ---
 
@@ -209,7 +209,7 @@ sightsteps/
 │   │   ├── patterns.js                # 8 clinically defensible pattern definitions
 │   │   └── questions.js               # Bilingual question bank with branching
 │   ├── engine/
-│   │   ├── patternEngine.js           # Pattern detection / inference engine
+│   │   ├── patternEngine.js           # Participant-response pattern organiser
 │   │   ├── ruleEngine.js              # Deterministic rules engine
 │   │   └── testEngine.mjs             # Engine and utility regression tests (961)
 │   ├── pages/
@@ -268,7 +268,7 @@ These checks cover source structure, data validation, routing, persistence, patt
 
 The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
 
-Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.60 kB (33.13 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
+Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.72 kB (33.16 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
 ---
 
