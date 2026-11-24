@@ -36,6 +36,8 @@ const lines = [
   '[HI] दस्तावेज़ की स्थिति: केवल स्वतंत्र चिकित्सकीय समीक्षा के लिए मसौदा। यह निदान, चिकित्सकीय परीक्षण का परिणाम या प्रिस्क्रिप्शन नहीं है।',
   '[EN] Demo-data notice: The Ramesh profile and its matched patterns/discussion prompts are based on scripted demo data, not a real participant record.',
   '[HI] डेमो डेटा सूचना: रमेश की प्रोफ़ाइल, उससे मेल खाते पैटर्न और चर्चा के विषय निर्धारित डेमो डेटा पर आधारित हैं, किसी वास्तविक प्रतिभागी के रिकॉर्ड पर नहीं।',
+  '[EN] The custom “Other activity” provenance example later in this export is also synthetic test data, not a participant record.',
+  '[HI] इस निर्यात में आगे दिया गया कस्टम “अन्य गतिविधि” स्रोत उदाहरण भी कृत्रिम परीक्षण डेटा है, किसी प्रतिभागी का रिकॉर्ड नहीं।',
   '',
 ];
 function section(title) { lines.push('', `${'═'.repeat(60)}`, `  ${title}`, `${'═'.repeat(60)}`, ''); }
@@ -116,8 +118,44 @@ for (const point of rameshReport.discussionPoints) {
   lines.push('');
 }
 
-// ─── 5. Follow-Up Notes ──────────────────────────────────────
-section('5. FOLLOW-UP NOTES (Ramesh)');
+// ─── 5. Custom "Other" Activity Provenance Example ────────────
+section('5. CUSTOM "OTHER" ACTIVITY PROVENANCE (SYNTHETIC TEST DATA)');
+
+const customOtherAnswers = {
+  custom_activity_name: {
+    value: 'Jewellery making',
+    label: { en: 'Jewellery making', hi: 'Jewellery making' },
+  },
+  affected_activities: {
+    value: ['other'],
+    label: { en: 'Other', hi: 'अन्य' },
+  },
+  activity_impact_other: {
+    value: ['takes_longer'],
+    label: { en: 'It takes longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' },
+  },
+};
+const customOtherReport = evaluateAnswers(customOtherAnswers, {
+  activities: ['other'],
+  primaryActivity: 'other',
+});
+for (const point of customOtherReport.discussionPoints.filter((item) => (
+  ['primary_activity_context', 'affected_activity_context'].includes(item.id)
+))) {
+  sub('Discussion: ' + point.id);
+  row('Title', loc(point.title, 'en'), loc(point.title, 'hi'));
+  row('Context', loc(point.context, 'en'), loc(point.context, 'hi'));
+  row('Prompt', loc(point.prompt, 'en'), loc(point.prompt, 'hi'));
+  lines.push('  Sources (' + point.sources.length + '):');
+  for (const source of point.sources) {
+    lines.push('    - [EN] ' + loc(source.label, 'en') + ': ' + loc(source.answer, 'en'));
+    lines.push('      [HI] ' + loc(source.label, 'hi') + ': ' + loc(source.answer, 'hi'));
+  }
+  lines.push('');
+}
+
+// ─── 6. Follow-Up Notes ──────────────────────────────────────
+section('6. FOLLOW-UP NOTES (Ramesh)');
 
 for (const note of rameshReport.followUpNotes) {
   sub(`Note: ${note.id}`);
@@ -126,8 +164,8 @@ for (const note of rameshReport.followUpNotes) {
   lines.push('');
 }
 
-// ─── 6. Amsler Grid Wording ──────────────────────────────────
-section('6. AMSLER GRID WORDING');
+// ─── 12. Amsler Grid Wording ──────────────────────────────────
+section('12. AMSLER GRID WORDING');
 
 const amslerStrings = {
   'Intro notice': {
@@ -157,8 +195,8 @@ for (const [label, text] of Object.entries(amslerStrings)) {
   row(label, text.en, text.hi);
 }
 
-// ─── 7. Clinician Brief Wording ──────────────────────────────
-section('7. CLINICIAN BRIEF WORDING');
+// ─── 12. Clinician Brief Wording ──────────────────────────────
+section('12. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
   'Main disclaimer': {
@@ -176,8 +214,8 @@ for (const [label, text] of Object.entries(briefStrings)) {
 }
 
 
-// ─── 8. Adaptive Additional-Experience Questions ─────────────
-section('8. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
+// ─── 12. Adaptive Additional-Experience Questions ─────────────
+section('12. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
 
 // Illustrative answer fixture: these are question templates, not a clinical case.
 const secondaryQuestionFixture = {
@@ -209,8 +247,8 @@ for (const question of secondaryQuestions) {
   lines.push('');
 }
 
-// ─── 9. Custom Activity and Participant Review ───────────────
-section('9. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
+// ─── 12. Custom Activity and Participant Review ───────────────
+section('12. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
 row(
   'Custom activity prompt',
   'What is your other everyday activity? Example participant entry: jewellery making.',
@@ -242,8 +280,8 @@ row(
   'यह समीक्षा केवल बातचीत का संदर्भ है। इससे मूल जवाब या चिकित्सकीय व्याख्या नहीं बदलती।',
 );
 
-// ─── 10. Source Provenance Labels ─────────────────────────────
-section('10. SOURCE PROVENANCE LABELS');
+// ─── 12. Source Provenance Labels ─────────────────────────────
+section('12. SOURCE PROVENANCE LABELS');
 row(
   'Report discussion topic',
   'Your responses linked to this topic:',
@@ -260,8 +298,8 @@ row(
   'इस विषय से जुड़े आपके जवाब:',
 );
 
-// ─── 11. Report Notice Strings ───────────────────────────────
-section('11. KEY i18n STRINGS');
+// ─── 12. Report Notice Strings ───────────────────────────────
+section('12. KEY i18n STRINGS');
 const keyI18nKeys = [
   'disclaimer.full',
   'patterns.title',
