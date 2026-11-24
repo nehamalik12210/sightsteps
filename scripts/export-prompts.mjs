@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { evaluateAnswers } from '../src/engine/ruleEngine.js';
 import { evaluatePatterns } from '../src/engine/patternEngine.js';
 import patterns from '../src/data/patterns.js';
+import clusters from '../src/data/patternClusters.js';
 import strings from '../src/data/i18n.js';
 import rameshPersona from '../src/data/demoPersona.js';
 import { getVisibleQuestions } from '../src/data/questions.js';
@@ -52,8 +53,20 @@ for (const pattern of patterns) {
   lines.push('');
 }
 
-// ─── 2. Pattern Engine Output (Demo Persona) ─────────────────
-section('2. MATCHED PATTERNS FOR DEMO PERSONA (Ramesh, 42, Tailor)');
+// ─── 2. Pattern Cluster Narratives ───────────────────────────
+section('2. PATTERN CLUSTER NARRATIVES (src/data/patternClusters.js)');
+
+for (const cluster of clusters) {
+  sub('Cluster: ' + cluster.id);
+  row('Title', loc(cluster.title, 'en'), loc(cluster.title, 'hi'));
+  row('Summary', loc(cluster.summary, 'en'), loc(cluster.summary, 'hi'));
+  lines.push('  Member pattern IDs: ' + cluster.memberIds.join(', '));
+  lines.push('  Minimum matched patterns: ' + cluster.minMatch);
+  lines.push('');
+}
+
+// ─── 3. Pattern Engine Output (Demo Persona) ─────────────────
+section('3. MATCHED PATTERNS FOR DEMO PERSONA (Ramesh, 42, Tailor)');
 
 const rameshPatterns = evaluatePatterns(rameshPersona.answers);
 if (rameshPatterns.length === 0) {
@@ -74,7 +87,7 @@ if (rameshPatterns.length === 0) {
 }
 
 // ─── 3. Rules Engine Discussion Prompts (Demo Persona) ────────
-section('3. DISCUSSION PROMPTS FROM RULES ENGINE (Ramesh)');
+section('4. DISCUSSION PROMPTS FROM RULES ENGINE (Ramesh)');
 
 const rameshReport = evaluateAnswers(rameshPersona.answers, {
   activities: rameshPersona.activities,
@@ -96,7 +109,7 @@ for (const point of rameshReport.discussionPoints) {
 }
 
 // ─── 4. Follow-Up Notes ──────────────────────────────────────
-section('4. FOLLOW-UP NOTES (Ramesh)');
+section('5. FOLLOW-UP NOTES (Ramesh)');
 
 for (const note of rameshReport.followUpNotes) {
   sub(`Note: ${note.id}`);
@@ -106,7 +119,7 @@ for (const note of rameshReport.followUpNotes) {
 }
 
 // ─── 5. Amsler Grid Wording ──────────────────────────────────
-section('5. AMSLER GRID WORDING');
+section('6. AMSLER GRID WORDING');
 
 const amslerStrings = {
   'Intro notice': {
@@ -137,7 +150,7 @@ for (const [label, text] of Object.entries(amslerStrings)) {
 }
 
 // ─── 6. Clinician Brief Wording ──────────────────────────────
-section('6. CLINICIAN BRIEF WORDING');
+section('7. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
   'Main disclaimer': {
@@ -156,7 +169,7 @@ for (const [label, text] of Object.entries(briefStrings)) {
 
 
 // ─── 7. Adaptive Additional-Experience Questions ─────────────
-section('7. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
+section('8. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
 
 // Illustrative answer fixture: these are question templates, not a clinical case.
 const secondaryQuestionFixture = {
@@ -189,7 +202,7 @@ for (const question of secondaryQuestions) {
 }
 
 // ─── 8. Custom Activity and Participant Review ───────────────
-section('8. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
+section('9. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
 row(
   'Custom activity prompt',
   'What is your other everyday activity? Example participant entry: jewellery making.',
@@ -222,7 +235,7 @@ row(
 );
 
 // ─── 9. Report Notice Strings ────────────────────────────────
-section('9. KEY i18n STRINGS');
+section('10. KEY i18n STRINGS');
 const keyI18nKeys = [
   'disclaimer.full',
   'patterns.title',
