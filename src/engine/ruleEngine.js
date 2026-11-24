@@ -636,7 +636,8 @@ export function evaluateAnswers(answers = {}, context = {}) {
     ...(id === mainConcernId ? {
       onset: safeAnswers.experience_onset?.label || null,
       change: safeAnswers.experience_change?.label || null,
-      frequency: safeAnswers.experience_frequency?.label || null,
+      frequency: safeAnswers.experience_frequency?.label
+        || (mainConcernId === 'headaches' ? safeAnswers.headaches?.label || null : null),
       eye: safeAnswers.which_eye?.label || null,
       contexts: safeAnswers.experience_context?.label || null,
       affectedActivities: (activitiesContext?.impactDetails || []).map((entry) => ({ id: entry.id, label: entry.label, impact: entry.answer, frequency: entry.frequencyAnswer })),
