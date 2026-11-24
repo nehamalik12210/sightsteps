@@ -321,6 +321,9 @@ check(report.includes('ClinicianBrief') && report.includes('showClinicianBrief')
 check(report.includes('rpt__patterns-section') && report.includes('rpt__pattern-card'), 'report renders pattern cards with their own section');
 check(report.includes('amslerResults') && report.includes('rpt__amsler-section'), 'report renders Amsler screening results');
 const amslerGridSource = read('src/pages/AmslerGrid.jsx');
+check(/handleOpenAmsler/.test(vision) && /setVisionResults\(buildDirectionAwarenessResult\(results\)\)/.test(vision) && /onClick=\{handleOpenAmsler\}/.test(vision), 'opening Amsler first saves the completed E-orientation activity');
+check(/navigate\(getAmslerReturnPath\(visionResults\)/.test(amslerGridSource) && /getAmslerReturnPath/.test(amslerGridSource), 'Amsler completion returns to the report after E activity completion');
+check(/savedDirectionResults/.test(vision) && /useState\(\(\) => \(savedDirectionResults \? 'results' : 'intro'\)\)/.test(vision), 'reopening the E activity restores its saved results instead of its intro screen');
 check(/id="main-content"/.test(amslerGridSource), 'Amsler grid page has a skip-navigation main landmark');
 check(accessibilityControlsSource.includes("addEventListener('pointerdown', handleOutsidePointer)") && accessibilityControlsSource.includes("detailsRef.current.contains(event.target)"), 'accessibility settings close when a user taps outside the panel');
 check(accessibilityControlsCssSource.includes('data-a11y-contrast') && accessibilityControlsCssSource.includes('data-a11y-targets') && accessibilityControlsCssSource.includes('data-a11y-motion'), 'display settings provide contrast, larger targets and reduced-motion modes');
