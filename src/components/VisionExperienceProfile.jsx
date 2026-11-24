@@ -14,6 +14,19 @@ function sourceLabel(sourceId, profile, language) {
   const question = questionBank.find((item) => item.id === sourceId);
   if (question?.text) return localized(question.text, language);
 
+  const additionalMatch = sourceId.match(/^additional_experience_(.+)_(onset|frequency|context|eye)$/);
+  if (additionalMatch) {
+    const experience = profile.additionalExperiences.find((item) => item.id === additionalMatch[1]);
+    const label = localized(experience?.label, language);
+    const suffix = {
+      onset: language === 'hi' ? 'पहली बार कब महसूस हुआ' : 'When first noticed',
+      frequency: language === 'hi' ? 'आवृत्ति' : 'Frequency',
+      context: language === 'hi' ? 'परिस्थितियाँ' : 'Situations',
+      eye: language === 'hi' ? 'किस आँख में' : 'Eye(s) involved',
+    }[additionalMatch[2]];
+    return label + ' — ' + suffix;
+  }
+
   const impactFrequency = sourceId.startsWith('activity_impact_frequency_');
   const impactDetail = sourceId.startsWith('activity_impact_');
   if (impactFrequency || impactDetail) {
@@ -139,6 +152,9 @@ export default function VisionExperienceProfile({
               <li key={item.id}>
                 <span>{localized(item.label, lang)}</span>
                 <strong>{localized(item.answer, lang)}</strong>
+                {item.selectedForDiscussion && item.narrative && localized(item.narrative, lang) && (
+                  <p className="vep__additional-detail">{localized(item.narrative, lang)}</p>
+                )}
               </li>
             ))}
           </ul>
