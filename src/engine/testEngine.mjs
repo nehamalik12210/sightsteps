@@ -6,7 +6,7 @@
 
 import { evaluateAnswers } from './ruleEngine.js';
 import { getBackNavigationAnswerIds, getAmslerReturnPath, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
-import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import questionBank, { getActivityDependentAnswerIds, getActivityLabel, getSelectedAdditionalExperienceIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
@@ -239,6 +239,7 @@ const preparationPack = buildAppointmentPreparationPack({
     prompt: { en: 'Prompt ' + index, hi: 'सवाल ' + index },
   })),
   questionsToAsk: 'Q'.repeat(520),
+  conversationReview: { confirmed: true, correction: 'The blur also affects jewellery making.' },
   timelineEntries: packTimeline,
   now: new Date('2026-11-18T10:00:00.000Z'),
 });
@@ -246,6 +247,8 @@ assert(preparationPack.priorities.length === 2, 'appointment pack keeps no more 
 assert(preparationPack.activities.length === 5, 'appointment pack keeps the compact activity context within five items');
 assert(preparationPack.discussionPoints.length === 3, 'appointment pack keeps the three most relevant discussion prompts');
 assert(preparationPack.questionsToAsk.length <= 480, 'appointment pack bounds the personal question text');
+assert(preparationPack.conversationReview.confirmed === true, 'appointment pack preserves participant summary confirmation');
+assert(preparationPack.conversationReview.correction.includes('jewellery making'), 'appointment pack preserves participant corrections within its bounded review record');
 const compactQuestionPack = buildAppointmentPreparationPack({ language: 'en', questionsToAsk: '  Can   we\n review  this?  ' });
 assert(compactQuestionPack.questionsToAsk === 'Can we review this?', 'appointment pack collapses repeated whitespace in personal questions');
 assert(preparationPack.timelineEntries.length === 5 && preparationPack.timelineEntries[0].id === 'pack-entry-7', 'appointment pack includes only the five newest timeline entries');
@@ -279,12 +282,14 @@ const savedRecord = createSessionRecord({
   primaryActivity: 'fine_detail',
   participantNote: 'Strain after sewing',
   answers: rameshAnswers,
+  conversationReview: { confirmed: true, correction: 'Mention stitching work.' },
   language: 'hi',
 });
 assert(savedRecord.activities.length === 2, 'saved record includes selected daily activities');
 assert(savedRecord.primaryActivity === 'fine_detail', 'saved record includes primary activity');
 assert(savedRecord.participantNote === 'Strain after sewing', 'saved record includes participant note');
 assert(savedRecord.answers === rameshAnswers, 'saved record includes questionnaire answers');
+assert(savedRecord.conversationReview.confirmed === true && savedRecord.conversationReview.correction === 'Mention stitching work.', 'saved record preserves participant confirmation and correction');
 assert(Array.isArray(savedRecord.visionTimelineEntries) && savedRecord.visionTimelineEntries.length === 0, 'saved record safely defaults to an empty vision timeline');
 
 console.log('\n=== Questionnaire branching and answer validity ===');
@@ -301,6 +306,29 @@ const reportedOptions = getVisibleQuestions({ blurred_vision: { value: 'yes' }, 
 assert(reportedOptions.length === 1 && reportedOptions[0].value === 'blurred_vision', 'main concern choices are limited to experiences the participant reported');
 const headacheFollowUps = getVisibleQuestions({ headaches: { value: 'sometimes' }, primary_concern: { value: 'headaches' } });
 assert(headacheFollowUps.some((question) => question.id === 'affected_activities'), 'affected-activity question is shown after a main concern is selected');
+
+const multiConcernAnswers = {
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  headaches: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  night_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  squinting: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+  primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
+  additional_concerns: { value: ['headaches', 'night_vision'], label: { en: 'Headaches, Difficulty in low light', hi: 'सिरदर्द, कम रोशनी में कठिनाई' } },
+};
+const multiConcernQuestions = getVisibleQuestions(multiConcernAnswers);
+const additionalIds = multiConcernQuestions.map((question) => question.id);
+assert(additionalIds.includes('additional_experience_headaches_onset'), 'selecting headaches as a secondary concern creates its own onset question');
+assert(additionalIds.includes('additional_experience_headaches_frequency'), 'secondary headache follow-up includes frequency');
+assert(additionalIds.includes('additional_experience_headaches_context'), 'secondary headache follow-up includes context');
+assert(!additionalIds.includes('additional_experience_headaches_eye'), 'secondary headache follow-up does not ask an inapplicable eye-side question');
+assert(additionalIds.includes('additional_experience_night_vision_eye'), 'another secondary experience includes an eye-side follow-up');
+assert(!getVisibleQuestions({ ...multiConcernAnswers, additional_concerns: { value: ['none'] } }).some((question) => question.id.startsWith('additional_experience_')), 'choosing no additional experience does not generate secondary follow-ups');
+assert(getSelectedAdditionalExperienceIds({ ...multiConcernAnswers, headaches: { value: 'rarely' } }).includes('headaches') === false, 'secondary selection is ignored when its originating experience is no longer reported');
+const otherActivityQuestion = questionBank.find((question) => question.id === 'affected_activities');
+const customActivityAnswers = { custom_activity_name: { value: 'Jewellery making', label: { en: 'Jewellery making', hi: 'Jewellery making' } } };
+const customActivityOptions = getQuestionForActivities(otherActivityQuestion, ['other'], customActivityAnswers).options;
+assert(customActivityOptions.find((option) => option.value === 'other')?.label.en === 'Jewellery making', 'affected-activity choice uses the participant-defined Other activity label');
+assert(getActivityLabel('other', customActivityAnswers)?.en === 'Jewellery making', 'custom activity helper resolves participant wording');
 
 const savedDirectionResult = { completed: true, skipped: false, data: { activityType: 'direction-awareness' } };
 assert(getAmslerReturnPath(savedDirectionResult) === '/report', 'Amsler returns to the report after a completed E activity');
@@ -971,6 +999,27 @@ assert(compactProfileSummary.length <= 360, 'compact summary respects its config
 const compactHindiSummary = buildCompactExperienceSummary(experienceProfile, 'hi', 360, 3);
 assert(compactHindiSummary.includes('मुख्य बताया गया अनुभव'), 'compact summary has a Hindi version');
 assert(buildCompactExperienceSummary({}, 'en') === '', 'compact summary omits a profile with no reportable content');
+
+const secondaryProfile = buildVisionExperienceProfile({
+  ...multiConcernAnswers,
+  additional_experience_headaches_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
+  additional_experience_headaches_frequency: { value: 'weekly', label: { en: 'A few times a week', hi: 'हफ़्ते में कुछ बार' } },
+  additional_experience_headaches_context: { value: ['near_tasks'], label: { en: 'Reading or other near tasks', hi: 'पढ़ना या पास के काम' } },
+  additional_experience_night_vision_onset: { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' } },
+  additional_experience_night_vision_frequency: { value: 'daily', label: { en: 'Every day', hi: 'रोज़' } },
+  additional_experience_night_vision_context: { value: ['low_light'], label: { en: 'Low-light situations', hi: 'कम रोशनी की स्थिति' } },
+  additional_experience_night_vision_eye: { value: 'both', label: { en: 'Both eyes', hi: 'दोनों आँखें' } },
+});
+const secondaryHeadaches = secondaryProfile.additionalExperiences.find((item) => item.id === 'headaches');
+const secondaryNightVision = secondaryProfile.additionalExperiences.find((item) => item.id === 'night_vision');
+assert(secondaryHeadaches.selectedForDiscussion === true && secondaryHeadaches.onset.en === 'Within the last few months', 'profile connects the selected secondary experience with its own onset answer');
+assert(secondaryHeadaches.contexts[0].id === 'near_tasks' && secondaryHeadaches.frequency.en === 'A few times a week', 'profile retains secondary experience context and frequency');
+assert(secondaryHeadaches.sourceIds.includes('additional_experience_headaches_context'), 'secondary experience links to its own context source answer');
+assert(secondaryNightVision.eye.en === 'Both eyes' && secondaryNightVision.contexts[0].id === 'low_light', 'profile retains a second secondary experience eye-side and context');
+assert(secondaryProfile.additionalExperiences.find((item) => item.id === 'squinting').selectedForDiscussion === false, 'reported but unselected experiences remain distinct from selected discussion topics');
+const secondaryCompactSummary = buildCompactExperienceSummary(secondaryProfile, 'en', 500, 3);
+assert(secondaryCompactSummary.includes('Also to discuss — Headaches around visual activities'), 'compact profile summary includes a selected secondary experience');
+assert(buildVisionExperienceProfile({ ...customActivityAnswers, affected_activities: { value: ['other'], label: { en: 'Other', hi: 'अन्य' } }, activity_impact_other: { value: ['takes_longer'], label: { en: 'It takes longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' } } }).activityImpacts[0].label.en === 'Jewellery making', 'experience profile uses the participant-defined activity label');
 
 const staleMainProfile = buildVisionExperienceProfile({
   ...rameshPersona.answers,
