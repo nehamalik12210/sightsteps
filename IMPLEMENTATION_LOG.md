@@ -114,5 +114,12 @@
 
 ### Change 16 — Near-vision cluster wording aligned with clinical-language audit
 - The revised near-vision grouping originally used the phrase “medical condition” in a negated sentence. The clinical-language audit correctly flagged the term, so the copy was changed to state the narrower point: grouping does not say that one experience explains the other.
-- Final re-verification on main commit 7224c5c8b59a402a8e7fbc97893a55fc00914f0d: 961 regression tests passed; 2,524 quality checks passed; clinical-language audit passed (22 JSX / 2,629 fragments); Vite build passed (100 modules; initial JS 345.09 kB / 106.00 kB gzip; Report 151.72 kB / 33.16 kB gzip; 34 precache entries / 980.26 KiB); clinical-review export generated successfully (965 lines reported by the exporter, 8 patterns, 4 Ramesh matches, 10 prompts, 2 follow-up notes).
+- Final re-verification on main commit c1936631a3eb93e4b025d50afe8659e7df11132f: 961 regression tests passed; 2,524 quality checks passed; clinical-language audit passed (22 JSX / 2,629 fragments); Vite build passed (100 modules; initial JS 345.09 kB / 106.00 kB gzip; Report 151.87 kB / 33.15 kB gzip; 34 precache entries / 980.40 KiB); clinical-review export generated successfully (965 lines reported by the exporter, 8 patterns, 4 Ramesh matches, 10 prompts, 2 follow-up notes).
 - This exact source has not been deployed because Vercel reports a build-rate-limit. The latest READY production deployment remains commit 92a4d0da...; production is not confirmed to contain this work.
+
+
+### Change 17 — Final symptom-language precision
+- Removed timing-oriented wording (“raise soon”) from the one-eye/recent-onset discussion pattern so the app does not imply a clinical urgency assessment.
+- Reworded the low-light discussion prompt to ask participants to describe each experience and its own context separately, rather than implying squinting occurred in low light.
+- Regression, quality, clinical-language, production-build and review-export checks were rerun on c1936631a3eb93e4b025d50afe8659e7df11132f and all passed (961 tests, 2,524 checks, 22 JSX files / 2,629 fragments; 100 modules; 34 precache entries / 980.40 KiB; export 965 lines).
+- Vercel deployment remains blocked by its build-rate-limit status; current production remains the older READY 92a4d0da... deployment.
