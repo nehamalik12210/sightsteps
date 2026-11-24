@@ -31,7 +31,7 @@ function loc(value, lang) {
 
 const lines = [];
 function section(title) { lines.push('', `${'═'.repeat(60)}`, `  ${title}`, `${'═'.repeat(60)}`, ''); }
-function sub(title) { lines.push('', `── ${title} ${'─'.repeat(50 - title.length)}`, ''); }
+function sub(title) { lines.push('', `── ${title} ${'─'.repeat(Math.max(0, 50 - title.length))}`, ''); }
 function row(label, en, hi) {
   lines.push(`  [EN] ${label}`);
   lines.push(`       ${en}`);
