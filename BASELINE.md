@@ -3,7 +3,7 @@
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
 **Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
 **Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
-**Latest verified source commit:** `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0`  
+**Latest verified source commit (isolated checks):** `ae31b03c81475ab1ba022986493719eefb6abd74`  
 **Latest verified production deployment:** `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (READY; `main`; commit `92a4d0da...`; production alias `https://sightsteps.vercel.app`; contains the verified app code from `5d964fc5...`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
@@ -34,6 +34,21 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - Route splitting reduced the initial JavaScript chunk from 581.00 kB minified (158.01 kB gzip) to **344.80 kB (105.91 kB gzip)**, a 40.6% reduction in minified entry size. The largest page chunk is Report at 147.38 kB (32.22 kB gzip); AmslerGrid is 21.91 kB (5.69 kB gzip). No emitted JavaScript chunk exceeds Vite's 500 kB warning threshold.
 - PWA service worker generated **34 precache entries (975.74 KiB)**. The split assets remain included in the precache, preserving the existing precache-based offline strategy; this does not mean the initial page downloads every page chunk at runtime.
 
+## Latest verified source checks — 25 November 2026
+
+**Exact source revision:** ae31b03c81475ab1ba022986493719eefb6abd74 on main. The repository was checked out at this SHA in an isolated Vercel sandbox; this is not a production deployment.
+
+**Execution environment:** Node.js v22.23.5; npm 10.9.9. npm ci completed successfully (349 packages added; 350 audited). npm reported four moderate dependency advisories in the existing PWA build chain; they remain tracked above.
+
+- git diff --check: passed; checkout was clean after resetting to the exact main SHA.
+- npm test: **961 passed, 0 failed**.
+- npm run audit: **2,524 passed, 0 failed**.
+- npm run clinical-lint: passed; **22 JSX files / 2,629 copy fragments**, no violations.
+- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (105.99 kB gzip)**; Report chunk **151.60 kB (33.13 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.14 KiB)**. The build reruns the three checks above.
+- npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
+
+**Deployment status:** the latest READY production deployment remains dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb, commit 92a4d0da..., which contains earlier application code through 5d964fc5.... The latest main source commit ae31b03... has not been deployed. Its Vercel status check currently reports build-rate-limit; do not treat that provider status as a passing deployment. An earlier build attempt at af2f541... did execute tests and failed on stale Ramesh cluster assertions; those assertions were corrected and the current exact source passed the checks listed above in the isolated sandbox.
+
 ## Clinical review export verification
 
 - Added `.github/workflows/clinical-review-export.yml` to generate the review export from locked dependencies and upload it as a 14-day GitHub Actions artifact.
@@ -45,7 +60,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 
 ## Verification limits
 
-- The repository was inspected through GitHub's connected repository interface because a local clone attempt failed due to DNS/network resolution.
+- Earlier repository work was inspected through GitHub's connected repository interface after a local clone attempt failed due to DNS/network resolution. The later exact-source verification recorded above used an isolated Vercel sandbox clone; it was not a production deployment.
 - No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
 - Production HTTP checks for `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 and the Vite SPA shell. This confirms the Vercel rewrite responds for direct route requests; it does not execute the client-side app or verify interactive route behavior.
 - The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
