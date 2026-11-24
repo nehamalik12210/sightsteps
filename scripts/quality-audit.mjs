@@ -290,7 +290,7 @@ check(timelineCssSource.includes('font-size: max(16px, var(--fs-sm))'), 'timelin
 check(timelineCssSource.includes('prefers-reduced-motion'), 'timeline respects reduced-motion preferences');
 
 const reportPreferencesSource = read('src/utils/reportPreferences.js');
-const appointmentPackComponentSource = read('src/components/AppointmentPreparationPack.jsx');
+
 const appointmentPackCssSource = read('src/components/AppointmentPreparationPack.css');
 const accessibilityControlsSource = read('src/components/AccessibilityControls.jsx');
 const accessibilityControlsCssSource = read('src/components/AccessibilityControls.css');
@@ -319,7 +319,7 @@ check(accessibilityControlsSource.includes('aria-pressed') && accessibilityContr
 check(existsSync(join(root, 'src/engine/patternEngine.js')), 'pattern detection engine exists');
 check(existsSync(join(root, 'src/data/patterns.js')), 'pattern definitions exist');
 const profileSource = read('src/components/VisionExperienceProfile.jsx');
-const clinicianBriefSource = read('src/components/ClinicianBrief.jsx');
+
 const reportSource = read('src/pages/Report.jsx');
 const appContextSource = read('src/context/AppContext.jsx');
 const demoPersonaSource = read('src/data/demoPersona.js');
