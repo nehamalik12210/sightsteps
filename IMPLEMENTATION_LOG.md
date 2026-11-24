@@ -74,3 +74,17 @@
 - Corrected an initial YAML `path` formatting mistake before accepting the successful run; the malformed run failed before starting a job and did not affect the app deployment.
 - Workflow run `45490205104` completed SUCCESS; artifact ID `14964948536` contains both the 68,713-byte export and npm audit JSON.
 - Audit reports four moderate findings in the development-time PWA dependency chain; no forced fix or version downgrade was applied pending compatibility review.
+
+### Change 11 — Route-level code splitting
+- Replaced static imports for nine non-Landing page routes with `React.lazy` and a shared `Suspense` boundary; Landing remains statically loaded.
+- Added a bilingual loading fallback with a `main-content` landmark, `tabIndex=-1` and polite live announcement.
+- Added a post-mount animation-frame focus handoff so keyboard focus moves from the fallback to the loaded page landmark.
+- Vercel production deployment `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e7132593d72fa64be23a303a312a2a3697a2`) reached READY.
+- Build output: initial JS entry fell from 581.00 kB / 158.01 kB gzip to 344.80 kB / 105.91 kB gzip. Report route: 147.38 kB / 32.22 kB gzip; Amsler route: 21.91 kB / 5.69 kB gzip. PWA precache: 34 entries / 975.74 KiB.
+- Review note: the first build showed eight fewer static quality checks because the import resolver only recognised static import syntax. The app build itself succeeded, but the missing checks were treated as a test-coverage regression and corrected before closing the task.
+
+### Change 12 — Dynamic-import path audit and route-load regression checks
+- Updated `scripts/quality-audit.mjs` to resolve literal relative dynamic `import()` calls as well as static imports.
+- Added explicit assertions that all nine lazy page imports resolve and that the shared Suspense fallback and post-load focus handoff exist.
+- Verified on production deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0`): **2,522 quality checks passed, 0 failed; 849 engine tests passed, 0 failed; clinical-language audit passed** (22 JSX files / 2,625 copy fragments). Build completed; 100 modules transformed.
+- Direct production requests to `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 with the SPA shell. This verifies the server-side fallback response only, not client rendering or browser interaction.
