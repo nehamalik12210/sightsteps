@@ -5,7 +5,7 @@
  * timeline records. It does not measure visual performance, infer a diagnosis,
  * score severity or determine clinical urgency.
  */
-import { getReportedExperienceOptions } from '../data/questions.js';
+import { getActivityLabel, getReportedExperienceOptions, getSelectedAdditionalExperienceIds } from '../data/questions.js';
 import { normalizeVisionTimelineEntries } from '../utils/visionTimeline.js';
 
 const ACTIVITY_LABELS = {
@@ -137,14 +137,41 @@ function buildMainExperience(answers, reportedExperiences) {
 }
 
 function buildAdditionalExperiences(reportedExperiences, mainId, answers) {
+  const selectedForDiscussion = new Set(getSelectedAdditionalExperienceIds(answers));
   return reportedExperiences
     .filter((item) => item.value !== mainId)
-    .map((item) => ({
-      id: item.value,
-      label: localizedLabel(item.label),
-      answer: answerLabel(answers, item.value, localizedLabel(item.label)),
-      sourceIds: presentSourceIds(answers, [item.value]),
-    }));
+    .map((item) => {
+      const prefix = 'additional_experience_' + item.value;
+      const onset = answerLabel(answers, prefix + '_onset');
+      const frequency = answerLabel(answers, prefix + '_frequency');
+      const eye = item.value === 'headaches' ? null : answerLabel(answers, prefix + '_eye');
+      const contextValues = Array.isArray(answers?.[prefix + '_context']?.value)
+        ? answers[prefix + '_context'].value.filter((value) => typeof value === 'string')
+        : [];
+      const contexts = contextValues.map((id) => ({ id, label: CONTEXT_LABELS[id] || { en: id, hi: id } }));
+      const isSelected = selectedForDiscussion.has(item.value);
+      const sourceIds = isSelected
+        ? presentSourceIds(answers, [item.value, prefix + '_onset', prefix + '_frequency', prefix + '_context', ...(eye ? [prefix + '_eye'] : [])])
+        : presentSourceIds(answers, [item.value]);
+      const label = localizedLabel(item.label);
+      const narrative = {
+        en: [
+          isSelected ? 'You also chose to discuss this experience.' : '',
+          onset?.en ? 'You first noticed it ' + onset.en.toLowerCase() + '.' : '',
+          frequency?.en ? 'You notice it ' + frequency.en.toLowerCase() + '.' : '',
+          contexts.length ? 'You selected these situations: ' + contexts.map((entry) => entry.label.en).join(', ') + '.' : '',
+          eye?.en ? 'You said it is noticed in ' + eye.en.toLowerCase() + '.' : '',
+        ].filter(Boolean).join(' '),
+        hi: [
+          isSelected ? 'आपने इस अनुभव पर भी चर्चा करने का विकल्प चुना।' : '',
+          onset?.hi ? 'आपने इसे पहली बार ' + onset.hi.toLowerCase() + ' महसूस किया।' : '',
+          frequency?.hi ? 'आपने बताया कि यह ' + frequency.hi.toLowerCase() + ' महसूस होता है।' : '',
+          contexts.length ? 'आपने ये परिस्थितियाँ चुनीं: ' + contexts.map((entry) => entry.label.hi).join(', ') + '।' : '',
+          eye?.hi ? 'आपने बताया कि यह ' + eye.hi.toLowerCase() + ' में महसूस होता है।' : '',
+        ].filter(Boolean).join(' '),
+      };
+      return { id: item.value, label, answer: answerLabel(answers, item.value, label), onset, frequency, contexts, eye, selectedForDiscussion: isSelected, narrative, sourceIds };
+    });
 }
 
 function buildActivityImpacts(answers) {
@@ -155,6 +182,7 @@ function buildActivityImpacts(answers) {
   return selected
     .filter((activityId) => Object.prototype.hasOwnProperty.call(ACTIVITY_LABELS, activityId))
     .map((activityId) => {
+      const activityLabel = getActivityLabel(activityId, answers) || ACTIVITY_LABELS[activityId];
       const impactKey = `activity_impact_${activityId}`;
       const frequencyKey = `activity_impact_frequency_${activityId}`;
       const rawImpacts = Array.isArray(answers?.[impactKey]?.value)
@@ -181,24 +209,24 @@ function buildActivityImpacts(answers) {
 
       const summary = {
         en: impactStatus === 'reported'
-          ? `For ${ACTIVITY_LABELS[activityId].en.toLowerCase()}, you reported: ${impacts.map((item) => item.label.en.toLowerCase()).join(', ')}.${frequency?.en ? ` You notice this impact ${frequency.en.toLowerCase()}.` : ''}`
+          ? `For ${activityLabel.en.toLowerCase()}, you reported: ${impacts.map((item) => item.label.en.toLowerCase()).join(', ')}.${frequency?.en ? ` You notice this impact ${frequency.en.toLowerCase()}.` : ''}`
           : impactStatus === 'no_impact_reported'
-            ? `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()} and reported no impact for this activity.`
+            ? `You selected ${activityLabel.en.toLowerCase()} and reported no impact for this activity.`
             : impactStatus === 'unsure'
-              ? `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()} but were unsure how to describe the impact.`
-              : `You selected ${ACTIVITY_LABELS[activityId].en.toLowerCase()}; no impact details were recorded.`,
+              ? `You selected ${activityLabel.en.toLowerCase()} but were unsure how to describe the impact.`
+              : `You selected ${activityLabel.en.toLowerCase()}; no impact details were recorded.`,
         hi: impactStatus === 'reported'
-          ? `${ACTIVITY_LABELS[activityId].hi} में आपने यह बताया: ${impacts.map((item) => item.label.hi).join(', ')}।${frequency?.hi ? ` आपने यह प्रभाव ${frequency.hi.toLowerCase()} महसूस होने की बात बताई।` : ''}`
+          ? `${activityLabel.hi} में आपने यह बताया: ${impacts.map((item) => item.label.hi).join(', ')}।${frequency?.hi ? ` आपने यह प्रभाव ${frequency.hi.toLowerCase()} महसूस होने की बात बताई।` : ''}`
           : impactStatus === 'no_impact_reported'
-            ? `आपने ${ACTIVITY_LABELS[activityId].hi} चुना और बताया कि इस गतिविधि पर कोई प्रभाव महसूस नहीं होता।`
+            ? `आपने ${activityLabel.hi} चुना और बताया कि इस गतिविधि पर कोई प्रभाव महसूस नहीं होता।`
             : impactStatus === 'unsure'
-              ? `आपने ${ACTIVITY_LABELS[activityId].hi} चुना, लेकिन प्रभाव का वर्णन करने को लेकर अनिश्चितता बताई।`
-              : `आपने ${ACTIVITY_LABELS[activityId].hi} चुना; प्रभाव का विवरण दर्ज नहीं किया गया।`,
+              ? `आपने ${activityLabel.hi} चुना, लेकिन प्रभाव का वर्णन करने को लेकर अनिश्चितता बताई।`
+              : `आपने ${activityLabel.hi} चुना; प्रभाव का विवरण दर्ज नहीं किया गया।`,
       };
 
       return {
         activityId,
-        label: ACTIVITY_LABELS[activityId],
+        label: activityLabel,
         impacts,
         frequency,
         impactStatus,
@@ -328,6 +356,17 @@ export function buildCompactExperienceSummary(profile, language = 'en', maxLengt
       }
     }
   }
+
+  const additionalItems = (Array.isArray(profile.additionalExperiences) ? profile.additionalExperiences : [])
+    .filter((item) => item.selectedForDiscussion && item.narrative)
+    .slice(0, 2)
+    .map((item) => {
+      const label = profileValue(item.label, language);
+      const narrative = profileValue(item.narrative, language);
+      return label && narrative ? (hi ? 'अन्य अनुभव — ' : 'Also to discuss — ') + label + ': ' + narrative : '';
+    })
+    .filter(Boolean);
+  if (additionalItems.length) parts.push(...additionalItems);
 
   const activityItems = (Array.isArray(profile.activityImpacts) ? profile.activityImpacts : [])
     .slice(0, Math.max(0, maxActivities))
