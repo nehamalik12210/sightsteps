@@ -50,6 +50,20 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
         />
       )}
 
+      {pack.conversationReview && (
+        <section className="appointment-pack__section appointment-pack__participant-review" aria-labelledby="appointment-pack-review">
+          <h2 id="appointment-pack-review">{hi ? 'मेरी समीक्षा' : 'Participant review'}</h2>
+          <p>
+            {pack.conversationReview.confirmed
+              ? (hi ? 'प्रतिभागी ने पुष्टि की कि सारांश उनकी बताई बात को दर्शाता है।' : 'The participant confirmed that the summary reflects what they wanted to share.')
+              : (hi ? 'प्रतिभागी ने सारांश की पुष्टि नहीं की।' : 'The participant has not confirmed the summary.')}
+          </p>
+          {pack.conversationReview.correction && (
+            <blockquote>{pack.conversationReview.correction}</blockquote>
+          )}
+        </section>
+      )}
+
       <section className="appointment-pack__section appointment-pack__discussion" aria-labelledby="appointment-pack-discussion">
         <h2 id="appointment-pack-discussion">{hi ? 'चर्चा के लिए विषय' : 'Topics to discuss'}</h2>
         {pack.discussionPoints.length ? (
