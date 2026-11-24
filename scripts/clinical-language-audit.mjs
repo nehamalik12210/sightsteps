@@ -72,6 +72,10 @@ const ALLOWLIST = [
   'eye condition',
   'actual conditions',
   'outdoor conditions',
+  'bright conditions',
+  'does not measure vision, diagnose a condition or determine clinical severity or urgency',
+  'not prescriptions',
+  'experiences you have noticed',
   'you have not had',
   'you have never had',
   'do you have',
@@ -180,8 +184,6 @@ function scanBilingualTree(label, value) {
 function discoverJsxFiles(directory = SRC_DIR) {
   const files = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    const absolutePath = new URL('.', import.meta.url).pathname;
-    void absolutePath;
     const childPath = directory + (directory.endsWith(sep) ? '' : sep) + entry.name;
     if (entry.isDirectory()) {
       files.push(...discoverJsxFiles(childPath));
@@ -381,6 +383,12 @@ console.log('Running fail-safe detector and JSX extraction tests...');
 const unsafeExample = 'You have astigmatism and need treatment immediately.';
 const mixedExample = 'SightSteps does not diagnose. You have glaucoma.';
 const safeExample = 'SightSteps does not diagnose or replace a professional eye examination.';
+const safeContextExamples = [
+  'Outdoors or bright conditions',
+  'This profile does not measure vision, diagnose a condition or determine clinical severity or urgency.',
+  'These topics are not prescriptions or medical advice.',
+  'Record experiences you have noticed on different days.',
+];
 
 if (findClinicalViolations('unsafe-example', unsafeExample).length === 0) {
   console.error('  FAIL: Detector accepted an unsafe diagnostic statement.');
@@ -393,6 +401,12 @@ if (!findClinicalViolations('mixed-example', mixedExample).some((item) => item.p
 if (findClinicalViolations('safe-example', safeExample).length !== 0) {
   console.error('  FAIL: Detector rejected a safe disclaimer.');
   violations += 1;
+}
+for (const [index, example] of safeContextExamples.entries()) {
+  if (findClinicalViolations('safe-context-' + index, example).length !== 0) {
+    console.error('  FAIL: Detector rejected safe contextual copy: ' + example);
+    violations += 1;
+  }
 }
 
 const jsxFixture = 'const Example = () => (<section aria-label="You have glaucoma"><p>You have damage</p><p>{flag ? "You have lesion" : "Safe text"}</p></section>);';
