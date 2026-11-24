@@ -1,7 +1,8 @@
 # SightSteps — Baseline Record
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
-**Current verified main commit:** `a83de5439cd04facbb3c967919c741373bfe8760`  
+**Application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
+**Latest full deployment checked:** `60d3b768ddb192c30c1adec413aabaea5aae1ea1`  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -44,7 +45,7 @@ Vercel deployment for commit `645f8783547e9f20cfaa32033d3ef4cf6348a394` complete
 - The repository was inspected through GitHub's connected repository interface because a local clone attempt failed due to DNS/network resolution.
 - No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
 - The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
-- Latest Vercel production deployment for main commit `a83de54` is READY at `https://sightsteps.vercel.app` (deployment `dpl_7hxQrBENfgt6tUnmFaTde4RWrgEJ`). Logs confirm 2,519 quality checks passed, the clinical-language audit passed (22 JSX files / 2,622 fragments, nested discovery fixture executed), 99 Vite modules transformed and 11 PWA precache entries. The engine test command completed successfully; exact 849/0 count is exposed by the prior build for the same application-code set (`723c3c5`).
+- Latest Vercel production deployment after documentation synchronization is READY at `https://sightsteps.vercel.app` (deployment `dpl_7zyFuStdgD1pocUKs8hKyDeTJuVs`, main commit `60d3b76`). Its app-code set is the same as the fully counted `723c3c5` build: 849 engine tests passed, 0 failed. The latest deployment build logs reconfirm 2,519 quality checks, clinical-language audit success (22 JSX files / 2,622 fragments; nested discovery fixture executed), 99 Vite modules transformed and 11 PWA precache entries.
 
 ## Dependency audit details
 
