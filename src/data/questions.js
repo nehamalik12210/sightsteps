@@ -98,6 +98,17 @@ const questions = [
     ],
   },
   {
+    id: 'additional_concerns',
+    text: {
+      en: 'Are there other experiences you would also like to discuss? Select any that apply.',
+      hi: 'क्या ऐसे अन्य अनुभव भी हैं जिन पर आप चर्चा करना चाहेंगे? लागू विकल्प चुनें।',
+    },
+    type: 'multi', category: 'refractive',
+    showIf: (answers) => Boolean(answers.primary_concern?.value)
+      && getReportedExperienceOptions(answers).some((item) => item.value !== answers.primary_concern?.value),
+    options: [],
+  },
+  {
     id: 'experience_onset',
     text: { en: 'When did you first notice this main experience?', hi: 'आपने यह मुख्य अनुभव पहली बार कब महसूस किया?' },
     type: 'single', category: 'refractive',
@@ -290,31 +301,79 @@ export function getReportedExperienceOptions(answers = {}) {
     .map(([id]) => ({ value: id, label: labels[id], icon: questions.find((q) => q.id === id)?.options?.[0]?.icon || 'visibility' }));
 }
 
+const ADDITIONAL_CONCERN_EXCLUSIONS = [
+  { value: 'none', label: { en: 'No other experience to add', hi: 'कोई अन्य अनुभव नहीं जोड़ना' }, icon: 'do_not_disturb_on' },
+  { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+];
+
+export function getSelectedAdditionalExperienceIds(answers = {}) {
+  const primaryId = answers?.primary_concern?.value;
+  const reportedIds = new Set(getReportedExperienceOptions(answers).map((item) => item.value));
+  return [...new Set(Array.isArray(answers?.additional_concerns?.value) ? answers.additional_concerns.value : [])]
+    .filter((id) => id !== primaryId && reportedIds.has(id));
+}
+
+export function getActivityLabel(activityId, answers = {}) {
+  if (activityId === 'other') {
+    const custom = typeof answers?.custom_activity_name?.value === 'string' ? answers.custom_activity_name.value.trim() : '';
+    if (custom) return { en: custom, hi: custom };
+  }
+  return ACTIVITY_LABELS[activityId] || null;
+}
+
+function buildAdditionalExperienceQuestions(answers = {}) {
+  const reported = new Map(getReportedExperienceOptions(answers).map((item) => [item.value, item.label]));
+  const onsetOptions = questions.find((question) => question.id === 'experience_onset')?.options || [];
+  const frequencyOptions = questions.find((question) => question.id === 'experience_frequency')?.options || [];
+  const contextOptions = questions.find((question) => question.id === 'experience_context')?.options || [];
+  const eyeOptions = questions.find((question) => question.id === 'which_eye')?.options || [];
+  return getSelectedAdditionalExperienceIds(answers).flatMap((experienceId) => {
+    const label = reported.get(experienceId) || { en: experienceId, hi: experienceId };
+    const prefix = 'additional_experience_' + experienceId;
+    const visible = (currentAnswers) => getSelectedAdditionalExperienceIds(currentAnswers).includes(experienceId);
+    const detail = (suffix, en, hi, type, options) => ({
+      id: prefix + '_' + suffix,
+      text: { en: en + ' ' + String(label.en || label.hi).toLowerCase() + '?', hi: String(label.hi || label.en) + ' — ' + hi },
+      type, category: 'refractive', showIf: visible, additionalExperienceId: experienceId, options,
+    });
+    return [
+      detail('onset', 'When did you first notice', 'आपने इसे पहली बार कब महसूस किया?', 'single', onsetOptions),
+      detail('frequency', 'How often do you notice', 'यह कितनी बार महसूस होता है?', 'single', frequencyOptions),
+      detail('context', 'In which situations do you notice', 'किन परिस्थितियों में यह महसूस होता है? सभी लागू विकल्प चुनें।', 'multi', contextOptions),
+      ...(experienceId === 'headaches' ? [] : [detail('eye', 'Where do you notice', 'यह किस आँख में महसूस होता है?', 'single', eyeOptions)]),
+    ];
+  });
+}
+
 /**
  * Keep the affected-activities follow-up constrained to the participant's
  * previously selected routine, while retaining explicit none/unsure choices.
  */
-export function getQuestionForActivities(question, activities = []) {
+export function getQuestionForActivities(question, activities = [], answers = {}) {
   if (question?.id !== 'affected_activities') return question;
   const selectedActivities = new Set(Array.isArray(activities) ? activities : []);
   return {
     ...question,
-    options: question.options.filter((option) => (
-      ['none', 'unsure'].includes(option.value) || selectedActivities.has(option.value)
-    )),
+    options: question.options
+      .filter((option) => ['none', 'unsure'].includes(option.value) || selectedActivities.has(option.value))
+      .map((option) => option.value === 'other' && getActivityLabel('other', answers)
+        ? { ...option, label: getActivityLabel('other', answers) }
+        : option),
   };
 }
 
-function buildActivityImpactQuestions(answers = []) {
+function buildActivityImpactQuestions(selected = [], answers = {}) {
   const selected = Array.isArray(answers) ? answers : [];
   return selected
     .filter((id) => ACTIVITY_LABELS[id])
-    .flatMap((activityId) => ([
+    .flatMap((activityId) => {
+      const activityLabel = getActivityLabel(activityId, answers) || activityLabel;
+      return ([
       {
         id: `activity_impact_${activityId}`,
         text: {
-          en: `How does ${ACTIVITY_LABELS[activityId].en.toLowerCase()} feel affected? Select all that apply.`,
-          hi: `${ACTIVITY_LABELS[activityId].hi} किस तरह प्रभावित महसूस होती है? सभी लागू विकल्प चुनें।`,
+          en: `How does ${activityLabel.en.toLowerCase()} feel affected? Select all that apply.`,
+          hi: `${activityLabel.hi} किस तरह प्रभावित महसूस होती है? सभी लागू विकल्प चुनें।`,
         },
         type: 'multi',
         category: 'lifestyle',
@@ -325,8 +384,8 @@ function buildActivityImpactQuestions(answers = []) {
       {
         id: `activity_impact_frequency_${activityId}`,
         text: {
-          en: `How often do you notice this impact during ${ACTIVITY_LABELS[activityId].en.toLowerCase()}?`,
-          hi: `${ACTIVITY_LABELS[activityId].hi} के दौरान आप यह प्रभाव कितनी बार महसूस करते हैं?`,
+          en: `How often do you notice this impact during ${activityLabel.en.toLowerCase()}?`,
+          hi: `${activityLabel.hi} के दौरान आप यह प्रभाव कितनी बार महसूस करते हैं?`,
         },
         type: 'single',
         category: 'lifestyle',
@@ -339,7 +398,8 @@ function buildActivityImpactQuestions(answers = []) {
         },
         options: IMPACT_FREQUENCY_OPTIONS,
       },
-    ]));
+    ]);
+    });
 }
 
 /** Invalidate activity-specific answers when a participant edits their routine. */
@@ -355,9 +415,20 @@ export function getVisibleQuestions(answers = {}, activities = []) {
   const visible = questions.filter((question) => !question.showIf || question.showIf(answers)).map((question) => ({ ...question, options: [...(question.options || [])] }));
   const primaryIndex = visible.findIndex((question) => question.id === 'primary_concern');
   if (primaryIndex >= 0) visible[primaryIndex] = { ...visible[primaryIndex], options: getReportedExperienceOptions(answers) };
-
+  const additionalIndex = visible.findIndex((question) => question.id === 'additional_concerns');
+  if (additionalIndex >= 0) {
+    const additionalOptions = getReportedExperienceOptions(answers).filter((item) => item.value !== answers.primary_concern?.value);
+    visible[additionalIndex] = { ...visible[additionalIndex], options: [...additionalOptions, ...ADDITIONAL_CONCERN_EXCLUSIONS] };
+  }
+  const additionalExperienceQuestions = buildAdditionalExperienceQuestions(answers);
+  if (additionalExperienceQuestions.length) {
+    const anchorIndex = visible.findIndex((question) => question.id === 'which_eye');
+    const fallbackIndex = visible.findIndex((question) => question.id === 'experience_frequency');
+    const insertionIndex = (anchorIndex >= 0 ? anchorIndex : fallbackIndex) + 1;
+    if (insertionIndex > 0) visible.splice(insertionIndex, 0, ...additionalExperienceQuestions);
+  }
   const affected = Array.isArray(answers.affected_activities?.value) ? answers.affected_activities.value : [];
-  const impactQuestions = buildActivityImpactQuestions(affected).filter((question) => !question.showIf || question.showIf(answers));
+  const impactQuestions = buildActivityImpactQuestions(affected, answers).filter((question) => !question.showIf || question.showIf(answers));
   const noteIndex = visible.findIndex((question) => question.id === 'participant_note');
   if (noteIndex >= 0) visible.splice(noteIndex, 0, ...impactQuestions);
   else visible.push(...impactQuestions);
