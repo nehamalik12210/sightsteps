@@ -137,8 +137,8 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 
 | Command | What it does |
 |---|---|
-| `npm run audit` | 2,230+ static project, data and feature checks |
-| `npm test` | Regression tests for rules, patterns, branching, persistence, routing and Amsler spatial analysis |
+| `npm run audit` | 2,519 static project, data and feature checks |
+| `npm test` | 842 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -255,10 +255,10 @@ The latest verified build completed with:
 
 | Check | Result |
 |---|---|
-| Static quality audit | **2,387 passed**, 0 failed |
-| Regression test suite | **785 passed**, 0 failed (incl. profile synthesis, appointment-pack integration, two-dimensional calibration fit, pattern engine and Amsler spatial tests) |
+| Static quality audit | **2,519 passed**, 0 failed |
+| Regression test suite | **842 passed**, 0 failed (incl. adaptive secondary-experience follow-ups, custom activities, participant review persistence, profile synthesis, two-dimensional Amsler fit, pattern engine and spatial analysis) |
 | Clinical language audit | **PASSED** — 0 violations |
-| Vite production build | 96 modules transformed |
+| Vite production build | 99 modules transformed |
 | PWA service worker | 11 precache entries generated |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
