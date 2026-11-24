@@ -622,6 +622,14 @@ assert(!hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS - 1), 'kiosk idl
 
 console.log('\n=== Pattern Detection Engine ===');
 
+const clusterIds = clusterDefinitions.map((cluster) => cluster.id);
+assert(new Set(clusterIds).size === clusterIds.length, 'cluster definitions have unique stable IDs');
+for (const cluster of clusterDefinitions) {
+  assert(Boolean(cluster.title?.en && cluster.title?.hi), `${cluster.id} has bilingual title`);
+  assert(Boolean(cluster.summary?.en && cluster.summary?.hi), `${cluster.id} has bilingual summary`);
+  assert(cluster.minMatch >= 2 && cluster.minMatch <= cluster.memberIds.length, `${cluster.id} has a valid minimum match threshold`);
+  assert(cluster.memberIds.every((id) => patternDefinitions.some((pattern) => pattern.id === id)), `${cluster.id} references only defined patterns`);
+}
 const definitionIds = patternDefinitions.map((pattern) => pattern.id);
 assert(definitionIds.length === 8 && new Set(definitionIds).size === definitionIds.length, 'all eight pattern definitions have unique stable IDs');
 for (const definition of patternDefinitions) {
@@ -954,6 +962,7 @@ for (const pattern of rameshPatterns) {
 console.log('\n=== Amsler spatial analysis ===');
 import { analyzeEye, analyzeSpatial, describeSpatial } from './amslerSpatial.js';
 import { evaluateClusters } from '../data/patternClusters.js';
+import clusterDefinitions from '../data/patternClusters.js';
 
 // Empty cells
 const emptyAnalysis = analyzeEye([]);
@@ -1064,7 +1073,11 @@ const rameshClusters = evaluateClusters(rameshPatternIds);
 assert(rameshClusters.length > 0, 'Ramesh triggers at least one cluster');
 const nearVisionCluster = rameshClusters.find((c) => c.id === 'near-vision-strain');
 assert(nearVisionCluster !== undefined, 'Ramesh triggers near-vision-strain cluster');
-assert(nearVisionCluster.matchedMembers.length >= 2, 'near-vision-strain has >= 2 matched members');
+assert(nearVisionCluster.matchedMembers.length === 2, 'near-vision-strain includes only its two specific near-vision/close-work patterns');
+assert(!nearVisionCluster.matchedMembers.includes('overdue-exam'), 'generic examination history is not counted as a near-vision cluster member');
+const lowLightCluster = rameshClusters.find((cluster) => cluster.id === 'low-light-age-cluster');
+assert(Boolean(lowLightCluster), 'Ramesh co-reported low-light difficulty and a long examination interval, creating the low-light discussion grouping');
+assert(/not additional or independent evidence/i.test(lowLightCluster.summary.en), 'low-light cluster states that grouping is not additional or independent evidence');
 
 // All matched patterns are still individually available (clusters don't hide them)
 assert(rameshPatterns.length >= 2, 'Ramesh still has multiple individual patterns after clustering');
