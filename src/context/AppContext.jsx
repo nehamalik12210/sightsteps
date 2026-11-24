@@ -32,6 +32,7 @@ const initialState = {
   visionTimelineEntries: [],
   discussionPriorities: [],
   questionsToAsk: '',
+  conversationReview: { confirmed: false, correction: '' },
   assistedCompletion: false,
   kioskMode: false,
   kioskCleanupFailed: false,
@@ -56,6 +57,7 @@ function appReducer(state, action) {
         visionTimelineEntries: normalizeVisionTimelineEntries(action.payload?.visionTimelineEntries),
         discussionPriorities: Array.isArray(action.payload?.discussionPriorities) ? action.payload.discussionPriorities : [],
         questionsToAsk: action.payload?.questionsToAsk || '',
+        conversationReview: { ...initialState.conversationReview, ...(action.payload?.conversationReview || {}) },
         assistedCompletion: Boolean(action.payload?.assistedCompletion),
         kioskMode: Boolean(action.payload?.kioskMode),
         isHydrated: true,
@@ -173,6 +175,15 @@ function appReducer(state, action) {
     case 'SET_QUESTIONS_TO_ASK':
       return { ...state, questionsToAsk: String(action.payload || '').slice(0, 1200) };
 
+    case 'SET_CONVERSATION_REVIEW':
+      return {
+        ...state,
+        conversationReview: {
+          confirmed: Boolean(action.payload?.confirmed),
+          correction: String(action.payload?.correction || '').slice(0, 500),
+        },
+      };
+
     case 'SET_APPOINTMENT_FOLLOW_UP':
       return { ...state, appointmentFollowUp: { ...state.appointmentFollowUp, ...(action.payload || {}) } };
 
@@ -229,6 +240,7 @@ export function AppProvider({ children }) {
               visionTimelineEntries: normalizeVisionTimelineEntries(record.visionTimelineEntries),
               discussionPriorities: record.discussionPriorities || [],
               questionsToAsk: record.questionsToAsk || '',
+              conversationReview: { ...initialState.conversationReview, ...(record.conversationReview || {}) },
               assistedCompletion: Boolean(record.assistedCompletion),
               kioskMode: false,
               sessionId: record.sessionId,
@@ -261,7 +273,7 @@ export function AppProvider({ children }) {
     state.consentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
     state.activities, state.primaryActivity, state.participantNote, state.answers,
     state.visionResults, state.amslerResults, state.report, state.appointmentFollowUp, state.visionTimelineEntries,
-    state.discussionPriorities, state.questionsToAsk, state.assistedCompletion, state.kioskMode,
+    state.discussionPriorities, state.questionsToAsk, state.conversationReview, state.assistedCompletion, state.kioskMode,
   ]);
 
   useEffect(() => {
@@ -292,6 +304,7 @@ export function AppProvider({ children }) {
   const setAssistedCompletion = useCallback((enabled) => dispatch({ type: 'SET_ASSISTED_COMPLETION', payload: enabled }), []);
   const setDiscussionPriorities = useCallback((priorities) => dispatch({ type: 'SET_DISCUSSION_PRIORITIES', payload: priorities }), []);
   const setQuestionsToAsk = useCallback((questions) => dispatch({ type: 'SET_QUESTIONS_TO_ASK', payload: questions }), []);
+  const setConversationReview = useCallback((review) => dispatch({ type: 'SET_CONVERSATION_REVIEW', payload: review }), []);
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
   const setVisionTimelineEntries = useCallback((entries) => dispatch({ type: 'SET_VISION_TIMELINE_ENTRIES', payload: entries }), []);
 
@@ -339,6 +352,7 @@ export function AppProvider({ children }) {
     setAssistedCompletion,
     setDiscussionPriorities,
     setQuestionsToAsk,
+    setConversationReview,
     setAppointmentFollowUp,
     setVisionTimelineEntries,
     reset,
