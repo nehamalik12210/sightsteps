@@ -18,6 +18,7 @@ import { evaluatePatterns } from '../src/engine/patternEngine.js';
 import patterns from '../src/data/patterns.js';
 import strings from '../src/data/i18n.js';
 import rameshPersona from '../src/data/demoPersona.js';
+import { getVisibleQuestions } from '../src/data/questions.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const exportDir = join(root, 'exports');
@@ -108,22 +109,27 @@ for (const note of rameshReport.followUpNotes) {
 section('5. AMSLER GRID WORDING');
 
 const amslerStrings = {
-  'Activity intro disclaimer': {
-    en: 'Amsler grids are sometimes used for self-monitoring of central vision changes. SightSteps records only areas you choose to flag; it does not test or interpret your vision. No areas flagged does not rule out a problem.',
-    hi: 'यह एक होम स्क्रीनिंग गतिविधि है, निदान नहीं। एम्सलर ग्रिड का उपयोग नेत्र चिकित्सक पहले से मरीजों को मैक्युलर परिवर्तनों की स्व-निगरानी के लिए सुझाते हैं। परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।',
+  'Intro notice': {
+    en: 'Amsler grids are sometimes used for self-monitoring of central vision changes. SightSteps only records the areas you choose to flag; it does not test or interpret your vision. No areas flagged does not rule out a problem.',
+    hi: 'एम्सलर ग्रिड का उपयोग कुछ लोग केंद्रीय दृष्टि में बदलाव की स्व-निगरानी के लिए करते हैं। SightSteps केवल आपके द्वारा चिह्नित क्षेत्रों को दर्ज करता है; यह आपकी दृष्टि की जाँच या व्याख्या नहीं करता। कोई क्षेत्र चिह्नित न होना समस्या को खारिज नहीं करता।',
   },
-  'Instructions disclaimer': {
-    en: 'SightSteps is not a diagnostic tool. This activity records only areas you choose to flag; it does not test or interpret your vision. A normal-looking grid does not rule out a problem.',
-    hi: 'SightSteps निदान उपकरण नहीं है। एम्सलर ग्रिड के परिणाम होम स्क्रीनिंग हैं और पेशेवर जाँच का विकल्प नहीं हैं। ये परिणाम अपने अगले नेत्र देखभाल अपॉइंटमेंट में दिखाएँ।',
+  'Activity description': {
+    en: 'This grid is sometimes used to monitor changes in central vision. SightSteps records only the areas you choose to flag; it cannot detect or rule out an eye condition.',
+    hi: 'यह ग्रिड केंद्रीय दृष्टि में बदलाव को स्वयं देखने के लिए उपयोग किया जाता है। SightSteps केवल आपके चिह्नित क्षेत्रों को दर्ज करता है; यह किसी नेत्र स्थिति का पता नहीं लगा सकता या उसे खारिज नहीं कर सकता।',
   },
-  'Result disclaimer': {
-    en: 'This records only the areas you chose to flag. No areas flagged does not rule out a vision problem.',
-    hi: 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। ये परिणाम अपने ऑप्टोमेट्रिस्ट को अपनी अगली मुलाक़ात में दिखाएँ।',
+  'Calibration instructions': {
+    en: 'Place a standard credit card (85.6 mm wide) against the screen and match the slider to its full width exactly. The complete 10 cm square must fit within both the visible screen width and height, with room for the controls. A phone may still be too small in landscape; use a tablet or larger display, or skip this activity. Do not estimate or shrink the grid.',
+    hi: 'एक मानक क्रेडिट कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और स्लाइडर को कार्ड की पूरी चौड़ाई से बिल्कुल मिलाएँ। फ़ोन लैंडस्केप में होने पर भी पूरा 10 cm वर्ग स्क्रीन की चौड़ाई और ऊँचाई दोनों में, नियंत्रणों के लिए जगह छोड़कर, फिट होना चाहिए। ऐसा न हो तो टैबलेट या बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें। अनुमान न लगाएँ और ग्रिड को छोटा न करें।',
   },
-  'Report Amsler disclaimer': {
-    en: 'This records only areas the participant chose to flag. It does not test or interpret vision, and no areas flagged does not rule out a problem.',
-    hi: 'यह एक होम स्क्रीनिंग परिणाम है, निदान नहीं। प्रतिभागी ने फ़ोन/टैबलेट स्क्रीन पर कैलिब्रेटेड ग्रिड का उपयोग किया। अपनी अगली मुलाक़ात में अपने ऑप्टोमेट्रिस्ट को यह दिखाएँ।',
+  'Testing instructions and safety note': {
+    en: 'This activity records only the areas you choose to flag. It does not test or interpret vision or rule out a problem. Discuss any concern with an eye-care professional even when no areas are flagged. Contact one promptly for new distortion, blurred or missing areas.',
+    hi: 'यह गतिविधि केवल आपके द्वारा चिह्नित क्षेत्रों को दर्ज करती है। यह दृष्टि की जाँच, व्याख्या या किसी समस्या को खारिज नहीं करती। कोई क्षेत्र चिह्नित न होने पर भी चिंता हो तो नेत्र-देखभाल पेशेवर से चर्चा करें। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो शीघ्र संपर्क करें।',
   },
+  'Result safety note': {
+    en: 'This records only the areas you chose to flag. No areas flagged does not rule out a vision problem, and this activity cannot detect every change. If you notice new distortion, blurred or missing areas, contact an eye-care professional promptly rather than waiting for a routine appointment.',
+    hi: 'यह केवल आपके द्वारा चिह्नित क्षेत्रों का रिकॉर्ड है। कोई क्षेत्र चिह्नित न होना दृष्टि की समस्या को खारिज नहीं करता और यह गतिविधि सभी बदलाव नहीं पकड़ सकती। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो नियमित अपॉइंटमेंट की प्रतीक्षा किए बिना शीघ्र नेत्र-देखभाल पेशेवर से संपर्क करें।',
+  },
+  'Spatial summary disclaimer': strings['amsler.spatial.disclaimer'],
 };
 
 for (const [label, text] of Object.entries(amslerStrings)) {
@@ -148,9 +154,75 @@ for (const [label, text] of Object.entries(briefStrings)) {
   row(label, text.en, text.hi);
 }
 
-// ─── 7. Report Notice Strings ────────────────────────────────
-section('7. KEY i18n STRINGS');
 
+// ─── 7. Adaptive Additional-Experience Questions ─────────────
+section('7. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
+
+// Illustrative answer fixture: these are question templates, not a clinical case.
+const secondaryQuestionFixture = {
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  headaches: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  night_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  squinting: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+  primary_concern: {
+    value: 'blurred_vision',
+    label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+  },
+  additional_concerns: {
+    value: ['headaches', 'night_vision'],
+    label: { en: 'Headaches, Difficulty in low light', hi: 'सिरदर्द, कम रोशनी में कठिनाई' },
+  },
+};
+const secondaryQuestions = getVisibleQuestions(secondaryQuestionFixture)
+  .filter((question) => question.additionalExperienceId || question.id === 'additional_concerns');
+for (const question of secondaryQuestions) {
+  sub('Question: ' + question.id);
+  row('Question text', loc(question.text, 'en'), loc(question.text, 'hi'));
+  if (question.options?.length) {
+    lines.push('  Options:');
+    for (const option of question.options) {
+      lines.push('    - [EN] ' + loc(option.label, 'en'));
+      lines.push('      [HI] ' + loc(option.label, 'hi'));
+    }
+  }
+  lines.push('');
+}
+
+// ─── 8. Custom Activity and Participant Review ───────────────
+section('8. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
+row(
+  'Custom activity prompt',
+  'What is your other everyday activity? Example participant entry: jewellery making.',
+  'आपकी अन्य दैनिक गतिविधि क्या है? उदाहरण: गहने बनाना।',
+);
+row(
+  'Custom activity use',
+  'The participant-entered label is reused in impact questions and profile summaries. It is not inferred by the application.',
+  'प्रतिभागी द्वारा लिखा गया नाम प्रभाव-संबंधी सवालों और प्रोफ़ाइल सारांश में उपयोग होता है। ऐप स्वयं गतिविधि का अनुमान नहीं लगाता।',
+);
+row(
+  'Review heading',
+  'Does this summary reflect what you wanted to share?',
+  'क्या यह सारांश आपकी बात सही तरह बताता है?',
+);
+row(
+  'Review confirmation',
+  'Yes, this summary reflects what I wanted to share.',
+  'हाँ, यह सारांश मेरी बात को सही तरह दर्शाता है।',
+);
+row(
+  'Review correction',
+  'Would you like to correct or add anything? (optional). Up to 500 characters, participant-authored.',
+  'क्या कुछ सुधारना या जोड़ना चाहेंगे? (वैकल्पिक)। अधिकतम 500 अक्षर, प्रतिभागी द्वारा लिखा गया।',
+);
+row(
+  'Review limitation',
+  'The review is conversation context only. It does not alter original answers or clinical interpretation.',
+  'यह समीक्षा केवल बातचीत का संदर्भ है। इससे मूल जवाब या चिकित्सकीय व्याख्या नहीं बदलती।',
+);
+
+// ─── 9. Report Notice Strings ────────────────────────────────
+section('9. KEY i18n STRINGS');
 const keyI18nKeys = [
   'disclaimer.full',
   'patterns.title',
