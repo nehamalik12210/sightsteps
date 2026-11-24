@@ -1,7 +1,7 @@
 # SightSteps — Baseline Record
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
-**Current verified code commit:** `4b5ebcf6793fbcf3e439a8264f9fa118a85201f0`  
+**Current verified main commit:** `a83de5439cd04facbb3c967919c741373bfe8760`  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -25,33 +25,37 @@
 
 Vercel deployment for commit `645f8783547e9f20cfaa32033d3ef4cf6348a394` completed READY:
 - Quality audit: 2,519 passed, 0 failed.
-- Engine regression suite: 842 passed, 0 failed.
-- Clinical-language audit: passed; 22 JSX files and 2,618 copy fragments scanned.
+- Engine regression suite: 849 passed, 0 failed on code commit `723c3c5a29abf31295fb77e8083564b48a53c156`.
+- Clinical-language audit: passed; 22 JSX files and 2,622 copy fragments scanned. The nested-component discovery fixture executed and passed.
 - Vite: 99 modules transformed; PWA generated 11 precache entries.
-- Bundle warning: main JS chunk approximately 580.50 kB (157.88 kB gzip), above Vite's 500 kB warning threshold.
-- npm install reported 4 moderate vulnerabilities and existing environment/deprecation/install-script warnings.
-
-Vercel deployment for current code commit `cfdd32bec6125c2c64e887df3b79c9cf257a811e` completed READY:
-- Quality audit: 2,519 passed, 0 failed.
-- Engine regression suite: 844 passed, 0 failed (two new source-provenance assertions included).
-- Clinical-language audit: passed; 22 JSX files and 2,622 copy fragments scanned.
-- Vite: 99 modules transformed; PWA generated 11 precache entries.
+- Latest deployment chunk: 581.00 kB minified (158.01 kB gzip), above Vite's 500 kB warning threshold.
 
 ## Clinical review export verification
 
 - Added `.github/workflows/clinical-review-export.yml` to generate the review export from locked dependencies and upload it as a 14-day GitHub Actions artifact.
-- Latest workflow run for commit `01f969f64b8f66bf47b93ee9b8a7979fd9805586`: run `45487346824`, conclusion SUCCESS.
-- Generated export: 899 lines, 65,087 bytes, 11 sections. The opening English/Hindi notice marks the document as a draft for independent clinical review and identifies the Ramesh profile as scripted demo data, not a real participant record.
-- Export inspection verified 53 English source rows, each immediately paired with a Hindi source row; no source row was missing its Hindi partner and no Hindi source value was blank.
-- Export covers bilingual pattern definitions, clusters, demo-matched patterns and sources, rules-engine discussion prompts and source links, follow-up notes, Amsler wording, clinician brief wording, adaptive questions, participant-review copy, source-provenance labels and selected i18n strings.
-- Artifact ID: `14964129797`; GitHub Actions artifact retention is 14 days (expires 8 December 2026).
+- Latest workflow run for commit `a83de5439cd04facbb3c967919c741373bfe8760`: run `45490205104`, conclusion SUCCESS.
+- Generated export: 954 lines, 68,713 bytes, 12 correctly numbered sections.
+- Export inspection verified 57 English source rows, each immediately paired with a non-empty Hindi source row; zero missing/mispaired/blank source pairs.
+- Includes the bilingual draft/non-diagnostic cover notice, scripted Ramesh demo-data notice, synthetic custom “Other” activity scenario, bilingual source labels and answers, eight pattern descriptions, pattern clusters, rule-engine prompts, follow-up notes, Amsler wording, clinician brief, adaptive questions and participant-review copy.
+- The same artifact contains `npm-audit.json`. Artifact ID: `14964948536`; retention 14 days (expires 8 December 2026).
 
 ## Verification limits
 
 - The repository was inspected through GitHub's connected repository interface because a local clone attempt failed due to DNS/network resolution.
-- No local `npm ci`, local browser automation, printed-PDF page-count/visual inspection, responsive visual inspection, or physical Amsler device-calibration validation was performed in this work session.
-- The clinical review export was executed and inspected as a GitHub Actions artifact, not as part of the Vercel app build.
-- Latest Vercel production deployment for code commit `4b5ebcf` is READY at `https://sightsteps.vercel.app` (deployment `dpl_ExV6kMDmCbPX1rQe8imuzDeDgwE2`). The Vercel build logs visibly confirm 2,519 quality checks passed, clinical-language audit passed (22 JSX files / 2,622 fragments), 99 Vite modules transformed and 11 PWA precache entries. The engine test command ran as part of `npm run build`; the build continued through clinical lint and Vite and finished READY. The previous fully visible run on `cfdd32b` recorded 844 engine tests passed. The new nested-component discovery fixture executed during the latest clinical-language audit and the audit passed.
+- No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
+- The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
+- Latest Vercel production deployment for main commit `a83de54` is READY at `https://sightsteps.vercel.app` (deployment `dpl_7hxQrBENfgt6tUnmFaTde4RWrgEJ`). Logs confirm 2,519 quality checks passed, the clinical-language audit passed (22 JSX files / 2,622 fragments, nested discovery fixture executed), 99 Vite modules transformed and 11 PWA precache entries. The engine test command completed successfully; exact 849/0 count is exposed by the prior build for the same application-code set (`723c3c5`).
+
+## Dependency audit details
+
+The `npm audit` artifact reports four moderate findings, all in the development-time PWA build chain:
+- `vite-plugin-pwa@2.0.0` (direct dev dependency) → `workbox-build@7.4.1` → `glob@11.1.0` → `minimatch@10.2.6`.
+- `GHSA-3g3m-2fjr-6pw4` affects glob `>=9.0.0 <=14.0.1`; the advisory reports a fix in glob 14.0.2.
+- `GHSA-g3hv-75wg-m249` affects minimatch `>=7.0.0 <11.0.1`; the advisory reports a fix in minimatch 11.0.1.
+- The current Workbox dependency ranges require glob `^11.0.1` and minimatch `^10.1.1`, so the advisory fixed versions are outside the declared ranges. npm's `fixAvailable` suggestion points to `vite-plugin-pwa@1.1.0` and marks it as a major change even though the lockfile has 2.0.0; this appears to be a downgrade and has not been applied.
+- No `npm audit fix`, forced upgrade or dependency override was applied. A compatible Workbox/plugin release or a deliberately tested override needs evaluation before remediation.
+
+The dependency report is a build/development dependency audit, not evidence that these packages execute in the deployed browser bundle. Treat it as an outstanding supply-chain maintenance item, not as zero-risk.
 
 ## Safety boundary
 

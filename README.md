@@ -256,12 +256,14 @@ The latest verified build completed with:
 | Check | Result |
 |---|---|
 | Static quality audit | **2,519 passed**, 0 failed |
-| Regression test suite | **842 passed**, 0 failed (incl. adaptive secondary-experience follow-ups, custom activities, participant review persistence, profile synthesis, two-dimensional Amsler fit, pattern engine and spatial analysis) |
-| Clinical language audit | **PASSED** — 0 violations |
+| Regression test suite | **849 passed**, 0 failed (incl. custom “Other” activity source traceability in rule-engine topics, experience-profile source IDs and localized appointment-pack provenance) |
+| Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,622 copy fragments scanned, including a nested-new-component discovery fixture |
 | Vite production build | 99 modules transformed |
 | PWA service worker | 11 precache entries generated |
 
-These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device/browser testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
+These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device Amsler calibration, responsive visual/print testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
+
+The latest production build also reports a 581.00 kB minified JavaScript chunk (158.01 kB gzip), above Vite’s 500 kB warning threshold. `npm audit` reports four moderate findings in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for exact advisory and fix-compatibility details; no dependency override or forced upgrade has been applied.
 
 ---
 
@@ -270,7 +272,7 @@ These checks cover source structure, data validation, routing, persistence, patt
 - **Clinical review pending.** The review kit is prepared (`CLINICAL_REVIEW_PENDING.md`), but no formal feedback from a licensed optometrist or ophthalmologist has been received yet. All clinical content is grounded in published guidance (see [`CLINICAL_GROUNDING.md`](CLINICAL_GROUNDING.md)); independent expert review is planned as the next step.
 - **Amsler calibration: desktop-validated only.** The credit-card calibration and grid rendering have been validated in desktop browser emulation. Physical-device calibration testing (actual phone, actual credit card, tap accuracy with a finger) is planned before clinical use.
 - **Amsler grid keyboard navigation.** Grid cells are focusable buttons with `aria-label` and `aria-pressed` attributes, so Tab/Shift+Tab/Enter work for flagging cells. A keyboard fallback with row/column number inputs and an Add/Remove button is provided for users who cannot tap a grid. Arrow-key grid cursor navigation is not yet implemented.
-- **Clinician brief one-page fit.** The brief uses compact font sizes (10–12px) and `break-inside: avoid` print rules targeting A4. Actual one-page fit depends on the number of matched patterns and observation groups for a given session; dense sessions may overflow to two pages. Physical print-preview verification is recommended.
+- **Clinician brief one-page fit.** The brief uses compact font sizes (10–12px) and `break-inside: avoid` print rules targeting A4. Actual one-page fit depends on the number of matched patterns and observation groups for a given session; dense sessions may overflow to two pages. Actual browser print-preview/page-count verification remains outstanding.
 - **No WCAG audit.** The app uses keyboard skip-nav, route focus management, `aria-*` attributes and high-contrast styles, but has not been audited against WCAG 2.1 AA by a third-party accessibility assessor.
 
 ## Privacy & Limitations

@@ -30,7 +30,7 @@
 - All changes were committed directly to `main`; no feature branches were created.
 - The first expanded clinical audit correctly exposed safe contextual wording that the original six-file audit did not see. Those false positives were narrowed by explicit contextual phrases and tests.
 - A deployment attempt using an incorrect custom output-directory configuration failed and was canceled; it did not replace the production deployment.
-- Production deployment for `4b5ebcf` is READY at `https://sightsteps.vercel.app`.
+- Production deployment for `a83de54` is READY at `https://sightsteps.vercel.app`.
 - No local browser/device test was run. Do not treat automated checks as clinical validation.
 
 ### Change 4 — Reproducible clinical-review export
@@ -41,7 +41,7 @@
 ### Change 5 — Bilingual provenance in exported discussion prompts
 - First inspection of the generated export found rules-engine discussion sources printed only in English; this was not visible from the pattern-source export.
 - Updated the export renderer to print both EN and HI source labels/answers for each discussion prompt.
-- Regenerated and re-inspected the export: 893 lines / 63,996 bytes, 11 sections, 53 EN source rows each followed by a non-empty HI row, zero missing Hindi pairs.
+- Regenerated and re-inspected the earlier export: 893 lines / 63,996 bytes, 11 sections, 53 EN source rows each followed by a non-empty HI row, zero missing Hindi pairs. Later export versions add the Other-activity example and are recorded below.
 - Commit: `e355deabfc4bc0b0fa679af3f5795f61c5154956`.
 - The generated text file is available as a GitHub Actions artifact; it was also retrieved and inspected in this work session.
 
@@ -54,5 +54,23 @@
 - Added bilingual document-status and demo-data notices at the top of the generated export.
 - Labels the export as a draft for independent clinical review, not a diagnosis/test result/prescription, and explicitly identifies the Ramesh example as scripted demo data.
 - Workflow run `45487346824` completed SUCCESS; artifact ID `14964129797`.
-- Inspected regenerated export: 899 lines / 65,087 bytes; all 53 source-answer rows have non-empty English and Hindi pairs; the opening notices are present.
+- Inspected regenerated export at this stage: 899 lines / 65,087 bytes; all 53 source-answer rows have non-empty English and Hindi pairs; the opening notices are present. Superseded by the 12-section export recorded in Change 9.
 - Commit: `01f969f64b8f66bf47b93ee9b8a7979fd9805586`.
+
+### Change 8 — Participant-entered “Other” activity provenance
+- Added `custom_activity_name` as an explicit source to primary and affected-activity discussion topics when the participant selects “Other”.
+- Added the same answer ID to activity-impact source IDs in the everyday experience profile; localized the source label in the profile component while preserving the participant's free-text answer verbatim.
+- Added regression assertions for affected/primary discussion topics, bilingual source labels, raw participant wording and Hindi appointment-pack serialization.
+- First Vercel test run exposed a fixture mismatch: the test expected translated free text although the app contract preserves participant-entered wording verbatim. Corrected the fixture/assertion; verified on commit `723c3c5a29abf31295fb77e8083564b48a53c156`: 849 passed, 0 failed; 2,519 quality checks; clinical audit passed; Vite build and PWA generation passed.
+
+### Change 9 — Synthetic custom-activity scenario in clinical review export
+- Added a separate, clearly labelled synthetic “Other” activity scenario to the export so reviewers can inspect how participant-entered text is sourced in both primary and affected-activity discussion topics.
+- Explicitly identifies this example as synthetic test data in the English/Hindi cover notice.
+- Corrected later-section numbering to 1–12 and re-generated/inspected export: 954 lines / 68,713 bytes; 57 EN source rows each immediately followed by a non-empty HI source row; zero mispaired rows.
+- Workflow run `45489986192` completed SUCCESS; artifact ID `14966680846`.
+
+### Change 10 — Dependency audit artifact
+- Extended the clinical-review workflow to include an `npm audit --json` report alongside the export artifact.
+- Corrected an initial YAML `path` formatting mistake before accepting the successful run; the malformed run failed before starting a job and did not affect the app deployment.
+- Workflow run `45490205104` completed SUCCESS; artifact ID `14964948536` contains both the 68,713-byte export and npm audit JSON.
+- Audit reports four moderate findings in the development-time PWA dependency chain; no forced fix or version downgrade was applied pending compatibility review.

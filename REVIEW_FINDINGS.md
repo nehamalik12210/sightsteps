@@ -1,7 +1,7 @@
 # SightSteps — Review Findings and Priorities
 
 **Last reviewed:** 25 November 2026  
-**Scope:** Baseline and the eight reviewer concerns carried into this audit.
+**Scope:** Eight original reviewer concerns plus provenance and dependency-audit issues discovered during implementation.
 
 ## Findings
 
@@ -15,19 +15,21 @@
 | F-06 | Clinical-language allowlist may be too coarse. | Detector retains phrase-level exceptions; mixed safe/unsafe text fixture protects against a disclaimer masking unsafe text elsewhere. Additional safe-context fixtures added. | Continue reviewing exceptions; avoid broad allowlist entries. |
 | F-07 | Clinical copy coverage was incomplete. | Replaced six-file hardcoded JSX list with recursive discovery and Babel JSX parsing. Audit covers visible JSX text, visible attributes, expressions/templates, bilingual data, base/adaptive questions, demo persona, clusters and engine output. Added a temporary nested-component fixture that proves a new JSX file is discovered and its text reaches the detector. | Implemented; preserve coverage tests. |
 | F-08 | Discussion-source provenance was ambiguous and omitted from appointment pack. | Report labels now identify responses linked to each topic/follow-up. Appointment pack retains up to eight localized source IDs, labels and answers per discussion topic; display and regression tests added. | Implemented; visual print inspection still pending. |
-| F-09 | Exported discussion-source provenance was English-only. | The generated artifact initially exposed English-only rule-engine source rows. Export renderer now emits adjacent EN/HI source labels and answers. Latest artifact has 53 EN/HI source pairs and no missing or blank Hindi rows; the cover also identifies the document as a review draft and the Ramesh profile as scripted demo data. | Implemented and artifact inspected; keep regression check when export format changes. |
+| F-09 | Exported discussion-source provenance was English-only. | The generated artifact initially exposed English-only rule-engine source rows. Export renderer now emits adjacent EN/HI source labels and answers. Latest artifact has 57 EN/HI source pairs and no missing or blank Hindi rows; cover identifies review-draft status and scripted demo data. | Implemented and artifact inspected; keep regression check when export format changes. |
+| F-10 | Participant-entered “Other” activity wording lacked explicit answer provenance. | `custom_activity_name` is now included as a source for primary/affected-activity discussion points and experience-profile source IDs. Its label is localized while the participant's free-text answer is preserved verbatim. Regression tests cover source IDs, bilingual labels, both topics and Hindi appointment-pack serialization. | Implemented; verify visually in printed pack. |
+| F-11 | npm audit reported four moderate transitive PWA build-tool findings. | npm audit artifact identifies the chain `vite-plugin-pwa@2.0.0` → `workbox-build@7.4.1` → `glob@11.1.0` / `minimatch@10.2.6`, with GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249. Suggested npm remediation is a major-change replacement that appears to downgrade the direct PWA plugin; no forced update applied. | Keep open; evaluate upstream compatible Workbox/plugin releases or test a controlled override. Do not run `npm audit fix --force`. |
 
 ## Additional engineering observations
 
 - The audit now scans 22 JSX files and over 2,600 copy fragments on the verified build.
-- Current build emits a main JavaScript chunk above 500 kB.
-- npm reports 4 moderate vulnerabilities; inspect `npm audit` output before changing dependency versions. Do not apply `npm audit fix --force` blindly.
-- Clinical review export includes pattern clusters and explicit source-provenance labels. GitHub Actions generates the artifact; latest export was inspected (899 lines / 65,087 bytes, 53 bilingual source pairs, explicit clinical-review and demo-data notice).
+- Latest build emits a 581.00 kB minified JavaScript chunk above Vite's 500 kB warning threshold (158.01 kB gzip).
+- npm audit report contains 4 moderate findings in the build-time PWA toolchain; see F-11 and `BASELINE.md` for advisory/version detail.
+- Clinical review export includes pattern clusters, source traceability and the synthetic Other-activity example. Latest inspected artifact: 954 lines / 68,713 bytes, 12 sections, 57 bilingual source pairs, explicit review-draft and demo-data notices.
 
 ## Outstanding release gates
 
 1. Independent optometrist/ophthalmologist review and recorded feedback.
 2. Amsler calibration and responsive geometry validation on real devices.
-3. Printed appointment-pack visual review in English and Hindi.
-4. Complete printed appointment-pack visual/page-count review in English and Hindi.
-5. Address bundle-size and dependency audit warnings after assessing actual dependency paths and compatibility.
+3. Browser print-preview and page-count/visual review of appointment packs in English and Hindi, including dense data and custom “Other” activity.
+4. Reduce the production JavaScript chunk after reviewing route-level splitting and actual bundle composition.
+5. Resolve the four moderate PWA build-tool advisories using compatible upstream versions or a fully tested override; do not force a major downgrade.

@@ -88,8 +88,9 @@ node scripts/export-prompts.mjs
 ```
 This creates `exports/clinical-review-export.txt` containing:
 - All 8 pattern descriptions (EN + HI), including source keys
-- Pattern engine output for the demo persona (Ramesh, 42, tailor)
-- Rules-engine discussion prompts and follow-up notes (EN + HI), with source answers
+- Pattern engine output for the scripted demo persona (Ramesh, 42, tailor)
+- Rules-engine discussion prompts and follow-up notes (EN + HI), with paired source answers
+- A separate synthetic “Other” activity scenario showing participant-entered activity-name provenance
 - Dynamically generated secondary-experience questions and answer options (EN + HI)
 - Current Amsler introduction, calibration, use instructions and result safety wording (EN + HI)
 - Participant-defined activity wording examples
@@ -117,7 +118,7 @@ Open the app and use "Explore Ramesh's demo" to walk through the full journey. T
 Update the "Reviewer Feedback" section below with the reviewer's responses. Apply accepted changes to `patterns.js`, `questions.js`, `ruleEngine.js`, and Amsler wording. Document any changes or justified no-changes in the Changes Log.
 
 ## Automated Safeguards
-- **Clinical language lint** (`npm run clinical-lint`): Scans all patterns, i18n strings, and engine output for forbidden diagnostic phrases. Fails CI on violation.
+- **Clinical language lint** (`npm run clinical-lint`): Recursively scans all JSX files under `src`, bilingual structured copy, questions, patterns, clusters, persona copy and generated engine output. A nested-component fixture proves new JSX components are discovered and their visible text is checked. Fails CI on violation.
 - **Disclaimer constant**: Rendered at the top of Detailed Report, Preparation Pack, Clinician Brief, Amsler activity page, and Amsler result.
 - **Pattern engine guardrail**: Patterns require ≥2 satisfied source links before they appear. No pattern fires on empty or partial answers.
 
@@ -135,6 +136,10 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 | 2026-11-24 | Participant-defined activity wording added to impact questions and summaries | Preserve the participant's own everyday context |
 | 2026-11-24 | Participant review and correction added to Conversation Map and exports | Allow participants to correct their communication summary |
 | 2026-11-24 | Clinical review export expanded for adaptive questions and participant review | Ensure the independent reviewer sees current bilingual UI copy |
+| 2026-11-25 | Discussion-source provenance added to report and appointment pack | Make it clear which participant responses are linked to each topic |
+| 2026-11-25 | Export expanded with paired EN/HI source answers and scripted “Other” activity example | Let reviewers inspect traceability, free-text preservation and bilingual labels |
+| 2026-11-25 | Export marked as a review draft with explicit synthetic-demo notice | Prevent demo data being mistaken for participant data |
+| 2026-11-25 | GitHub Actions export and npm audit artifact workflow added | Reproduce the review pack and retain dependency-audit evidence |
 
 ## Reviewer Feedback
 _To be completed after formal clinical review._
