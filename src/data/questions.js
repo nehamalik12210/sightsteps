@@ -380,22 +380,17 @@ export function getProgress(answers = {}, activities = []) {
 }
 
 /**
- * Progress for the question currently displayed in the questionnaire.
- * The count, percentage label, progress-bar width and ARIA value must all use
- * this same current-position calculation (rather than answered-answer count).
+ * Progress reports completed visible questions, not the position of the
+ * question currently on screen. The count, percentage, bar and ARIA value
+ * all use this same completed-answer total.
  */
-export function getQuestionPositionProgress(visibleQuestions = [], currentQuestionId = '') {
+export function getQuestionCompletionProgress(visibleQuestions = [], answers = {}) {
   const questions = Array.isArray(visibleQuestions) ? visibleQuestions : [];
   const total = questions.length;
-  if (!total || !currentQuestionId) return { current: 0, total, percent: 0 };
-
-  const index = questions.findIndex((question) => question?.id === currentQuestionId);
-  if (index < 0) return { current: 0, total, percent: 0 };
-
-  const current = index + 1;
+  const completed = questions.filter((question) => isAnswerComplete(answers?.[question?.id])).length;
   return {
-    current,
+    completed,
     total,
-    percent: Math.round((current / total) * 100),
+    percent: total ? Math.round((completed / total) * 100) : 0,
   };
 }
