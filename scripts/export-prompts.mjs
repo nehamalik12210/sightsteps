@@ -86,7 +86,7 @@ if (rameshPatterns.length === 0) {
   }
 }
 
-// ─── 3. Rules Engine Discussion Prompts (Demo Persona) ────────
+// ─── 4. Rules Engine Discussion Prompts (Demo Persona) ────────
 section('4. DISCUSSION PROMPTS FROM RULES ENGINE (Ramesh)');
 
 const rameshReport = evaluateAnswers(rameshPersona.answers, {
@@ -108,7 +108,7 @@ for (const point of rameshReport.discussionPoints) {
   lines.push('');
 }
 
-// ─── 4. Follow-Up Notes ──────────────────────────────────────
+// ─── 5. Follow-Up Notes ──────────────────────────────────────
 section('5. FOLLOW-UP NOTES (Ramesh)');
 
 for (const note of rameshReport.followUpNotes) {
@@ -118,7 +118,7 @@ for (const note of rameshReport.followUpNotes) {
   lines.push('');
 }
 
-// ─── 5. Amsler Grid Wording ──────────────────────────────────
+// ─── 6. Amsler Grid Wording ──────────────────────────────────
 section('6. AMSLER GRID WORDING');
 
 const amslerStrings = {
@@ -149,7 +149,7 @@ for (const [label, text] of Object.entries(amslerStrings)) {
   row(label, text.en, text.hi);
 }
 
-// ─── 6. Clinician Brief Wording ──────────────────────────────
+// ─── 7. Clinician Brief Wording ──────────────────────────────
 section('7. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
@@ -168,7 +168,7 @@ for (const [label, text] of Object.entries(briefStrings)) {
 }
 
 
-// ─── 7. Adaptive Additional-Experience Questions ─────────────
+// ─── 8. Adaptive Additional-Experience Questions ─────────────
 section('8. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
 
 // Illustrative answer fixture: these are question templates, not a clinical case.
@@ -201,7 +201,7 @@ for (const question of secondaryQuestions) {
   lines.push('');
 }
 
-// ─── 8. Custom Activity and Participant Review ───────────────
+// ─── 9. Custom Activity and Participant Review ───────────────
 section('9. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
 row(
   'Custom activity prompt',
