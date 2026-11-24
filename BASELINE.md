@@ -4,7 +4,7 @@
 **Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
 **Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
 **Latest verified source commit:** `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0`  
-**Latest verified production deployment:** `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (READY; `main`; production alias `https://sightsteps.vercel.app`)  
+**Latest verified production deployment:** `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (READY; `main`; commit `92a4d0da...`; production alias `https://sightsteps.vercel.app`; contains the verified app code from `5d964fc5...`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -49,7 +49,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
 - Production HTTP checks for `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 and the Vite SPA shell. This confirms the Vercel rewrite responds for direct route requests; it does not execute the client-side app or verify interactive route behavior.
 - The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
-- The route-splitting deployment `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e713...`) and latest verified deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5...`) both reached READY on the production target. The latest logs contain the full quality/test/lint/build evidence above.
+- The route-splitting deployment `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e713...`), the fully instrumented verification deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5...`) and the latest production deployment `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (documentation commit `92a4d0da...`, same application code) all reached READY. The latest deployment logs reconfirmed 2,522 quality checks and 849 regression tests with zero failures; the 5d964 verification logs also confirm the 22-file / 2,625-fragment clinical-language scan.
 
 ## Dependency audit details
 
