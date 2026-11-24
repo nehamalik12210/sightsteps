@@ -58,6 +58,15 @@ export function buildAppointmentPreparationPack({
       title: compactText(localized(point.title, language), 72),
       context: compactText(localized(point.context, language), 105),
       prompt: compactText(localized(point.prompt, language), 190),
+      sources: (Array.isArray(point.sources) ? point.sources : [])
+        .filter((source) => source && typeof source === 'object')
+        .slice(0, 8)
+        .map((source) => ({
+          id: compactText(source.id, 80),
+          label: compactText(localized(source.label, language), 90),
+          answer: compactText(localized(source.answer, language), 90),
+        }))
+        .filter((source) => source.id && source.label),
     }));
 
   const orderedTimeline = normalizeVisionTimelineEntries(timelineEntries)

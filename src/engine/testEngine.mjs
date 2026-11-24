@@ -238,6 +238,11 @@ const preparationPack = buildAppointmentPreparationPack({
     title: { en: 'Topic ' + index, hi: 'विषय ' + index },
     context: { en: 'Context ' + index, hi: 'संदर्भ ' + index },
     prompt: { en: 'Prompt ' + index, hi: 'सवाल ' + index },
+    sources: index === 0 ? [{
+      id: 'blurred_vision',
+      label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+      answer: { en: 'Yes', hi: 'हाँ' },
+    }] : [],
   })),
   questionsToAsk: 'Q'.repeat(520),
   conversationReview: { confirmed: true, correction: 'The blur also affects jewellery making.' },
@@ -247,6 +252,8 @@ const preparationPack = buildAppointmentPreparationPack({
 assert(preparationPack.priorities.length === 2, 'appointment pack keeps no more than two participant priorities');
 assert(preparationPack.activities.length === 5, 'appointment pack keeps the compact activity context within five items');
 assert(preparationPack.discussionPoints.length === 3, 'appointment pack keeps the three most relevant discussion prompts');
+assert(preparationPack.discussionPoints[0].sources[0]?.id === 'blurred_vision', 'appointment pack preserves discussion source identifiers');
+assert(preparationPack.discussionPoints[0].sources[0]?.label === 'Blurred or unclear vision' && preparationPack.discussionPoints[0].sources[0]?.answer === 'Yes', 'appointment pack localizes and preserves source labels and answers');
 assert(preparationPack.questionsToAsk.length <= 480, 'appointment pack bounds the personal question text');
 assert(preparationPack.conversationReview.confirmed === true, 'appointment pack preserves participant summary confirmation');
 assert(preparationPack.conversationReview.correction.includes('jewellery making'), 'appointment pack preserves participant corrections within its bounded review record');

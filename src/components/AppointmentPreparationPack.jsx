@@ -73,6 +73,14 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
                 <h3>{point.title || (hi ? 'चर्चा का विषय' : 'Discussion topic')}</h3>
                 {point.context && <p className="appointment-pack__context">{point.context}</p>}
                 <p>{point.prompt}</p>
+                {point.sources?.length > 0 && (
+                  <p className="appointment-pack__context">
+                    <strong>{hi ? 'इस विषय से जुड़े आपके जवाब:' : 'Your responses linked to this topic:'}</strong>{' '}
+                    {point.sources.map((source) => (
+                      source.answer ? source.label + ': ' + source.answer : source.label
+                    )).join(' · ')}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

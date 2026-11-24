@@ -606,7 +606,7 @@ export default function Report() {
                     </div>
                     {point.sources?.length > 0 && (
                       <p className="rpt__discuss-ctx">
-                        <strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(point.sources)}
+                        <strong>{lang === 'hi' ? 'इस विषय से जुड़े आपके जवाब:' : 'Your responses linked to this topic:'}</strong> {sourcesText(point.sources)}
                       </p>
                     )}
                   </div>
@@ -639,7 +639,7 @@ export default function Report() {
                 <article key={note.id} className="rpt__followup-item">
                   <h3>{localized(note.title, lang)}</h3>
                   <p>{localized(note.detail, lang)}</p>
-                  {note.sources?.length > 0 && <p className="rpt__discuss-ctx"><strong>{lang === 'hi' ? 'आधार:' : 'Based on:'}</strong> {sourcesText(note.sources)}</p>}
+                  {note.sources?.length > 0 && <p className="rpt__discuss-ctx"><strong>{lang === 'hi' ? 'इस फॉलो-अप नोट से जुड़े आपके जवाब:' : 'Your responses linked to this follow-up note:'}</strong> {sourcesText(note.sources)}</p>}
                 </article>
               ))}
             </div>
