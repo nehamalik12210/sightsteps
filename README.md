@@ -31,7 +31,13 @@ A pattern engine (`src/engine/patternEngine.js`) evaluates combinations of parti
 **8 patterns:** `screen-strain` · `night-vision` · `close-work-headache` · `asymmetry` · `presbyopia` · `digital-eye-strain` · `low-light-contrast` · `overdue-exam`
 
 ### 🧭 Everyday Vision Experience Profile
-A bilingual synthesis layer (`src/engine/visionExperienceProfile.js`) connects the participant's main and additional reported experiences with onset, change over time, frequency, contexts, eye involvement, activity-specific impacts and participant-recorded timeline entries. Each profile section retains source answer IDs and displays the source responses on demand. The same profile is reused in the detailed report, clinician brief and compact appointment preparation pack. It does not score severity, measure visual performance, infer a diagnosis or determine urgency.
+A bilingual synthesis layer (`src/engine/visionExperienceProfile.js`) connects the participant's main and additional reported experiences with onset, change over time, frequency, contexts, eye involvement, activity-specific impacts and participant-recorded timeline entries. Participants may choose additional experiences for separate, optional follow-up questions; each profile section retains source answer IDs and displays the source responses on demand. The same profile is reused in the detailed report, clinician brief and compact appointment preparation pack. It does not score severity, measure visual performance, infer a diagnosis or determine urgency.
+
+### 🧩 Personalized Everyday Activities
+Participants can describe an activity that is not covered by the preset categories (for example, jewellery making or repair work). Their own activity label is carried into impact questions, the experience profile and discussion prompts. Changing the custom label invalidates impact details tied to the old label so outdated wording is not reused.
+
+### ✅ Participant-Reviewed Conversation Map
+Before using the report, participants can confirm that the Conversation Map reflects what they intended to share or add a correction in their own words. The review and bounded correction are stored with the local session and carried into the Appointment Preparation Pack and Clinician Brief as participant-authored context. It never overwrites the original answers or changes a clinical interpretation.
 
 ### 🔲 Amsler Grid Self-Monitoring Activity
 An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked unless the calibrated 10 cm square fits within both visible viewport dimensions with reserved space for controls. Wide but short landscape-phone viewports are blocked. This screen-fit guard does not validate physical display calibration. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
@@ -80,12 +86,12 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 
 1. Start a private session or open the clearly labelled **Ramesh demo**.
 2. Choose English or Hindi, review purpose and consent information, indicate whether someone is assisting.
-3. Select everyday activities that are part of the participant's routine.
-4. Complete the guided questions and describe visual experiences noticed.
+3. Select everyday activities that are part of the participant's routine, including a custom description when choosing **Other**.
+4. Complete the guided questions, select any additional experiences to discuss, and answer only the follow-ups relevant to those selections.
 5. Identify activities that feel affected and describe the impact.
 6. Optionally try the **direction-awareness interaction** (uncalibrated, does not measure visual acuity).
 7. Optionally try the **Amsler grid self-monitoring activity** — record any grid areas that appear distorted, blurred or missing, one eye at a time. It cannot detect or rule out an eye condition.
-8. Review the **Vision Conversation Map** with inferred patterns, choose conversation priorities, add personal questions, open the clinician brief, and print an Appointment Preparation Pack or the detailed report.
+8. Review the **Vision Conversation Map**, confirm or correct its summary, choose conversation priorities, add personal questions, open the clinician brief, and print an Appointment Preparation Pack or the detailed report.
 9. Optionally add dated entries to **My Vision Timeline**.
 10. Optionally record appointment notes and follow-up steps.
 
@@ -98,7 +104,7 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 | Frontend | React 19 |
 | Build | Vite 6 |
 | Navigation | React Router 7 |
-| Local storage | IndexedDB |
+| Local storage | IndexedDB (including participant summary review and corrections) |
 | Rules engine | Deterministic JS rules engine (`src/engine/ruleEngine.js`) |
 | Pattern engine | Inference engine for answer-combination patterns (`src/engine/patternEngine.js`) |
 | Clinical language lint | Automated forbidden-phrase scanner (`scripts/clinical-language-audit.mjs`) |
@@ -190,6 +196,7 @@ sightsteps/
 │   │   ├── AccessibilityControls.jsx  # Text size, contrast, motion, touch targets
 │   │   ├── AppointmentPreparationPack.jsx  # One-page printable summary
 │   │   ├── ClinicianBrief.jsx         # Print-optimised clinician overlay
+│   │   ├── ConversationReview.jsx     # Participant confirmation and correction
 │   │   ├── KioskGuard.jsx             # Shared-device inactivity timeout
 │   │   ├── LocalSaveStatus.jsx        # IndexedDB save feedback
 │   │   ├── OfflineStatus.jsx          # Offline detection banner
