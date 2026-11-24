@@ -633,16 +633,23 @@ assert(rameshPatterns.length > 0, 'Ramesh profile triggers at least one pattern'
 assert(rameshPatterns.some((p) => p.id === 'close-work-headache'), 'Ramesh triggers close-work-headache pattern');
 // Ramesh: eye_exam=never + 3 experiences → overdue-exam
 assert(rameshPatterns.some((p) => p.id === 'overdue-exam'), 'Ramesh triggers overdue-exam pattern');
-// Outdoor time alone must not be treated as evidence of low-light difficulty.
-assert(!rameshPatterns.some((p) => p.id === 'low-light-contrast'), 'low-light pattern does not fire from outdoor time alone');
+// Ramesh reported both night-vision difficulty and squinting, so the co-reported pattern is visible.
+// His context answers describe blurred vision, however, so they must not be reused as night-vision context.
+assert(rameshPatterns.some((p) => p.id === 'low-light-contrast'), 'co-reported night-vision difficulty and squinting are traceable as separate responses');
+assert(!rameshPatterns.some((p) => p.id === 'night-vision'), 'blurred-vision context is not attributed to the separate night-vision response');
+
+const outdoorOnlyPatterns = evaluatePatterns({
+  outdoor_time: { value: 'high', label: { en: 'Most of the day', hi: 'दिन का ज़्यादातर समय' } },
+});
+assert(!outdoorOnlyPatterns.some((p) => p.id === 'low-light-contrast' || p.id === 'night-vision'), 'outdoor time alone does not create a low-light pattern');
 
 const lowLightAnswers = {
   night_vision: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
-  experience_context: { value: ['low_light'], label: { en: 'Low-light situations', hi: 'कम रोशनी की स्थिति' } },
   squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
 };
 const lowLightPatterns = evaluatePatterns(lowLightAnswers);
-assert(lowLightPatterns.some((p) => p.id === 'low-light-contrast'), 'low-light pattern requires explicit low-light context, night difficulty and squinting');
+assert(lowLightPatterns.some((p) => p.id === 'low-light-contrast'), 'co-reported night-vision difficulty and squinting create a discussion prompt without asserting they occur in the same context');
+assert(!evaluatePatterns({ night_vision: { value: 'sometimes' } }).some((p) => p.id === 'low-light-contrast'), 'low-light co-report prompt requires squinting to be reported too');
 
 for (const pattern of rameshPatterns) {
   assert(pattern.sources.length >= 2, `matched pattern ${pattern.id} has ≥2 source links`);
@@ -654,34 +661,135 @@ for (const pattern of rameshPatterns) {
   }
 }
 
-// Specific trigger isolation tests
+// Specific trigger isolation and attribution tests.
 const screenStrainAnswers = {
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
   screen_hours: { value: 'high', label: { en: '6+ hours', hi: '6+ घंटे' } },
   blur_distance: { value: 'far', label: { en: 'Far objects', hi: 'दूर की चीज़ें' } },
   eye_exam: { value: 'never', label: { en: 'Never', hi: 'कभी नहीं' } },
 };
 const screenStrainPatterns = evaluatePatterns(screenStrainAnswers);
-assert(screenStrainPatterns.some((p) => p.id === 'screen-strain'), 'screen-strain fires on its specific triggers');
+assert(screenStrainPatterns.some((p) => p.id === 'screen-strain'), 'screen-strain fires when screen use, reported distance blur and examination history are all present');
+assert(screenStrainPatterns.find((p) => p.id === 'screen-strain').sources.some((source) => source.id === 'blurred_vision'), 'screen-strain links the original positive blur response');
+const staleBlurDistance = evaluatePatterns({
+  ...screenStrainAnswers,
+  blurred_vision: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+});
+assert(!staleBlurDistance.some((p) => p.id === 'screen-strain'), 'screen-strain rejects a stale distance answer when blur is currently reported as absent');
 
 const asymmetryAnswers = {
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
   which_eye: { value: 'left', label: { en: 'Left eye', hi: 'बाईं आँख' } },
   experience_onset: { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' } },
 };
 const asymmetryPatterns = evaluatePatterns(asymmetryAnswers);
-assert(asymmetryPatterns.some((p) => p.id === 'asymmetry'), 'asymmetry fires on one-eye + recent onset');
+assert(asymmetryPatterns.some((p) => p.id === 'asymmetry'), 'asymmetry fires on a reported main experience, one eye and recent onset');
+assert(asymmetryPatterns.find((p) => p.id === 'asymmetry').sources.some((source) => source.id === 'primary_concern'), 'asymmetry links the main experience that the eye/onset answers describe');
+assert(!evaluatePatterns({
+  ...asymmetryAnswers,
+  blurred_vision: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+}).some((p) => p.id === 'asymmetry'), 'asymmetry rejects stale one-eye answers after the main experience is no longer reported');
+assert(!evaluatePatterns({
+  ...asymmetryAnswers,
+  primary_concern: { value: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+}).some((p) => p.id === 'asymmetry'), 'asymmetry does not attach eye-side answers to an unrelated primary experience');
 
 const presbyopiaAnswers = {
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
   blur_distance: { value: 'near', label: { en: 'Near objects', hi: 'पास की चीज़ें' } },
   age_group: { value: 'senior', label: { en: '55+', hi: '55+' } },
   experience_change: { value: 'more_noticeable', label: { en: 'Getting worse', hi: 'बढ़ रहा है' } },
 };
 const presbyopiaPatterns = evaluatePatterns(presbyopiaAnswers);
-assert(presbyopiaPatterns.some((p) => p.id === 'presbyopia'), 'presbyopia fires on near blur + older age + worsening');
+assert(presbyopiaPatterns.some((p) => p.id === 'presbyopia'), 'near blur reported as the main experience, age group and worsening trend create the near-vision discussion prompt');
+assert(!evaluatePatterns({
+  ...presbyopiaAnswers,
+  primary_concern: { value: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+}).some((p) => p.id === 'presbyopia'), 'near blur does not borrow the change-over-time answer from an unrelated main experience');
+assert(!evaluatePatterns({
+  ...presbyopiaAnswers,
+  blurred_vision: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+}).some((p) => p.id === 'presbyopia'), 'near-vision discussion prompt requires a currently reported blur experience');
 
-// Partial triggers should not fire
+const nightDrivingMain = evaluatePatterns({
+  night_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  primary_concern: { value: 'night_vision', label: { en: 'Difficulty in low light', hi: 'कम रोशनी में कठिनाई' } },
+  age_group: { value: 'middle', label: { en: '40–55', hi: '40–55' } },
+  experience_context: { value: ['driving'], label: { en: 'Driving or travelling', hi: 'ड्राइविंग या यात्रा' } },
+  affected_activities: { value: ['driving'], label: { en: 'Driving & travel', hi: 'ड्राइविंग और यात्रा' } },
+});
+const nightVisionMainPattern = nightDrivingMain.find((pattern) => pattern.id === 'night-vision');
+assert(Boolean(nightVisionMainPattern), 'night-vision pattern fires when driving context belongs to the main night-vision experience');
+assert(nightVisionMainPattern.sources.some((source) => source.id === 'experience_context'), 'night-vision pattern links the correct main-experience context');
+const nightDrivingSecondary = evaluatePatterns({
+  night_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  headaches: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  primary_concern: { value: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+  additional_concerns: { value: ['night_vision'], label: { en: 'Difficulty in low light', hi: 'कम रोशनी में कठिनाई' } },
+  additional_experience_night_vision_context: { value: ['driving'], label: { en: 'Driving or travelling', hi: 'ड्राइविंग या यात्रा' } },
+  age_group: { value: 'senior', label: { en: 'Above 55', hi: '55 से ऊपर' } },
+});
+const nightVisionSecondaryPattern = nightDrivingSecondary.find((pattern) => pattern.id === 'night-vision');
+assert(Boolean(nightVisionSecondaryPattern), 'night-vision pattern can use a selected secondary experience context');
+assert(nightVisionSecondaryPattern.sources.some((source) => source.id === 'additional_experience_night_vision_context'), 'secondary night-vision pattern links the secondary symptom context');
+assert(!nightVisionSecondaryPattern.sources.some((source) => source.id === 'experience_context'), 'secondary night-vision pattern does not cite the primary headache context');
+const borrowedNightContext = evaluatePatterns({
+  night_vision: { value: 'yes' },
+  blurred_vision: { value: 'yes' },
+  primary_concern: { value: 'blurred_vision' },
+  age_group: { value: 'middle' },
+  experience_context: { value: ['driving'] },
+  affected_activities: { value: ['driving'] },
+});
+assert(!borrowedNightContext.some((pattern) => pattern.id === 'night-vision'), 'blurred-vision driving context is not borrowed by a secondary night-vision report');
+
+const digitalMain = evaluatePatterns({
+  screen_hours: { value: 'high', label: { en: 'Most of the day', hi: 'दिन का ज़्यादातर समय' } },
+  headaches: { value: 'often', label: { en: 'Often', hi: 'अक्सर' } },
+  primary_concern: { value: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+  experience_context: { value: ['screens'], label: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' } },
+});
+const digitalMainPattern = digitalMain.find((pattern) => pattern.id === 'digital-eye-strain');
+assert(Boolean(digitalMainPattern), 'screen-headache pattern requires explicit screen context for headaches');
+assert(digitalMainPattern.sources.some((source) => source.id === 'experience_context'), 'main headache pattern links its screen context');
+const digitalSecondary = evaluatePatterns({
+  screen_hours: { value: 'high' },
+  headaches: { value: 'sometimes' },
+  blurred_vision: { value: 'yes' },
+  primary_concern: { value: 'blurred_vision' },
+  additional_concerns: { value: ['headaches'] },
+  additional_experience_headaches_context: { value: ['screens'] },
+});
+const digitalSecondaryPattern = digitalSecondary.find((pattern) => pattern.id === 'digital-eye-strain');
+assert(Boolean(digitalSecondaryPattern), 'screen-headache pattern supports a selected secondary headache experience');
+assert(digitalSecondaryPattern.sources.some((source) => source.id === 'additional_experience_headaches_context'), 'secondary screen-headache pattern links its own context answer');
+assert(!digitalSecondaryPattern.sources.some((source) => source.id === 'experience_context'), 'secondary screen-headache pattern does not cite an unrelated primary context');
+const borrowedScreenContext = evaluatePatterns({
+  screen_hours: { value: 'high' },
+  headaches: { value: 'sometimes' },
+  blurred_vision: { value: 'yes' },
+  primary_concern: { value: 'blurred_vision' },
+  experience_context: { value: ['screens'] },
+});
+assert(!borrowedScreenContext.some((pattern) => pattern.id === 'digital-eye-strain'), 'screen context for blurred vision is not borrowed by a separate headache response');
+
+const overdueTwoExperiences = evaluatePatterns({
+  eye_exam: { value: 'very_old' },
+  blurred_vision: { value: 'sometimes' },
+  headaches: { value: 'sometimes' },
+});
+assert(overdueTwoExperiences.some((pattern) => pattern.id === 'overdue-exam'), 'extended examination interval plus two reported experiences creates a discussion prompt');
+assert(!evaluatePatterns({
+  eye_exam: { value: 'never' },
+  blurred_vision: { value: 'sometimes' },
+}).some((pattern) => pattern.id === 'overdue-exam'), 'extended examination interval plus only one reported experience does not trigger the pattern');
+
+// Partial triggers should not fire.
 const partialScreenAnswers = {
   screen_hours: { value: 'high', label: { en: '6+ hours', hi: '6+ घंटे' } },
-  // Missing blur_distance and eye_exam
+  // Missing the blur report, distance and examination history.
 };
 assert(evaluatePatterns(partialScreenAnswers).every((p) => p.id !== 'screen-strain'), 'screen-strain does not fire on partial triggers');
 
@@ -691,7 +799,7 @@ const partialAsymmetry = {
 };
 assert(evaluatePatterns(partialAsymmetry).every((p) => p.id !== 'asymmetry'), 'asymmetry does not fire when both eyes are reported');
 
-// Null/undefined safety
+// Null/undefined safety.
 assert(evaluatePatterns(null).length === 0, 'null answers produce no patterns');
 assert(evaluatePatterns(undefined).length === 0, 'undefined answers produce no patterns');
 
