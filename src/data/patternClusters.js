@@ -1,15 +1,15 @@
 /**
- * SightSteps — Pattern Cluster Definitions
+ * SightSteps — grouped discussion patterns.
  *
- * When multiple patterns co-fire, cluster narratives surface the relationship
- * between them. This adds inference: independent pattern matches are survey
- * logic; recognising that patterns form a coherent group is intelligence.
+ * Clusters organise patterns that match the same participant's answers. Patterns
+ * can reuse overlapping answers, so a cluster is not an additional inference,
+ * independent confirmation or measure of clinical certainty.
  *
  * Rules:
- * 1. Only cluster patterns that actually co-fired for this user.
- * 2. Never hide an individual pattern because it's in a cluster.
- * 3. Show all matched patterns, then cluster summary above them.
- * 4. All text uses non-diagnostic framing.
+ * 1. Include only pattern IDs that actually matched.
+ * 2. Preserve every individual pattern in the report.
+ * 3. Label shared-answer overlap honestly in the cluster summary.
+ * 4. Keep all text non-diagnostic and participant-reported.
  */
 
 const clusters = [
