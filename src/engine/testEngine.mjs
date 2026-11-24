@@ -333,10 +333,30 @@ assert(additionalIds.includes('additional_experience_night_vision_eye'), 'anothe
 assert(!getVisibleQuestions({ ...multiConcernAnswers, additional_concerns: { value: ['none'] } }).some((question) => question.id.startsWith('additional_experience_')), 'choosing no additional experience does not generate secondary follow-ups');
 assert(getSelectedAdditionalExperienceIds({ ...multiConcernAnswers, headaches: { value: 'rarely' } }).includes('headaches') === false, 'secondary selection is ignored when its originating experience is no longer reported');
 const otherActivityQuestion = questionBank.find((question) => question.id === 'affected_activities');
-const customActivityAnswers = { custom_activity_name: { value: 'Jewellery making', label: { en: 'Jewellery making', hi: 'Jewellery making' } } };
+const customActivityAnswers = { custom_activity_name: { value: 'Jewellery making', label: { en: 'Jewellery making', hi: 'आभूषण बनाना' } } };
 const customActivityOptions = getQuestionForActivities(otherActivityQuestion, ['other'], customActivityAnswers).options;
 assert(customActivityOptions.find((option) => option.value === 'other')?.label.en === 'Jewellery making', 'affected-activity choice uses the participant-defined Other activity label');
 assert(getActivityLabel('other', customActivityAnswers)?.en === 'Jewellery making', 'custom activity helper resolves participant wording');
+assert(getActivityLabel('other', customActivityAnswers)?.hi === 'आभूषण बनाना', 'custom activity helper retains the participant-entered Hindi wording');
+
+const customActivityContextAnswers = {
+  ...customActivityAnswers,
+  affected_activities: { value: ['other'], label: { en: 'Other', hi: 'अन्य' } },
+  activity_impact_other: { value: ['takes_longer'], label: { en: 'It takes longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' } },
+};
+const customActivityReport = evaluateAnswers(customActivityContextAnswers, {
+  activities: ['other'],
+  primaryActivity: 'other',
+});
+const customAffectedTopic = customActivityReport.discussionPoints.find((point) => point.id === 'affected_activity_context');
+const customPrimaryTopic = customActivityReport.discussionPoints.find((point) => point.id === 'primary_activity_context');
+assert(customAffectedTopic?.sources.some((source) => source.id === 'custom_activity_name' && source.label.en === 'Participant-entered activity name' && source.answer.en === 'Jewellery making' && source.answer.hi === 'आभूषण बनाना'), 'affected-activity topic cites the actual participant-entered Other activity name in both languages');
+assert(customPrimaryTopic?.sources.some((source) => source.id === 'custom_activity_name' && source.answer.en === 'Jewellery making'), 'primary-activity topic cites the actual participant-entered Other activity name');
+const customActivityHindiPack = buildAppointmentPreparationPack({
+  language: 'hi',
+  discussionPoints: [customAffectedTopic],
+});
+assert(customActivityHindiPack.discussionPoints[0].sources.some((source) => source.id === 'custom_activity_name' && source.label === 'प्रतिभागी द्वारा दर्ज गतिविधि का नाम' && source.answer === 'आभूषण बनाना'), 'Hindi appointment pack retains the custom activity source label and answer');
 
 const savedDirectionResult = { completed: true, skipped: false, data: { activityType: 'direction-awareness' } };
 assert(getAmslerReturnPath(savedDirectionResult) === '/report', 'Amsler returns to the report after a completed E activity');
@@ -1027,7 +1047,9 @@ assert(secondaryNightVision.eye.en === 'Both eyes' && secondaryNightVision.conte
 assert(secondaryProfile.additionalExperiences.find((item) => item.id === 'squinting').selectedForDiscussion === false, 'reported but unselected experiences remain distinct from selected discussion topics');
 const secondaryCompactSummary = buildCompactExperienceSummary(secondaryProfile, 'en', 500, 3);
 assert(secondaryCompactSummary.includes('Also to discuss — Headaches around visual activities'), 'compact profile summary includes a selected secondary experience');
-assert(buildVisionExperienceProfile({ ...customActivityAnswers, affected_activities: { value: ['other'], label: { en: 'Other', hi: 'अन्य' } }, activity_impact_other: { value: ['takes_longer'], label: { en: 'It takes longer than usual', hi: 'इसमें सामान्य से अधिक समय लगता है' } } }).activityImpacts[0].label.en === 'Jewellery making', 'experience profile uses the participant-defined activity label');
+const customActivityProfile = buildVisionExperienceProfile(customActivityContextAnswers);
+assert(customActivityProfile.activityImpacts[0].label.en === 'Jewellery making', 'experience profile uses the participant-defined activity label');
+assert(customActivityProfile.activityImpacts[0].sourceIds.includes('custom_activity_name'), 'experience profile traces the custom activity label to the participant-entered answer');
 
 const staleMainProfile = buildVisionExperienceProfile({
   ...rameshPersona.answers,

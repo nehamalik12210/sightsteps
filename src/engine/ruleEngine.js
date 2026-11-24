@@ -171,6 +171,7 @@ const SOURCE_LABELS = {
   close_work: { en: 'Close-up work', hi: 'पास से किया जाने वाला काम' },
   glasses_age: { en: 'Prescription age', hi: 'प्रिस्क्रिप्शन की अवधि' },
   affected_activities: { en: 'Activities reported as affected', hi: 'प्रभावित बताई गई गतिविधियाँ' },
+  custom_activity_name: { en: 'Participant-entered activity name', hi: 'प्रतिभागी द्वारा दर्ज गतिविधि का नाम' },
   primary_concern: { en: 'Main concern selected by participant', hi: 'प्रतिभागी द्वारा चुनी गई मुख्य चिंता' },
   experience_onset: { en: 'When first noticed', hi: 'पहली बार कब महसूस हुआ' },
   experience_change: { en: 'Change over time', hi: 'समय के साथ बदलाव' },
@@ -330,7 +331,10 @@ function buildDiscussionPoints(answers, context = {}) {
         context: { en: content.en[1], hi: content.hi[1] },
         prompt: { en: content.en[2], hi: content.hi[2] },
         icon: content.icon,
-        sources: nonEmptySources([makeActivitySource('primaryActivity', primaryActivity, answers)]),
+        sources: nonEmptySources([
+          makeActivitySource('primaryActivity', primaryActivity, answers),
+          ...(primaryActivity === 'other' ? [makeQuestionSource('custom_activity_name', answers)] : []),
+        ]),
       });
     }
   }
@@ -351,7 +355,10 @@ function buildDiscussionPoints(answers, context = {}) {
         hi: 'हर गतिविधि के लिए बताएं कि क्या कठिन लगता है, यह कितनी बार होता है और काम की सामान्य दूरी या रोशनी कैसी होती है। ये विवरण पेशेवर को आपका रोज़मर्रा का अनुभव समझने में मदद कर सकते हैं।',
       },
       icon: 'fact_check',
-      sources: nonEmptySources([makeQuestionSource('affected_activities', answers)]),
+      sources: nonEmptySources([
+        makeQuestionSource('affected_activities', answers),
+        ...(affectedIds.includes('other') ? [makeQuestionSource('custom_activity_name', answers)] : []),
+      ]),
     });
   }
 

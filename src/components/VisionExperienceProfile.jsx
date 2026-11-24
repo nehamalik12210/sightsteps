@@ -11,6 +11,11 @@ function localized(value, language) {
 }
 
 function sourceLabel(sourceId, profile, language) {
+  if (sourceId === 'custom_activity_name') {
+    return language === 'hi'
+      ? 'प्रतिभागी द्वारा दर्ज गतिविधि का नाम'
+      : 'Participant-entered activity name';
+  }
   const question = questionBank.find((item) => item.id === sourceId);
   if (question?.text) return localized(question.text, language);
 

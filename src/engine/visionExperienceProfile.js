@@ -203,6 +203,7 @@ function buildActivityImpacts(answers) {
       const frequency = answerLabel(answers, frequencyKey);
       const sources = presentSourceIds(answers, [
         'affected_activities',
+        ...(activityId === 'other' ? ['custom_activity_name'] : []),
         impactKey,
         ...(frequency ? [frequencyKey] : []),
       ]);
