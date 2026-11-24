@@ -30,7 +30,7 @@
 - All changes were committed directly to `main`; no feature branches were created.
 - The first expanded clinical audit correctly exposed safe contextual wording that the original six-file audit did not see. Those false positives were narrowed by explicit contextual phrases and tests.
 - A deployment attempt using an incorrect custom output-directory configuration failed and was canceled; it did not replace the production deployment.
-- Production deployment for `e355deab` is READY at `https://sightsteps.vercel.app`.
+- Production deployment for `4b5ebcf` is READY at `https://sightsteps.vercel.app`.
 - No local browser/device test was run. Do not treat automated checks as clinical validation.
 
 ### Change 4 — Reproducible clinical-review export
@@ -44,3 +44,15 @@
 - Regenerated and re-inspected the export: 893 lines / 63,996 bytes, 11 sections, 53 EN source rows each followed by a non-empty HI row, zero missing Hindi pairs.
 - Commit: `e355deabfc4bc0b0fa679af3f5795f61c5154956`.
 - The generated text file is available as a GitHub Actions artifact; it was also retrieved and inspected in this work session.
+
+### Change 6 — Clinical-language scanner discovery regression
+- Added a temporary nested `NewFeature.jsx` fixture to verify recursive JSX discovery finds newly added components and sends their visible text to the clinical detector.
+- Fixture is created under the OS temporary directory and removed in a `finally` block; no test files remain in the repository.
+- Verified by Vercel on commit `4b5ebcf6793fbcf3e439a8264f9fa118a85201f0`: fixture executed, clinical-language audit passed, 22 JSX files / 2,622 copy fragments scanned, build READY.
+
+### Change 7 — Clinical export draft and demo-data notice
+- Added bilingual document-status and demo-data notices at the top of the generated export.
+- Labels the export as a draft for independent clinical review, not a diagnosis/test result/prescription, and explicitly identifies the Ramesh example as scripted demo data.
+- Workflow run `45487346824` completed SUCCESS; artifact ID `14964129797`.
+- Inspected regenerated export: 899 lines / 65,087 bytes; all 53 source-answer rows have non-empty English and Hindi pairs; the opening notices are present.
+- Commit: `01f969f64b8f66bf47b93ee9b8a7979fd9805586`.

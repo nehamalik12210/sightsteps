@@ -1,7 +1,7 @@
 # SightSteps — Baseline Record
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
-**Current verified code commit:** `e355deabfc4bc0b0fa679af3f5795f61c5154956`  
+**Current verified code commit:** `4b5ebcf6793fbcf3e439a8264f9fa118a85201f0`  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -40,18 +40,18 @@ Vercel deployment for current code commit `cfdd32bec6125c2c64e887df3b79c9cf257a8
 ## Clinical review export verification
 
 - Added `.github/workflows/clinical-review-export.yml` to generate the review export from locked dependencies and upload it as a 14-day GitHub Actions artifact.
-- Latest workflow run for commit `e355deabfc4bc0b0fa679af3f5795f61c5154956`: run `45486764134`, conclusion SUCCESS.
-- Generated export: 893 lines, 63,996 bytes, 11 sections.
+- Latest workflow run for commit `01f969f64b8f66bf47b93ee9b8a7979fd9805586`: run `45487346824`, conclusion SUCCESS.
+- Generated export: 899 lines, 65,087 bytes, 11 sections. The opening English/Hindi notice marks the document as a draft for independent clinical review and identifies the Ramesh profile as scripted demo data, not a real participant record.
 - Export inspection verified 53 English source rows, each immediately paired with a Hindi source row; no source row was missing its Hindi partner and no Hindi source value was blank.
 - Export covers bilingual pattern definitions, clusters, demo-matched patterns and sources, rules-engine discussion prompts and source links, follow-up notes, Amsler wording, clinician brief wording, adaptive questions, participant-review copy, source-provenance labels and selected i18n strings.
-- Artifact ID: `14963749045`; GitHub Actions artifact retention is 14 days (expires 8 December 2026).
+- Artifact ID: `14964129797`; GitHub Actions artifact retention is 14 days (expires 8 December 2026).
 
 ## Verification limits
 
 - The repository was inspected through GitHub's connected repository interface because a local clone attempt failed due to DNS/network resolution.
 - No local `npm ci`, local browser automation, printed-PDF page-count/visual inspection, responsive visual inspection, or physical Amsler device-calibration validation was performed in this work session.
 - The clinical review export was executed and inspected as a GitHub Actions artifact, not as part of the Vercel app build.
-- Latest Vercel production deployment for code commit `e355deab` is READY at `https://sightsteps.vercel.app` (deployment `dpl_8DDfcH4FKMRHUa7foyLEueu66Svn`). The Vercel build logs visibly confirm 2,519 quality checks passed, clinical-language audit passed (22 JSX files / 2,622 fragments), 99 Vite modules transformed and 11 PWA precache entries. The engine test command ran as part of `npm run build`; its numeric summary was not exposed in the returned event window. The previous fully visible run on `cfdd32b` recorded 844 engine tests passed.
+- Latest Vercel production deployment for code commit `4b5ebcf` is READY at `https://sightsteps.vercel.app` (deployment `dpl_ExV6kMDmCbPX1rQe8imuzDeDgwE2`). The Vercel build logs visibly confirm 2,519 quality checks passed, clinical-language audit passed (22 JSX files / 2,622 fragments), 99 Vite modules transformed and 11 PWA precache entries. The engine test command ran as part of `npm run build`; the build continued through clinical lint and Vite and finished READY. The previous fully visible run on `cfdd32b` recorded 844 engine tests passed. The new nested-component discovery fixture executed during the latest clinical-language audit and the audit passed.
 
 ## Safety boundary
 
