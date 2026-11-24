@@ -322,3 +322,16 @@
   break-inside: avoid;
 }
 @media print { .vep--compact { box-shadow: none; break-inside: avoid; } }
+
+
+.vep__additional-detail {
+  flex: 1 0 100%;
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-relaxed);
+  overflow-wrap: anywhere;
+}
+.vep__experience-list li {
+  flex-wrap: wrap;
+}
