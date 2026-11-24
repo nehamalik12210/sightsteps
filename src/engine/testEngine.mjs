@@ -6,7 +6,7 @@
 
 import { evaluateAnswers } from './ruleEngine.js';
 import { getBackNavigationAnswerIds, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
-import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionPositionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
@@ -459,7 +459,7 @@ const skippedNoteProgress = getProgress({ participant_note: { value: '' } });
 assert(skippedNoteProgress.answered === 1, 'intentionally skipped optional note counts as complete');
 assert(!isAnswerComplete({ value: null }), 'null response is treated as unanswered');
 assert(!isAnswerComplete(null), 'missing response is treated as unanswered');
-assert(isAnswerComplete({ value: ['reading'] }), 'non-empty multi-select response is complete');
+assert(isAnswerComplete({ value: ['reading'] }), 'non-empty multi-select response is complete');\nconst progressFixture = [{ id: 'q1' }, { id: 'q2' }, { id: 'q3' }, { id: 'q4' }];\nconst firstQuestionProgress = getQuestionPositionProgress(progressFixture, 'q1');\nassert(firstQuestionProgress.current === 1 && firstQuestionProgress.total === 4 && firstQuestionProgress.percent === 25, 'first question shows 1 of 4 and a 25 percent progress bar');\nconst middleQuestionProgress = getQuestionPositionProgress(progressFixture, 'q3');\nassert(middleQuestionProgress.current === 3 && middleQuestionProgress.total === 4 && middleQuestionProgress.percent === 75, 'middle question percentage matches its displayed position');\nconst lastQuestionProgress = getQuestionPositionProgress(progressFixture, 'q4');\nassert(lastQuestionProgress.current === 4 && lastQuestionProgress.total === 4 && lastQuestionProgress.percent === 100, 'last question reaches exactly 100 percent');\nconst unknownQuestionProgress = getQuestionPositionProgress(progressFixture, 'missing');\nassert(unknownQuestionProgress.current === 0 && unknownQuestionProgress.total === 4 && unknownQuestionProgress.percent === 0, 'unknown current question fails safely to zero progress');\nconst emptyQuestionProgress = getQuestionPositionProgress([], 'q1');\nassert(emptyQuestionProgress.current === 0 && emptyQuestionProgress.total === 0 && emptyQuestionProgress.percent === 0, 'empty question list has zero progress without division errors');\nconst shortBranch = getVisibleQuestions({ blurred_vision: { value: 'no' } });\nconst longBranch = getVisibleQuestions({ blurred_vision: { value: 'yes' } });\nassert(getQuestionPositionProgress(shortBranch, shortBranch[0].id).percent === Math.round(100 / shortBranch.length), 'first question percentage uses the currently visible short branch total');\nassert(getQuestionPositionProgress(longBranch, longBranch[0].id).percent === Math.round(100 / longBranch.length), 'first question percentage recalculates when conditional questions are visible');
 
 console.log('\n=== Traceability schema and non-diagnostic output ===');
 for (const point of rameshResult.discussionPoints) {
