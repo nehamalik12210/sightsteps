@@ -1,13 +1,9 @@
 /**
- * SightSteps — Clinically-defensible pattern definitions.
+ * SightSteps — participant-reported discussion pattern definitions.
  *
- * Each pattern fires only when a specific combination of participant-reported
- * answers is present. The app then infers something the participant did not
- * explicitly state, surfacing it as a discussion prompt — never a conclusion.
- *
- * Every description uses non-diagnostic language:
- *   ✅ "Your responses suggest…" / "Worth discussing"
- *   ❌ "You have…" / "You suffer from…" / "Diagnosis"
+ * Each pattern is a transparent combination of questionnaire answers. A match
+ * is a prompt to discuss the reported information, not a clinical inference,
+ * diagnosis, cause assessment or independent confirmation.
  */
 
 const EXPERIENCE_ANSWER_VALUES = {
@@ -56,8 +52,8 @@ const patterns = [
       hi: 'स्क्रीन उपयोग, दूर का धुंधलापन और जाँच का इतिहास',
     },
     description: {
-      en: 'Your responses suggest a combination of heavy screen use, blurred distance vision and infrequent eye examinations. These factors together may be worth discussing with an eye-care professional to determine whether your current vision needs have been assessed recently.',
-      hi: 'आपके जवाब स्क्रीन के अधिक उपयोग, दूर की धुंधली दृष्टि और आँखों की जाँच में लंबे अंतराल का संयोजन सुझाते हैं। इन कारकों पर नेत्र देखभाल पेशेवर से चर्चा करना उचित हो सकता है।',
+      en: 'You reported regular screen use, blurred distance vision and an examination history that is not recent. These details can be discussed together with an eye-care professional; they do not identify a cause.',
+      hi: 'आपने नियमित स्क्रीन उपयोग, दूर की धुंधली दृष्टि और हाल की न होने वाली नेत्र-जाँच का इतिहास बताया। इन बातों पर नेत्र देखभाल पेशेवर से साथ में चर्चा की जा सकती है; ये किसी कारण की पहचान नहीं करतीं।',
     },
     discussionPrompt: {
       en: 'You may want to ask your eye-care professional whether your screen-work viewing distance and current vision correction (if any) have been evaluated recently.',
@@ -81,7 +77,7 @@ const patterns = [
     },
     description: {
       en: 'You reported difficulty seeing at night or in low light and selected night vision as the main experience you want to discuss. You also selected driving or travelling as a situation or activity where you notice this experience. These details can be discussed with an eye-care professional; they do not identify a cause.',
-      hi: 'आपके जवाब कम रोशनी में देखने में कठिनाई, ड्राइविंग जैसी गतिविधियों और उस आयु वर्ग का संयोजन सुझाते हैं जहाँ रात की दृष्टि में बदलाव अधिक बताए जाते हैं। यह संयोजन नेत्र देखभाल पेशेवर से चर्चा के लायक हो सकता है।',
+      hi: 'आपने रात या कम रोशनी में देखने में कठिनाई को मुख्य अनुभव के रूप में चुना और ड्राइविंग या यात्रा को ऐसी स्थिति या गतिविधि बताया जिसमें यह अनुभव होता है। इन बातों पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है; ये किसी कारण की पहचान नहीं करतीं।',
     },
     discussionPrompt: {
       en: 'You may want to describe your low-light experiences to an eye-care professional and ask whether any further assessment is appropriate for your age group.',
@@ -111,7 +107,7 @@ const patterns = [
     },
     description: {
       en: 'You reported headaches, extended periods of close-up work and squinting. These are separate reported experiences and habits; their combination does not establish that one causes another. You can describe each to an eye-care professional.',
-      hi: 'आपके जवाब दृष्टि गतिविधियों के दौरान सिरदर्द, नियमित पास का काम और आँखें सिकोड़ने का संयोजन सुझाते हैं। ये मिलकर अनसुधारित अपवर्तन दोष या समंजन तनाव की ओर इशारा कर सकते हैं — नेत्र देखभाल पेशेवर से चर्चा के योग्य।',
+      hi: 'आपने सिरदर्द, लंबे समय तक पास से काम और आँखें सिकोड़ने की बात बताई। ये अलग-अलग बताए गए अनुभव और आदतें हैं; इनका संयोजन यह साबित नहीं करता कि एक दूसरे का कारण है। आप हर अनुभव के बारे में नेत्र देखभाल पेशेवर को बता सकते हैं।',
     },
     discussionPrompt: {
       en: 'You may want to ask whether a refraction check would be appropriate, given your reported headaches and close-work habits.',
@@ -129,8 +125,8 @@ const patterns = [
   {
     id: 'asymmetry',
     title: {
-      en: 'Asymmetric symptoms',
-      hi: 'असमान लक्षण',
+      en: 'Main experience reported more in one eye',
+      hi: 'मुख्य अनुभव एक आँख में अधिक महसूस होना',
     },
     description: {
       en: 'Your responses suggest that the main experience you reported is primarily noticed in one eye and was first noticed recently. Single-eye symptoms with recent onset may be worth raising soon with an eye-care professional.',
@@ -142,11 +138,14 @@ const patterns = [
     },
     icon: 'visibility',
     triggers: (answers) => {
+      const mainExperienceId = answers.primary_concern?.value;
+      const isRelevantMainExperience = ['blurred_vision', 'squinting', 'night_vision']
+        .includes(mainExperienceId) && hasReportedExperience(answers, mainExperienceId);
       const oneEye = ['left', 'right'].includes(answers.which_eye?.value);
       const recentOnset = ['recent_weeks', 'recent_months'].includes(answers.experience_onset?.value);
-      return oneEye && recentOnset;
+      return isRelevantMainExperience && oneEye && recentOnset;
     },
-    sourceKeys: ['which_eye', 'experience_onset'],
+    sourceKeys: ['primary_concern', 'which_eye', 'experience_onset'],
   },
   {
     id: 'presbyopia',
@@ -156,7 +155,7 @@ const patterns = [
     },
     description: {
       en: 'You reported near-vision blur, selected an age group and said the experience has become more noticeable. These responses describe your experience over time; they do not establish an age-related eye condition.',
-      hi: 'आपके जवाब पास की वस्तुओं में कठिनाई, उस आयु वर्ग जहाँ प्रेसबायोपिया (उम्र-संबंधी निकट-दृष्टि परिवर्तन) आमतौर पर बताया जाता है, और समय के साथ बिगड़ने की प्रवृत्ति का संयोजन सुझाते हैं। नेत्र देखभाल पेशेवर से चर्चा करना उचित हो सकता है।',
+      hi: 'आपने पास की दृष्टि में धुंधलापन बताया, एक आयु वर्ग चुना और कहा कि समय के साथ यह अनुभव अधिक महसूस होने लगा है। ये जवाब समय के साथ आपके अनुभव को दर्शाते हैं; ये उम्र-संबंधी नेत्र स्थिति स्थापित नहीं करते।',
     },
     discussionPrompt: {
       en: 'You may want to ask about near-vision correction options suitable for your daily activities and working distances.',
@@ -181,7 +180,7 @@ const patterns = [
     },
     description: {
       en: 'You reported more than six hours of screen use per day and headaches that you also selected as occurring during screen use. These responses do not establish a cause, but the combination may be useful to discuss with an eye-care professional.',
-      hi: 'आपके जवाब स्क्रीन के बार-बार उपयोग और दृष्टि गतिविधियों के दौरान सिरदर्द का संयोजन सुझाते हैं। यह संयोजन आमतौर पर डिजिटल आँखों के तनाव से जुड़ा होता है और नेत्र देखभाल पेशेवर से चर्चा के योग्य हो सकता है।',
+      hi: 'आपने प्रतिदिन छह घंटे से अधिक स्क्रीन उपयोग और स्क्रीन देखते समय होने वाले सिरदर्द की बात बताई। ये जवाब किसी कारण को स्थापित नहीं करते, लेकिन इस संयोजन पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है।',
     },
     discussionPrompt: {
       en: 'You may want to describe your screen setup, viewing distance and break habits to your eye-care professional and ask whether any adjustment or correction could help.',
@@ -208,7 +207,7 @@ const patterns = [
     },
     description: {
       en: 'You reported difficulty seeing at night or in low light, and separately reported squinting to see clearly. The questionnaire does not establish that squinting occurs in low light or that the experiences share a cause. You can describe both experiences to an eye-care professional.',
-      hi: 'आपने कम रोशनी की स्थितियों में देखने में कठिनाई और उन स्थितियों में आँखें सिकोड़ने की बात बताई। इन अनुभवों के बारे में नेत्र-देखभाल पेशेवर को बताएँ; ये अपने आप किसी कारण की पहचान नहीं करते।',
+      hi: 'आपने रात या कम रोशनी में देखने में कठिनाई और अलग से साफ देखने के लिए आँखें सिकोड़ने की बात बताई। प्रश्नावली यह स्थापित नहीं करती कि आँखें सिकोड़ना कम रोशनी में ही होता है या दोनों अनुभवों का एक ही कारण है। आप दोनों अनुभवों के बारे में नेत्र देखभाल पेशेवर को बता सकते हैं।',
     },
     discussionPrompt: {
       en: 'You may want to describe when the low-light difficulty and squinting occur, and ask what kind of eye examination is appropriate.',
@@ -230,7 +229,7 @@ const patterns = [
     },
     description: {
       en: 'You reported that your last professional eye examination was more than three years ago or that you have never had one, alongside two or more reported vision experiences. You can ask an eye-care professional whether an examination is appropriate for you.',
-      hi: 'आपके जवाब सुझाते हैं कि आपने हाल ही में पेशेवर आँखों की जाँच नहीं करवाई है, साथ ही एक या अधिक दृष्टि-संबंधी अनुभव भी बताए हैं। नियमित जाँच शुरुआती बदलावों का पता लगाने में मदद कर सकती है।',
+      hi: 'आपने बताया कि आपकी पिछली पेशेवर नेत्र-जाँच को तीन वर्ष से अधिक हो चुके हैं या आपने कभी ऐसी जाँच नहीं करवाई, साथ ही दो या अधिक दृष्टि-संबंधी अनुभव बताए। आप नेत्र देखभाल पेशेवर से पूछ सकते हैं कि आपके लिए जाँच उपयुक्त है या नहीं।',
     },
     discussionPrompt: {
       en: 'You may want to ask an eye-care professional about scheduling a comprehensive eye examination.',
