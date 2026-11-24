@@ -36,6 +36,7 @@ const rameshPersona = {
     squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
     outdoor_time: { value: 'moderate', label: { en: 'A few hours', hi: 'कुछ घंटे' } },
     primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
+    additional_concerns: { value: ['none'], label: { en: 'No other experience to add', hi: 'कोई अन्य अनुभव नहीं जोड़ना' } },
     experience_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
     experience_change: { value: 'more_noticeable', label: { en: 'Getting more noticeable', hi: 'अधिक ध्यान देने योग्य हो रहा है' } },
     experience_context: { value: ['near_tasks', 'screens'], label: { en: 'Reading or other near tasks, Using screens', hi: 'पढ़ना या पास के काम, स्क्रीन का उपयोग' } },
