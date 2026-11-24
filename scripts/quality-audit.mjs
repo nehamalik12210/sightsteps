@@ -187,9 +187,9 @@ check(/aria-describedby=\{\[countId, privacyId, status \? statusId : null\]/.tes
 check(/aria-pressed=\{listening\}/.test(voiceSource) && /aria-controls=\{id\}/.test(voiceSource), 'microphone button exposes pressed state and its controlled field');
 check(/No speech was captured/.test(voiceSource), 'empty speech capture ends with an explanatory message rather than stale listening status');
 check(/speechSynthesis/.test(intake) && /currentOptions\.map/.test(intake), 'question text and answer options can be read aloud');
-check(/getQuestionPositionProgress/.test(intake), 'questionnaire progress is calculated from the active visible-question position');
+check(/getQuestionCompletionProgress/.test(intake), 'questionnaire progress is calculated from completed visible answers');
 check(/aria-valuenow=\{progress\.percent\}/.test(intake) && /width: `\$\{progress\.percent\}%`/.test(intake) && /\{progress\.percent\}%/.test(intake), 'progress-bar fill, accessible value and percentage label use the same rounded percentage');
-check(/current: progress\.current, total: progress\.total/.test(intake) && !/progress\.fraction/.test(intake), 'question count and percentage share one position-based progress calculation');
+check(/current: progress\.completed, total: progress\.total/.test(intake) && !/progress\.current|progress\.fraction/.test(intake), 'question count and percentage share one completed-answer progress calculation');
 check(/\/follow-up/.test(appSource) && /\/kiosk/.test(appSource), 'appointment follow-up and kiosk routes are registered');
 check(/RouteGuard/.test(appSource) && /getProtectedRouteRedirect/.test(appSource) && /requireIntake/.test(appSource), 'deep links require a valid session and completed journey stages');
 check(/path="\*"/.test(appSource) && /Navigate to="\/" replace/.test(appSource), 'unknown application routes return safely to Landing');
