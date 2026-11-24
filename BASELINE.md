@@ -2,7 +2,7 @@
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
 **Application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
-**Latest full deployment checked:** `60d3b768ddb192c30c1adec413aabaea5aae1ea1`  
+**Code-under-test deployment:** `dpl_3wFWDSqvD23sReoZngnY8LFSSExk` (READY for app-code commit `723c3c5a29abf31295fb77e8083564b48a53c156`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
