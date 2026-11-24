@@ -102,7 +102,8 @@ for (const point of rameshReport.discussionPoints) {
   if (point.sources?.length > 0) {
     lines.push(`  Sources (${point.sources.length}):`);
     for (const source of point.sources) {
-      lines.push(`    - ${loc(source.label, 'en')}: ${loc(source.answer, 'en')}`);
+      lines.push(`    - [EN] ${loc(source.label, 'en')}: ${loc(source.answer, 'en')}`);
+      lines.push(`      [HI] ${loc(source.label, 'hi')}: ${loc(source.answer, 'hi')}`);
     }
   }
   lines.push('');
