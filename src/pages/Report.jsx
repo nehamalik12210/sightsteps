@@ -128,6 +128,7 @@ export default function Report() {
         timelineEntries: sortedTimelineEntries,
         amslerResults,
         experienceProfile,
+        conversationReview,
         now: new Date(),
       }));
     } else {
