@@ -69,7 +69,7 @@ const rameshContext = {
 
 console.log('\n=== Ramesh profile ===');
 const rameshResult = evaluateAnswers(rameshAnswers, rameshContext);
-assert(rameshResult.answeredCount === 20, `Ramesh should have 20 stored responses, got ${rameshResult.answeredCount}`);
+assert(rameshResult.answeredCount === 21, `Ramesh should have 21 stored responses, got ${rameshResult.answeredCount}`);
 assert(rameshResult.groups.length === 3, `Ramesh should have 3 non-empty groups, got ${rameshResult.groups.length}`);
 const experienceGroup = rameshResult.groups.find((group) => group.id === 'experiences');
 const habitGroup = rameshResult.groups.find((group) => group.id === 'dailyHabits');
@@ -312,7 +312,7 @@ const multiConcernAnswers = {
   blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
   headaches: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
   night_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
-  squinting: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+  squinting: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
   primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
   additional_concerns: { value: ['headaches', 'night_vision'], label: { en: 'Headaches, Difficulty in low light', hi: 'सिरदर्द, कम रोशनी में कठिनाई' } },
 };
