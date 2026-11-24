@@ -17,6 +17,7 @@ import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 import { buildDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { evaluatePatterns } from './patternEngine.js';
+import patternDefinitions from '../data/patterns.js';
 import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
 import {
   calculateGridSizePx,
@@ -620,6 +621,16 @@ assert(hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS), 'kiosk idle pol
 assert(!hasKioskSessionExpired(1000, 1000 + KIOSK_IDLE_LIMIT_MS - 1), 'kiosk idle policy does not expire before its limit');
 
 console.log('\n=== Pattern Detection Engine ===');
+
+const definitionIds = patternDefinitions.map((pattern) => pattern.id);
+assert(definitionIds.length === 8 && new Set(definitionIds).size === definitionIds.length, 'all eight pattern definitions have unique stable IDs');
+for (const definition of patternDefinitions) {
+  assert(Boolean(definition.title?.en && definition.title?.hi), `${definition.id} has bilingual title`);
+  assert(Boolean(definition.description?.en && definition.description?.hi), `${definition.id} has bilingual explanation`);
+  assert(Boolean(definition.discussionPrompt?.en && definition.discussionPrompt?.hi), `${definition.id} has bilingual discussion prompt`);
+  assert(typeof definition.triggers === 'function', `${definition.id} exposes a deterministic trigger`);
+  assert(Array.isArray(definition.sourceKeys) || typeof definition.sourceKeys === 'function', `${definition.id} declares traceable source keys`);
+}
 const emptyPatterns = evaluatePatterns({});
 assert(emptyPatterns.length === 0, 'empty answers produce no patterns');
 assert(Array.isArray(emptyPatterns), 'evaluatePatterns returns an array');
@@ -1058,18 +1069,23 @@ assert(nearVisionCluster.matchedMembers.length >= 2, 'near-vision-strain has >= 
 // All matched patterns are still individually available (clusters don't hide them)
 assert(rameshPatterns.length >= 2, 'Ramesh still has multiple individual patterns after clustering');
 
-// Empty patterns → no clusters
+// Empty, partial, duplicate and malformed inputs are handled deterministically.
 const emptyClusters = evaluateClusters([]);
 assert(emptyClusters.length === 0, 'no patterns → no clusters');
+assert(evaluateClusters(null).length === 0, 'null cluster input returns no clusters');
+assert(evaluateClusters({ pattern: 'screen-strain' }).length === 0, 'non-array cluster input returns no clusters');
 
-// Single pattern → no clusters
+// Single pattern and unrelated member pair → no clusters.
 const singleClusters = evaluateClusters(['presbyopia']);
 assert(singleClusters.length === 0, 'single pattern → no clusters');
+assert(evaluateClusters(['presbyopia', 'overdue-exam']).every((cluster) => cluster.id !== 'near-vision-strain'), 'generic overdue-exam history cannot create a near-vision cluster by itself');
 
-// Digital cluster needs both screen-strain + digital-eye-strain
+// Digital cluster needs both screen-strain + digital-eye-strain.
 const digitalClusters = evaluateClusters(['screen-strain', 'digital-eye-strain']);
 assert(digitalClusters.length === 1, 'screen-strain + digital-eye-strain triggers digital cluster');
 assert(digitalClusters[0].id === 'digital-screen-cluster', 'digital cluster ID correct');
+assert(evaluateClusters(['screen-strain', 'digital-eye-strain', 'digital-eye-strain']).length === 1, 'duplicate pattern IDs do not create duplicate cluster members');
+assert(/overlapping discussion prompts rather than independent confirmations/i.test(digitalClusters[0].summary.en), 'digital cluster warns that overlapping patterns are not independent confirmations');
 
 // Cluster text is bilingual
 assert(nearVisionCluster.title.en && nearVisionCluster.title.hi, 'cluster title is bilingual');
