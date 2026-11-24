@@ -134,8 +134,8 @@ const patterns = [
       hi: 'मुख्य अनुभव एक आँख में अधिक महसूस होना',
     },
     description: {
-      en: 'Your responses suggest that the main experience you reported is primarily noticed in one eye and was first noticed recently. Single-eye symptoms with recent onset may be worth raising soon with an eye-care professional.',
-      hi: 'आपके जवाब सुझाते हैं कि आपका मुख्य बताया गया अनुभव मुख्य रूप से एक आँख में महसूस होता है और हाल ही में पहली बार देखा गया। एक आँख के लक्षण जो हाल ही में शुरू हुए हैं, नेत्र देखभाल पेशेवर से जल्द चर्चा करने योग्य हो सकते हैं।',
+      en: 'Your responses suggest that the main experience you reported is primarily noticed in one eye and was first noticed recently. A recently noticed experience that is mainly in one eye may be worth discussing with an eye-care professional.',
+      hi: 'आपके जवाब सुझाते हैं कि आपका मुख्य बताया गया अनुभव मुख्य रूप से एक आँख में महसूस होता है और हाल ही में पहली बार देखा गया। एक आँख में हाल ही में महसूस हुआ अनुभव नेत्र देखभाल पेशेवर से चर्चा करने योग्य हो सकता है।',
     },
     discussionPrompt: {
       en: 'You may want to mention to your eye-care professional that the experience is primarily in one eye and when you first noticed it.',
@@ -215,8 +215,8 @@ const patterns = [
       hi: 'आपने रात या कम रोशनी में देखने में कठिनाई और अलग से साफ देखने के लिए आँखें सिकोड़ने की बात बताई। प्रश्नावली यह स्थापित नहीं करती कि आँखें सिकोड़ना कम रोशनी में ही होता है या दोनों अनुभवों का एक ही कारण है। आप दोनों अनुभवों के बारे में नेत्र देखभाल पेशेवर को बता सकते हैं।',
     },
     discussionPrompt: {
-      en: 'You may want to describe when the low-light difficulty and squinting occur, and ask what kind of eye examination is appropriate.',
-      hi: 'आप बता सकते हैं कि कम रोशनी में कठिनाई और आँखें सिकोड़ना कब होता है, और पूछ सकते हैं कि कौन-सी नेत्र जाँच उपयुक्त होगी।',
+      en: 'You may want to describe each experience separately and the situations in which you notice it, then ask an eye-care professional what kind of examination is appropriate.',
+      hi: 'आप दोनों अनुभवों के बारे में अलग-अलग और उन परिस्थितियों के बारे में बता सकते हैं जिनमें वे महसूस होते हैं; फिर पूछ सकते हैं कि किस प्रकार की नेत्र-जाँच उपयुक्त होगी।',
     },
     icon: 'contrast',
     triggers: (answers) => {
