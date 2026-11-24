@@ -459,6 +459,14 @@ const headacheMainQuestions = getVisibleQuestions({
   primary_concern: { value: 'headaches' },
 });
 assert(!headacheMainQuestions.some((question) => question.id === 'experience_frequency'), 'main headache frequency is not asked twice');
+const headacheWithSecondary = getVisibleQuestions({
+  ...multiConcernAnswers,
+  primary_concern: { value: 'headaches' },
+  additional_concerns: { value: ['night_vision'] },
+});
+const headacheContextPosition = headacheWithSecondary.findIndex((question) => question.id === 'experience_context');
+const secondaryFollowUpPosition = headacheWithSecondary.findIndex((question) => question.id === 'additional_experience_night_vision_onset');
+assert(headacheContextPosition >= 0 && secondaryFollowUpPosition > headacheContextPosition, 'secondary follow-ups remain after main headache details when the frequency anchor is omitted');
 const blurMainContext = getVisibleQuestions({
   blurred_vision: { value: 'yes' },
   primary_concern: { value: 'blurred_vision' },
