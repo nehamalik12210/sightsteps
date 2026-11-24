@@ -106,7 +106,10 @@ const questions = [
     type: 'multi', category: 'refractive',
     showIf: (answers) => Boolean(answers.primary_concern?.value)
       && getReportedExperienceOptions(answers).some((item) => item.value !== answers.primary_concern?.value),
-    options: [],
+    options: [
+      { value: 'none', label: { en: 'No other experience to add', hi: 'कोई अन्य अनुभव नहीं जोड़ना' }, icon: 'do_not_disturb_on' },
+      { value: 'unsure', label: { en: 'Not sure', hi: 'निश्चित नहीं' }, icon: 'help' },
+    ],
   },
   {
     id: 'experience_onset',
