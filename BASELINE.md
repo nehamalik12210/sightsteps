@@ -1,8 +1,10 @@
 # SightSteps — Baseline Record
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
-**Application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
-**Code-under-test deployment:** `dpl_3wFWDSqvD23sReoZngnY8LFSSExk` (READY for app-code commit `723c3c5a29abf31295fb77e8083564b48a53c156`)  
+**Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
+**Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
+**Latest verified source commit:** `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0`  
+**Latest verified production deployment:** `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (READY; `main`; production alias `https://sightsteps.vercel.app`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -24,12 +26,13 @@
 
 ## Verified build evidence
 
-Vercel deployment for commit `645f8783547e9f20cfaa32033d3ef4cf6348a394` completed READY:
-- Quality audit: 2,519 passed, 0 failed.
-- Engine regression suite: 849 passed, 0 failed on code commit `723c3c5a29abf31295fb77e8083564b48a53c156`.
-- Clinical-language audit: passed; 22 JSX files and 2,622 copy fragments scanned. The nested-component discovery fixture executed and passed.
-- Vite: 99 modules transformed; PWA generated 11 precache entries.
-- Latest deployment chunk: 581.00 kB minified (158.01 kB gzip), above Vite's 500 kB warning threshold.
+Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0` completed READY:
+- Quality audit: **2,522 passed, 0 failed**. The audit now resolves relative paths from both static imports and literal dynamic `import()` calls; explicit checks cover all nine lazy-loaded page routes and the loading/focus handoff.
+- Engine regression suite: **849 passed, 0 failed**.
+- Clinical-language audit: passed; **22 JSX files and 2,625 copy fragments** scanned. The nested-component discovery fixture executed and passed.
+- Vite: **100 modules transformed**.
+- Route splitting reduced the initial JavaScript chunk from 581.00 kB minified (158.01 kB gzip) to **344.80 kB (105.91 kB gzip)**, a 40.6% reduction in minified entry size. The largest page chunk is Report at 147.38 kB (32.22 kB gzip); AmslerGrid is 21.91 kB (5.69 kB gzip). No emitted JavaScript chunk exceeds Vite's 500 kB warning threshold.
+- PWA service worker generated **34 precache entries (975.74 KiB)**. The split assets remain included in the precache, preserving the existing precache-based offline strategy; this does not mean the initial page downloads every page chunk at runtime.
 
 ## Clinical review export verification
 
@@ -44,8 +47,9 @@ Vercel deployment for commit `645f8783547e9f20cfaa32033d3ef4cf6348a394` complete
 
 - The repository was inspected through GitHub's connected repository interface because a local clone attempt failed due to DNS/network resolution.
 - No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
+- Production HTTP checks for `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 and the Vite SPA shell. This confirms the Vercel rewrite responds for direct route requests; it does not execute the client-side app or verify interactive route behavior.
 - The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
-- Latest Vercel production deployment after documentation synchronization is READY at `https://sightsteps.vercel.app` (deployment `dpl_7zyFuStdgD1pocUKs8hKyDeTJuVs`, main commit `60d3b76`). Its app-code set is the same as the fully counted `723c3c5` build: 849 engine tests passed, 0 failed. The latest deployment build logs reconfirm 2,519 quality checks, clinical-language audit success (22 JSX files / 2,622 fragments; nested discovery fixture executed), 99 Vite modules transformed and 11 PWA precache entries.
+- The route-splitting deployment `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e713...`) and latest verified deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5...`) both reached READY on the production target. The latest logs contain the full quality/test/lint/build evidence above.
 
 ## Dependency audit details
 
@@ -54,6 +58,7 @@ The `npm audit` artifact reports four moderate findings, all in the development-
 - `GHSA-3g3m-2fjr-6pw4` affects glob `>=9.0.0 <=14.0.1`; the advisory reports a fix in glob 14.0.2.
 - `GHSA-g3hv-75wg-m249` affects minimatch `>=7.0.0 <11.0.1`; the advisory reports a fix in minimatch 11.0.1.
 - The current Workbox dependency ranges require glob `^11.0.1` and minimatch `^10.1.1`, so the advisory fixed versions are outside the declared ranges. npm's `fixAvailable` suggestion points to `vite-plugin-pwa@1.1.0` and marks it as a major change even though the lockfile has 2.0.0; this appears to be a downgrade and has not been applied.
+- Upstream Workbox issue [GoogleChrome/workbox#3599](https://github.com/GoogleChrome/workbox/issues/3599) documents the same semver-range blocker for `workbox-build@7.4.1`; the issue was still open when checked on 25 November 2026. Its discussion describes candidate upstream work but does not establish a released compatible fix for the complete dependency tree.
 - No `npm audit fix`, forced upgrade or dependency override was applied. A compatible Workbox/plugin release or a deliberately tested override needs evaluation before remediation.
 
 The dependency report is a build/development dependency audit, not evidence that these packages execute in the deployed browser bundle. Treat it as an outstanding supply-chain maintenance item, not as zero-risk.
