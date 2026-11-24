@@ -1,7 +1,7 @@
 # SightSteps — Baseline Record
 
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
-**Current implementation commit:** `cfdd32bec6125c2c64e887df3b79c9cf257a811e`  
+**Current implementation commit:** `87794fde5d8bd893ac9037eb4e93088eb6da6a94`  
 **Branch:** `main`  
 **Date:** 25 November 2026
 

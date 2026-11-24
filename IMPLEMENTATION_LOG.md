@@ -22,7 +22,8 @@
 ### Change 3 — Clinical review export coverage
 - Added bilingual pattern-cluster title/summary and member IDs to the review export.
 - Added report, follow-up and appointment-pack source-provenance labels to the export.
-- Commit: `ba59301bf1b0eb1a9cc973c2171f5857616702fe`.
+- Corrected the export section ordering and ensured the provenance section is actually inserted.
+- Commits: `ba59301bf1b0eb1a9cc973c2171f5857616702fe`, `03f5a499e8891c9f2f9f5c34ae9badae19909ebd`, `87794fde5d8bd893ac9037eb4e93088eb6da6a94`.
 - The generated export file has not yet been independently inspected. The normal Vercel build does not run `npm run export-review`.
 
 ## Verification notes

@@ -28,5 +28,5 @@
 1. Independent optometrist/ophthalmologist review and recorded feedback.
 2. Amsler calibration and responsive geometry validation on real devices.
 3. Printed appointment-pack visual review in English and Hindi.
-4. Inspect the generated clinical-review export and reconcile it with current UI copy.
+4. Run `npm run export-review`, inspect the generated bilingual export and reconcile it with current UI copy. This script has not yet been executed in the verified build.
 5. Address bundle-size and dependency audit warnings after assessing actual dependency paths and compatibility.
