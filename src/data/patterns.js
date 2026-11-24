@@ -76,8 +76,8 @@ const patterns = [
       hi: 'रात में देखने की कठिनाई और ड्राइविंग का संदर्भ',
     },
     description: {
-      en: 'You reported difficulty seeing at night or in low light and selected night vision as the main experience you want to discuss. You also selected driving or travelling as a situation or activity where you notice this experience. These details can be discussed with an eye-care professional; they do not identify a cause.',
-      hi: 'आपने रात या कम रोशनी में देखने में कठिनाई को मुख्य अनुभव के रूप में चुना और ड्राइविंग या यात्रा को ऐसी स्थिति या गतिविधि बताया जिसमें यह अनुभव होता है। इन बातों पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है; ये किसी कारण की पहचान नहीं करतीं।',
+      en: 'You reported difficulty seeing at night or in low light. In the context linked to that specific experience, you also selected driving or travelling. These details can be discussed with an eye-care professional; they do not identify a cause.',
+      hi: 'आपने रात या कम रोशनी में देखने में कठिनाई बताई। इसी अनुभव से जुड़े संदर्भ में आपने ड्राइविंग या यात्रा भी चुनी। इन बातों पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है; ये किसी कारण की पहचान नहीं करतीं।',
     },
     discussionPrompt: {
       en: 'You may want to describe your low-light experiences to an eye-care professional and ask whether any further assessment is appropriate for your age group.',
@@ -92,12 +92,17 @@ const patterns = [
       const affectedActivities = Array.isArray(answers.affected_activities?.value)
         ? answers.affected_activities.value
         : [];
-      // Activity impact is asked about the main experience only.
-      const hasDrivingContext = isMainExperience
-        && (contexts.includes('driving') || affectedActivities.includes('driving'));
-      return nightIssue && isMainExperience && olderAge && hasDrivingContext;
+      // Activity impact only describes the main experience; symptom context is specific to either main or selected additional experience.
+      const hasDrivingContext = contexts.includes('driving')
+        || (isMainExperience && affectedActivities.includes('driving'));
+      return nightIssue && olderAge && hasDrivingContext;
     },
-    sourceKeys: ['night_vision', 'primary_concern', 'age_group', 'experience_context', 'affected_activities'],
+    sourceKeys: (answers) => [
+      'night_vision',
+      'age_group',
+      ...getExperienceContextSourceKeys(answers, 'night_vision'),
+      ...(answers.primary_concern?.value === 'night_vision' ? ['affected_activities'] : []),
+    ],
   },
   {
     id: 'close-work-headache',
