@@ -92,6 +92,14 @@ assert(rameshResult.activitiesContext?.impactDetails?.[0]?.frequency === 'often'
 assert(rameshResult.experienceProfiles?.find((item) => item.isPrimary)?.affectedActivities?.[0]?.frequency?.en === 'Often', 'primary experience profile includes linked activity-impact frequency');
 assert(rameshResult.experienceProfiles?.length === 4, 'reported experiences are exposed as structured experience profiles');
 assert(rameshResult.experienceProfiles?.find((item) => item.isPrimary)?.id === 'blurred_vision', 'the selected main experience is marked in the structured profile');
+const mainHeadacheSummary = evaluateAnswers({
+  headaches: { value: 'often', label: { en: 'Often', hi: 'अक्सर' } },
+  primary_concern: { value: 'headaches', label: { en: 'Headaches', hi: 'सिरदर्द' } },
+});
+assert(
+  mainHeadacheSummary.experienceProfiles?.find((item) => item.isPrimary)?.frequency?.en === 'Often',
+  'the structured rule-engine profile reuses the original headache frequency when the duplicate follow-up is omitted'
+);
 assert(rameshResult.experienceProfiles?.find((item) => item.isPrimary)?.affectedActivities?.[0]?.id === 'fine_detail', 'main experience profile links to selected affected activity details');
 assert(rameshResult.discussionPoints.some((point) => point.id === 'primary_activity_context'), 'primary-activity discussion point is generated');
 assert(rameshResult.discussionPoints.some((point) => point.id === 'screen_comfort'), 'screen discussion point is generated');
@@ -1067,16 +1075,36 @@ assert(!singleFlagDesc.right[0].includes('scattered'), 'single flag does not say
 // === Pattern Cluster Narratives ===
 console.log('\n=== Pattern cluster narratives ===');
 
-// Ramesh matches a subset of the defined patterns; outdoor time alone no longer creates a low-light match.
+// Ramesh has only one member of each narrowly defined cluster; the generic
+// examination-history pattern must not turn either single match into a cluster.
 const rameshPatternIds = rameshPatterns.map((p) => p.id);
 const rameshClusters = evaluateClusters(rameshPatternIds);
-assert(rameshClusters.length > 0, 'Ramesh triggers at least one cluster');
-const nearVisionCluster = rameshClusters.find((c) => c.id === 'near-vision-strain');
-assert(nearVisionCluster !== undefined, 'Ramesh triggers near-vision-strain cluster');
-assert(nearVisionCluster.matchedMembers.length === 2, 'near-vision-strain includes only its two specific near-vision/close-work patterns');
+assert(rameshClusters.length === 0, 'Ramesh does not receive clusters from a single specific match plus generic examination history');
+
+// A coherent near-vision grouping needs both specific member patterns.
+const nearVisionScenario = evaluatePatterns({
+  ...rameshAnswers,
+  experience_change: { value: 'more_noticeable', label: { en: 'More noticeable', hi: 'अधिक महसूस होता है' } },
+});
+const nearVisionCluster = evaluateClusters(nearVisionScenario.map((pattern) => pattern.id))
+  .find((cluster) => cluster.id === 'near-vision-strain');
+assert(Boolean(nearVisionCluster), 'near-vision cluster appears when both of its specific member patterns match');
+assert(nearVisionCluster.matchedMembers.length === 2, 'near-vision cluster contains exactly its two specific near-vision/close-work patterns');
 assert(!nearVisionCluster.matchedMembers.includes('overdue-exam'), 'generic examination history is not counted as a near-vision cluster member');
-const lowLightCluster = rameshClusters.find((cluster) => cluster.id === 'low-light-age-cluster');
-assert(Boolean(lowLightCluster), 'Ramesh co-reported low-light difficulty and a long examination interval, creating the low-light discussion grouping');
+
+// A low-light grouping requires both specific low-light patterns, not a generic overdue-exam match.
+const lowLightClusterScenario = evaluatePatterns({
+  night_vision: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  primary_concern: { value: 'night_vision', label: { en: 'Difficulty in low light', hi: 'कम रोशनी में कठिनाई' } },
+  age_group: { value: 'middle', label: { en: '40–55', hi: '40–55' } },
+  experience_context: { value: ['driving'], label: { en: 'Driving or travelling', hi: 'ड्राइविंग या यात्रा' } },
+  affected_activities: { value: ['driving'], label: { en: 'Driving & travel', hi: 'ड्राइविंग और यात्रा' } },
+  squinting: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+});
+const lowLightCluster = evaluateClusters(lowLightClusterScenario.map((pattern) => pattern.id))
+  .find((cluster) => cluster.id === 'low-light-age-cluster');
+assert(Boolean(lowLightCluster), 'low-light cluster appears only when both specific low-light patterns match');
+assert(lowLightCluster.matchedMembers.length === 2, 'low-light cluster contains only the two specific low-light patterns');
 assert(/not additional or independent evidence/i.test(lowLightCluster.summary.en), 'low-light cluster states that grouping is not additional or independent evidence');
 
 // All matched patterns are still individually available (clusters don't hide them)
