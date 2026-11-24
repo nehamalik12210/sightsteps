@@ -11,6 +11,7 @@ import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
 import ClinicianBrief from '../components/ClinicianBrief.jsx';
 import VisionExperienceProfile from '../components/VisionExperienceProfile.jsx';
+import ConversationReview from '../components/ConversationReview.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
@@ -41,6 +42,8 @@ export default function Report() {
     visionTimelineEntries,
     discussionPriorities,
     questionsToAsk,
+    conversationReview,
+    setConversationReview,
     assistedCompletion,
     kioskMode,
     amslerResults,
@@ -248,6 +251,12 @@ export default function Report() {
             language={lang}
           />
         )}
+
+        <ConversationReview
+          value={conversationReview}
+          onChange={setConversationReview}
+          language={lang}
+        />
 
         {matchedPatterns.length > 0 && (
           <section className="rpt__section rpt__patterns-section" aria-labelledby="rpt-patterns-heading">
