@@ -87,13 +87,14 @@ To prepare a review package for the clinical expert:
 node scripts/export-prompts.mjs
 ```
 This creates `exports/clinical-review-export.txt` containing:
-- All 8 pattern descriptions (EN + HI)
+- All 8 pattern descriptions (EN + HI), including source keys
 - Pattern engine output for the demo persona (Ramesh, 42, tailor)
-- All generated discussion prompts (EN + HI)
-- All follow-up notes (EN + HI)
-- Amsler grid wording at every touchpoint (EN + HI)
-- Clinician brief wording (EN + HI)
-- Key i18n disclaimer strings
+- Rules-engine discussion prompts and follow-up notes (EN + HI), with source answers
+- Dynamically generated secondary-experience questions and answer options (EN + HI)
+- Current Amsler introduction, calibration, use instructions and result safety wording (EN + HI)
+- Participant-defined activity wording examples
+- Conversation Map confirmation and correction wording
+- Clinician brief wording and key translated disclaimers
 
 ### Step 2: Run the demo
 ```bash
@@ -104,10 +105,13 @@ Open the app and use "Explore Ramesh's demo" to walk through the full journey. T
 ### Step 3: Send the reviewer
 1. The exported `exports/clinical-review-export.txt` file
 2. A link to the running demo (or deployed app)
-3. These three review questions:
-   - **Are the pattern descriptions clinically defensible?**
-   - **Does the Amsler framing match how you instruct patients?**
-   - **Are any prompts or patterns misleading, redundant, or alarming? Would you reword any?**
+3. These review questions:
+   - **Are the pattern descriptions and discussion prompts clinically defensible and appropriately cautious?**
+   - **Are the additional-experience follow-ups clear, neutral, proportionate and suitable in both English and Hindi?**
+   - **Does the Amsler framing match how you instruct patients, including the no-flags warning and device-calibration limitations?**
+   - **Is the participant-defined activity wording clear and suitable for use in summaries?**
+   - **Is the Conversation Map confirmation/correction clearly a communication check rather than clinical sign-off?**
+   - **Are any questions or prompts misleading, redundant, alarming or too burdensome? What would you reword?**
 
 ### Step 4: Record feedback
 Update the "Reviewer Feedback" section below with the reviewer's responses. Apply accepted changes to `patterns.js`, `questions.js`, `ruleEngine.js`, and Amsler wording. Document any changes or justified no-changes in the Changes Log.
@@ -130,6 +134,7 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 | 2026-11-24 | Adaptive follow-ups added for selected additional experiences | Improve participant-specific context without clinical scoring |
 | 2026-11-24 | Participant-defined activity wording added to impact questions and summaries | Preserve the participant's own everyday context |
 | 2026-11-24 | Participant review and correction added to Conversation Map and exports | Allow participants to correct their communication summary |
+| 2026-11-24 | Clinical review export expanded for adaptive questions and participant review | Ensure the independent reviewer sees current bilingual UI copy |
 
 ## Reviewer Feedback
 _To be completed after formal clinical review._
