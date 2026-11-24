@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
+import { buildDirectionAwarenessResult } from '../utils/visionActivity.js';
 import './VisionActivity.css';
 
 const SYMBOL_SIZE = 88;
@@ -112,17 +113,15 @@ export default function VisionActivity() {
   const handleFinish = () => {
     if (reportPending) return;
     setReportPending(true);
-    const leftCorrect = results.left.filter((t) => t.correct).length;
-    const rightCorrect = results.right.filter((t) => t.correct).length;
-    setVisionResults({
-      completed: true,
-      skipped: false,
-      data: {
-        activityType: 'direction-awareness',
-        left: { correct: leftCorrect, total: results.left.length, trials: results.left },
-        right: { correct: rightCorrect, total: results.right.length, trials: results.right },
-      },
-    });
+    setVisionResults(buildDirectionAwarenessResult(results));
+  };
+
+  const handleOpenAmsler = () => {
+    if (reportPending) return;
+    // Save the completed E activity before navigating away. Amsler uses this
+    // state to return to the report instead of restarting the E activity.
+    setVisionResults(buildDirectionAwarenessResult(results));
+    navigate('/amsler');
   };
 
   if (isDemo && demoPersona?.skipVision) return null;
@@ -198,7 +197,7 @@ export default function VisionActivity() {
         <button className="btn btn--primary btn--full btn--lg va__finish-btn" type="button" onClick={handleFinish} disabled={reportPending}>{lang === 'hi' ? 'रिपोर्ट देखें' : 'View your report'}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
         <div className="va__amsler-cta">
           <p className="va__amsler-cta-label">{lang === 'hi' ? 'एक और वैकल्पिक स्व-निगरानी गतिविधि आज़माएँ:' : 'Try another optional self-monitoring activity:'}</p>
-          <button className="btn btn--outline btn--full" type="button" onClick={() => navigate('/amsler')}>
+          <button className="btn btn--outline btn--full" type="button" onClick={handleOpenAmsler} disabled={reportPending}>
             <span className="material-symbols-outlined" aria-hidden="true">grid_on</span>
             {lang === 'hi' ? 'एम्सलर ग्रिड स्व-निगरानी गतिविधि' : 'Amsler Grid Self-Monitoring Activity'}
           </button>
