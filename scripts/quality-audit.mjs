@@ -54,7 +54,7 @@ console.log('\nSightSteps quality audit');
 const sourceFiles = collect('src').filter((path) => /\.(js|jsx|mjs)$/.test(path));
 for (const file of sourceFiles) {
   const source = read(file);
-  const importPattern = /(?:from\s*|import\s*)['"](\.[^'"]+)['"]/g;
+  const importPattern = /(?:from\s*|import\s*(?:\(\s*)?)['"]([.][^'"]+)['"]/g;
   for (const match of source.matchAll(importPattern)) {
     check(Boolean(resolveLocalImport(file, match[1])), `${file} import resolves: ${match[1]}`);
   }
@@ -210,6 +210,9 @@ check(/getQuestionCompletionProgress/.test(intake), 'questionnaire progress is c
 check(/aria-valuenow=\{progress\.percent\}/.test(intake) && /width: `\$\{progress\.percent\}%`/.test(intake) && /\{progress\.percent\}%/.test(intake), 'progress-bar fill, accessible value and percentage label use the same rounded percentage');
 check(/current: progress\.completed, total: progress\.total/.test(intake) && !/progress\.current|progress\.fraction/.test(intake), 'question count and percentage share one completed-answer progress calculation');
 check(/\/follow-up/.test(appSource) && /\/kiosk/.test(appSource), 'appointment follow-up and kiosk routes are registered');
+const lazyRoutePaths = [...appSource.matchAll(/lazy\(\(\)\s*=>\s*import\(['"]([^'"]+)['"]\)\)/g)].map((match) => match[1]);
+check(lazyRoutePaths.length === 9 && lazyRoutePaths.every((path) => Boolean(resolveLocalImport('src/App.jsx', path))), 'all nine lazy-loaded route modules resolve locally');
+check(appSource.includes('<Suspense fallback={<RouteLoadingFallback />}>') && /function LazyPage/.test(appSource) && /document\.getElementById\('main-content'\)\?\.focus/.test(appSource), 'lazy routes use an accessible loading fallback and restore keyboard focus after mount');
 check(/RouteGuard/.test(appSource) && /getProtectedRouteRedirect/.test(appSource) && /requireIntake/.test(appSource), 'deep links require a valid session and completed journey stages');
 check(/path="\*"/.test(appSource) && /Navigate to="\/" replace/.test(appSource), 'unknown application routes return safely to Landing');
 check(/navigate\('\/intake', \{ replace: true \}\)/.test(vision), 'direction activity back navigation returns to the questionnaire even after a direct visit or refresh');
