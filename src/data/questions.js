@@ -362,46 +362,45 @@ export function getQuestionForActivities(question, activities = [], answers = {}
   };
 }
 
-function buildActivityImpactQuestions(selected = [], answers = {}) {
-  const selected = Array.isArray(answers) ? answers : [];
-  return selected
+function buildActivityImpactQuestions(selectedActivities = [], answers = {}) {
+  const activityIds = Array.isArray(selectedActivities) ? selectedActivities : [];
+  return activityIds
     .filter((id) => ACTIVITY_LABELS[id])
     .flatMap((activityId) => {
-      const activityLabel = getActivityLabel(activityId, answers) || activityLabel;
-      return ([
-      {
-        id: `activity_impact_${activityId}`,
-        text: {
-          en: `How does ${activityLabel.en.toLowerCase()} feel affected? Select all that apply.`,
-          hi: `${activityLabel.hi} किस तरह प्रभावित महसूस होती है? सभी लागू विकल्प चुनें।`,
+      const activityLabel = getActivityLabel(activityId, answers) || ACTIVITY_LABELS[activityId];
+      return [
+        {
+          id: `activity_impact_${activityId}`,
+          text: {
+            en: `How does ${activityLabel.en.toLowerCase()} feel affected? Select all that apply.`,
+            hi: `${activityLabel.hi} किस तरह प्रभावित महसूस होती है? सभी लागू विकल्प चुनें।`,
+          },
+          type: 'multi',
+          category: 'lifestyle',
+          dynamicActivityId: activityId,
+          showIf: (currentAnswers) => Boolean(currentAnswers.affected_activities?.value?.includes(activityId)),
+          options: IMPACT_OPTIONS,
         },
-        type: 'multi',
-        category: 'lifestyle',
-        dynamicActivityId: activityId,
-        showIf: (currentAnswers) => Boolean(currentAnswers.affected_activities?.value?.includes(activityId)),
-        options: IMPACT_OPTIONS,
-      },
-      {
-        id: `activity_impact_frequency_${activityId}`,
-        text: {
-          en: `How often do you notice this impact during ${activityLabel.en.toLowerCase()}?`,
-          hi: `${activityLabel.hi} के दौरान आप यह प्रभाव कितनी बार महसूस करते हैं?`,
+        {
+          id: `activity_impact_frequency_${activityId}`,
+          text: {
+            en: `How often do you notice this impact during ${activityLabel.en.toLowerCase()}?`,
+            hi: `${activityLabel.hi} के दौरान आप यह प्रभाव कितनी बार महसूस करते हैं?`,
+          },
+          type: 'single',
+          category: 'lifestyle',
+          dynamicActivityId: activityId,
+          showIf: (currentAnswers) => {
+            const values = currentAnswers[`activity_impact_${activityId}`]?.value;
+            return Boolean(currentAnswers.affected_activities?.value?.includes(activityId))
+              && Array.isArray(values)
+              && values.some((value) => !['none', 'unsure'].includes(value));
+          },
+          options: IMPACT_FREQUENCY_OPTIONS,
         },
-        type: 'single',
-        category: 'lifestyle',
-        dynamicActivityId: activityId,
-        showIf: (currentAnswers) => {
-          const values = currentAnswers[`activity_impact_${activityId}`]?.value;
-          return Boolean(currentAnswers.affected_activities?.value?.includes(activityId))
-            && Array.isArray(values)
-            && values.some((value) => !['none', 'unsure'].includes(value));
-        },
-        options: IMPACT_FREQUENCY_OPTIONS,
-      },
-    ]);
+      ];
     });
 }
-
 /** Invalidate activity-specific answers when a participant edits their routine. */
 export function getActivityDependentAnswerIds(answers = {}, previousActivities = [], nextActivities = []) {
   const previous = [...new Set(Array.isArray(previousActivities) ? previousActivities : [])].sort();
