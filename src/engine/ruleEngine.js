@@ -4,6 +4,7 @@
  * Produces observations, activity context, discussion prompts and follow-up notes.
  * It does not diagnose, triage, score clinical risk, measure visual acuity or prescribe.
  */
+import { getActivityLabel } from '../data/questions.js';
 
 const GROUPS = [
   {
@@ -234,7 +235,7 @@ function makeQuestionSource(questionId, answers) {
   if (!hasAnswer(answer)) return null;
   const definition = OBSERVATIONS[questionId];
   const impactMeta = getActivityImpactMeta(questionId);
-  const activityLabel = ACTIVITY_LABELS[impactMeta?.activityId];
+  const activityLabel = getActivityLabel(impactMeta?.activityId, answers) || ACTIVITY_LABELS[impactMeta?.activityId];
   const activityNameEn = activityLabel?.en || impactMeta?.activityId || '';
   const activityNameHi = activityLabel?.hi || impactMeta?.activityId || '';
   const generatedLabel = impactMeta?.kind === 'frequency'
@@ -250,7 +251,7 @@ function makeQuestionSource(questionId, answers) {
   };
 }
 
-function makeActivitySource(field, activityId) {
+function makeActivitySource(field, activityId, answers = {}) {
   if (!activityId) return null;
   return {
     type: 'activity_profile',
@@ -258,7 +259,7 @@ function makeActivitySource(field, activityId) {
     label: field === 'primaryActivity'
       ? { en: 'Primary daily activity', hi: 'मुख्य दैनिक गतिविधि' }
       : { en: 'Selected daily activities', hi: 'चुनी गई दैनिक गतिविधियाँ' },
-    answer: ACTIVITY_LABELS[activityId] || { en: activityId, hi: activityId },
+    answer: getActivityLabel(activityId, answers) || ACTIVITY_LABELS[activityId] || { en: activityId, hi: activityId },
   };
 }
 
@@ -297,7 +298,17 @@ function buildDiscussionPoints(answers, context = {}) {
         hi: ['आपकी मुख्य दैनिक गतिविधि', 'आपने किसी अन्य गतिविधि को अपनी दिनचर्या का सबसे बड़ा हिस्सा बताया।', 'बताएं कि इस गतिविधि में क्या शामिल है, आप इसे कितनी देर करते हैं और इसमें किस तरह के दृश्य कार्य शामिल हैं।'], icon: 'more_horiz',
       },
     };
-    const content = activityPrompts[primaryActivity];
+    let content = activityPrompts[primaryActivity];
+    if (primaryActivity === 'other') {
+      const customActivity = getActivityLabel('other', answers);
+      if (customActivity?.en) {
+        content = {
+          en: [customActivity.en, `You selected ${customActivity.en} as your main daily activity.`, `Describe what ${customActivity.en.toLowerCase()} involves, how long you do it and what visual tasks it requires.`],
+          hi: [customActivity.hi, `आपने ${customActivity.hi} को अपनी मुख्य दैनिक गतिविधि चुना।`, `बताएं कि ${customActivity.hi} में क्या शामिल है, आप इसे कितनी देर करते हैं और इसमें किस तरह के दृश्य कार्य शामिल हैं।`],
+          icon: 'more_horiz',
+        };
+      }
+    }
     if (content) {
       points.push({
         id: 'primary_activity_context',
@@ -305,7 +316,7 @@ function buildDiscussionPoints(answers, context = {}) {
         context: { en: content.en[1], hi: content.hi[1] },
         prompt: { en: content.en[2], hi: content.hi[2] },
         icon: content.icon,
-        sources: nonEmptySources([makeActivitySource('primaryActivity', primaryActivity)]),
+        sources: nonEmptySources([makeActivitySource('primaryActivity', primaryActivity, answers)]),
       });
     }
   }
@@ -313,7 +324,7 @@ function buildDiscussionPoints(answers, context = {}) {
   const affected = Array.isArray(answers.affected_activities?.value) ? answers.affected_activities.value : [];
   const affectedIds = affected.filter((id) => ACTIVITY_LABELS[id] && !['none', 'unsure'].includes(id));
   if (affectedIds.length) {
-    const labels = affectedIds.map((id) => ACTIVITY_LABELS[id]);
+    const labels = affectedIds.map((id) => getActivityLabel(id, answers) || ACTIVITY_LABELS[id]);
     points.push({
       id: 'affected_activity_context',
       title: { en: 'Activities you said are affected', hi: 'आपके अनुसार प्रभावित गतिविधियाँ' },
@@ -538,7 +549,7 @@ export function evaluateAnswers(answers = {}, context = {}) {
       for (const [questionId, answer] of Object.entries(safeAnswers)) {
         const impactMeta = getActivityImpactMeta(questionId);
         if (!impactMeta || !hasAnswer(answer)) continue;
-        const label = ACTIVITY_LABELS[impactMeta.activityId] || { en: impactMeta.activityId, hi: impactMeta.activityId };
+        const label = getActivityLabel(impactMeta.activityId, safeAnswers) || ACTIVITY_LABELS[impactMeta.activityId] || { en: impactMeta.activityId, hi: impactMeta.activityId };
         const isFrequency = impactMeta.kind === 'frequency';
         observations.push({
           id: questionId,
@@ -571,15 +582,15 @@ export function evaluateAnswers(answers = {}, context = {}) {
 
   const activitiesContext = selectedActivities.length || context.primaryActivity || affectedValues.length
     ? {
-        selected: selectedActivities.map((id) => ({ id, label: ACTIVITY_LABELS[id] || { en: id, hi: id } })),
+        selected: selectedActivities.map((id) => ({ id, label: getActivityLabel(id, safeAnswers) || ACTIVITY_LABELS[id] || { en: id, hi: id } })),
         primary: context.primaryActivity
-          ? { id: context.primaryActivity, label: ACTIVITY_LABELS[context.primaryActivity] || { en: context.primaryActivity, hi: context.primaryActivity } }
+          ? { id: context.primaryActivity, label: getActivityLabel(context.primaryActivity, safeAnswers) || ACTIVITY_LABELS[context.primaryActivity] || { en: context.primaryActivity, hi: context.primaryActivity } }
           : null,
-        affected: affectedIds.map((id) => ({ id, label: ACTIVITY_LABELS[id] })),
+        affected: affectedIds.map((id) => ({ id, label: getActivityLabel(id, safeAnswers) || ACTIVITY_LABELS[id] })),
         affectedStatus,
         impactDetails: affectedIds.map((id) => ({
           id,
-          label: ACTIVITY_LABELS[id],
+          label: getActivityLabel(id, safeAnswers) || ACTIVITY_LABELS[id],
           impacts: Array.isArray(safeAnswers[`activity_impact_${id}`]?.value) ? safeAnswers[`activity_impact_${id}`].value : [],
           answer: safeAnswers[`activity_impact_${id}`]?.label || null,
           frequency: safeAnswers[`activity_impact_frequency_${id}`]?.value || null,
