@@ -153,12 +153,12 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 npm run export-review
 ```
 
-Generates `exports/clinical-review-export.txt` containing all pattern descriptions, discussion prompts, Amsler wording and clinician brief text in both English and Hindi. Send this to a clinical reviewer along with the demo walkthrough.
+Generates `exports/clinical-review-export.txt` containing pattern definitions and sources, generated discussion prompts, bilingual adaptive follow-up questions and options, current Amsler instructions and safety wording, custom-activity examples, participant-review copy, and clinician-brief text. Send this export to an optometrist or ophthalmologist with the demo walkthrough.
 
 See [`CLINICAL_REVIEW_PENDING.md`](CLINICAL_REVIEW_PENDING.md) for the full review kit procedure, reviewer questions and change log.
 
 > [!NOTE]
-> Expert review kit is prepared and ready to send; reviewer feedback is the immediate next step. Clinical content is grounded in published guidance (see [`CLINICAL_GROUNDING.md`](CLINICAL_GROUNDING.md)); no pattern or activity introduces a novel clinical claim.
+> The review kit is prepared, but independent review feedback has not yet been received. Clinical wording and new adaptive follow-ups still require review by a qualified optometrist or ophthalmologist. Existing content is grounded in published guidance (see [`CLINICAL_GROUNDING.md`](CLINICAL_GROUNDING.md)); automated language checks do not establish clinical suitability.
 
 ---
 
