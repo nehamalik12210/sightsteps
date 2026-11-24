@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
+import { getAmslerReturnPath } from '../utils/sessionRouting.js';
 import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
 import {
   CREDIT_CARD_WIDTH_MM,
@@ -25,7 +26,7 @@ function getViewportMetrics() {
 
 function AmslerGrid() {
   const navigate = useNavigate();
-  const { language, setAmslerResults, amslerResults } = useApp();
+  const { language, setAmslerResults, amslerResults, visionResults } = useApp();
   const lang = language || 'en';
 
   const [phase, setPhase] = useState('intro');
@@ -65,9 +66,9 @@ function AmslerGrid() {
 
   useEffect(() => {
     if (reportPending && amslerResults) {
-      navigate('/vision', { replace: true });
+      navigate(getAmslerReturnPath(visionResults), { replace: true });
     }
-  }, [reportPending, amslerResults, navigate]);
+  }, [reportPending, amslerResults, visionResults, navigate]);
 
   const handleCalibrate = () => {
     if (!canCalibrate) return;
