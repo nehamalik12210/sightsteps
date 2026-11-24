@@ -106,7 +106,7 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 | Navigation | React Router 7 |
 | Local storage | IndexedDB (including participant summary review and corrections) |
 | Rules engine | Deterministic JS rules engine (`src/engine/ruleEngine.js`) |
-| Pattern engine | Inference engine for answer-combination patterns (`src/engine/patternEngine.js`) |
+| Pattern engine | Predefined response-pattern organiser (`src/engine/patternEngine.js`) |
 | Clinical language lint | Automated forbidden-phrase scanner (`scripts/clinical-language-audit.mjs`) |
 | PWA | vite-plugin-pwa, web app manifest & service worker |
 | Voice | Browser Web Speech APIs where available |
@@ -251,7 +251,7 @@ sightsteps/
 
 ## Validation Status
 
-The latest exact-source verification completed on main commit ae31b03c81475ab1ba022986493719eefb6abd74 in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
+The latest exact-source verification completed on main commit 7224c5c8b59a402a8e7fbc97893a55fc00914f0d in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
 
 | Check | Result |
 |---|---|
@@ -259,8 +259,8 @@ The latest exact-source verification completed on main commit ae31b03c81475ab1ba
 | Regression test suite | **961 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
 | Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
 | Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (105.99 kB gzip) |
-| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.60 kB (33.13 kB gzip) |
-| PWA service worker | 34 precache entries generated (980.14 KiB) |
+| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.72 kB (33.16 kB gzip) |
+| PWA service worker | 34 precache entries generated (980.26 KiB) |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device Amsler calibration, responsive visual/print testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
