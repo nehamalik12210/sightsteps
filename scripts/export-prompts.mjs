@@ -164,8 +164,8 @@ for (const note of rameshReport.followUpNotes) {
   lines.push('');
 }
 
-// ─── 12. Amsler Grid Wording ──────────────────────────────────
-section('12. AMSLER GRID WORDING');
+// ─── 7. Amsler Grid Wording ──────────────────────────────────
+section('7. AMSLER GRID WORDING');
 
 const amslerStrings = {
   'Intro notice': {
@@ -195,8 +195,8 @@ for (const [label, text] of Object.entries(amslerStrings)) {
   row(label, text.en, text.hi);
 }
 
-// ─── 12. Clinician Brief Wording ──────────────────────────────
-section('12. CLINICIAN BRIEF WORDING');
+// ─── 8. Clinician Brief Wording ──────────────────────────────
+section('8. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
   'Main disclaimer': {
@@ -214,8 +214,8 @@ for (const [label, text] of Object.entries(briefStrings)) {
 }
 
 
-// ─── 12. Adaptive Additional-Experience Questions ─────────────
-section('12. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
+// ─── 9. Adaptive Additional-Experience Questions ─────────────
+section('9. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
 
 // Illustrative answer fixture: these are question templates, not a clinical case.
 const secondaryQuestionFixture = {
@@ -247,8 +247,8 @@ for (const question of secondaryQuestions) {
   lines.push('');
 }
 
-// ─── 12. Custom Activity and Participant Review ───────────────
-section('12. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
+// ─── 10. Custom Activity and Participant Review ───────────────
+section('10. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
 row(
   'Custom activity prompt',
   'What is your other everyday activity? Example participant entry: jewellery making.',
@@ -280,8 +280,8 @@ row(
   'यह समीक्षा केवल बातचीत का संदर्भ है। इससे मूल जवाब या चिकित्सकीय व्याख्या नहीं बदलती।',
 );
 
-// ─── 12. Source Provenance Labels ─────────────────────────────
-section('12. SOURCE PROVENANCE LABELS');
+// ─── 11. Source Provenance Labels ─────────────────────────────
+section('11. SOURCE PROVENANCE LABELS');
 row(
   'Report discussion topic',
   'Your responses linked to this topic:',
