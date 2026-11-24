@@ -243,10 +243,24 @@ function makeQuestionSource(questionId, answers) {
     : impactMeta
       ? { en: `Impact on ${activityNameEn}`, hi: `${activityNameHi} पर प्रभाव` }
       : null;
+  const secondaryMatch = questionId.match(/^additional_experience_(.+)_(onset|frequency|context|eye)$/);
+  const secondaryExperience = secondaryMatch ? OBSERVATIONS[secondaryMatch[1]]?.question : null;
+  const secondarySuffix = secondaryMatch ? {
+    onset: { en: 'When first noticed', hi: 'पहली बार कब महसूस हुआ' },
+    frequency: { en: 'Frequency', hi: 'आवृत्ति' },
+    context: { en: 'Situations', hi: 'परिस्थितियाँ' },
+    eye: { en: 'Eye(s) involved', hi: 'किस आँख में' },
+  }[secondaryMatch[2]] : null;
+  const secondaryLabel = secondaryExperience && secondarySuffix
+    ? {
+        en: secondaryExperience.en + ' — ' + secondarySuffix.en,
+        hi: secondaryExperience.hi + ' — ' + secondarySuffix.hi,
+      }
+    : null;
   return {
     type: 'question',
     id: questionId,
-    label: SOURCE_LABELS[questionId] || generatedLabel || definition?.question || { en: questionId, hi: questionId },
+    label: SOURCE_LABELS[questionId] || generatedLabel || secondaryLabel || definition?.question || { en: questionId, hi: questionId },
     answer: answer.label || { en: String(answer.value), hi: String(answer.value) },
   };
 }
@@ -401,7 +415,7 @@ function buildDiscussionPoints(answers, context = {}) {
     .filter((activityId) => ACTIVITY_LABELS[activityId])
     .map((activityId) => ({
       id: activityId,
-      label: ACTIVITY_LABELS[activityId],
+      label: getActivityLabel(activityId, answers) || ACTIVITY_LABELS[activityId],
       impacts: Array.isArray(answers[`activity_impact_${activityId}`]?.value)
         ? answers[`activity_impact_${activityId}`].value
         : [],
