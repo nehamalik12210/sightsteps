@@ -50,6 +50,7 @@ const rameshAnswers = {
   squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
   outdoor_time: { value: 'moderate', label: { en: 'A few hours', hi: 'कुछ घंटे' } },
   primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
+  additional_concerns: { value: ['none'], label: { en: 'No other experience to add', hi: 'कोई अन्य अनुभव नहीं जोड़ना' } },
   experience_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
   experience_change: { value: 'varies', label: { en: 'It varies', hi: 'इसमें उतार-चढ़ाव होता है' } },
   experience_context: { value: ['near_tasks', 'screens'], label: { en: 'Reading or other near tasks, Using screens', hi: 'पढ़ना या पास के काम, स्क्रीन का उपयोग' } },
@@ -534,7 +535,7 @@ assert(!Object.hasOwn(rameshResult, 'urgency'), 'report engine exposes no urgenc
 
 console.log('\n=== Storage failure contract ===');
 const minimalSavedRecord = createSessionRecord({ sessionId: 'empty-test' });
-assert(minimalSavedRecord.schemaVersion === 4, 'saved record has the current schema version');
+assert(minimalSavedRecord.schemaVersion === 5, 'saved record has the current schema version');
 assert(Array.isArray(minimalSavedRecord.visionTimelineEntries), 'legacy sessions safely hydrate with an empty timeline list');
 assert(minimalSavedRecord.activities.length === 0, 'missing activities restore to a safe empty list');
 assert(minimalSavedRecord.answers && typeof minimalSavedRecord.answers === 'object', 'missing answers restore to a safe object');
