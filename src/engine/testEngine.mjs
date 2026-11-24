@@ -6,7 +6,7 @@
 
 import { evaluateAnswers } from './ruleEngine.js';
 import { getBackNavigationAnswerIds, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
-import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionPositionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import questionBank, { getActivityDependentAnswerIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
@@ -460,21 +460,24 @@ assert(skippedNoteProgress.answered === 1, 'intentionally skipped optional note 
 assert(!isAnswerComplete({ value: null }), 'null response is treated as unanswered');
 assert(!isAnswerComplete(null), 'missing response is treated as unanswered');
 assert(isAnswerComplete({ value: ['reading'] }), 'non-empty multi-select response is complete');
-const progressFixture = [{ id: 'q1' }, { id: 'q2' }, { id: 'q3' }, { id: 'q4' }];
-const firstQuestionProgress = getQuestionPositionProgress(progressFixture, 'q1');
-assert(firstQuestionProgress.current === 1 && firstQuestionProgress.total === 4 && firstQuestionProgress.percent === 25, 'first question shows 1 of 4 and a 25 percent progress bar');
-const middleQuestionProgress = getQuestionPositionProgress(progressFixture, 'q3');
-assert(middleQuestionProgress.current === 3 && middleQuestionProgress.total === 4 && middleQuestionProgress.percent === 75, 'middle question percentage matches its displayed position');
-const lastQuestionProgress = getQuestionPositionProgress(progressFixture, 'q4');
-assert(lastQuestionProgress.current === 4 && lastQuestionProgress.total === 4 && lastQuestionProgress.percent === 100, 'last question reaches exactly 100 percent');
-const unknownQuestionProgress = getQuestionPositionProgress(progressFixture, 'missing');
-assert(unknownQuestionProgress.current === 0 && unknownQuestionProgress.total === 4 && unknownQuestionProgress.percent === 0, 'unknown current question fails safely to zero progress');
-const emptyQuestionProgress = getQuestionPositionProgress([], 'q1');
-assert(emptyQuestionProgress.current === 0 && emptyQuestionProgress.total === 0 && emptyQuestionProgress.percent === 0, 'empty question list has zero progress without division errors');
+const sevenQuestionFixture = Array.from({ length: 7 }, (_, index) => ({ id: `q${index + 1}` }));
+const sixCompletedAnswers = Object.fromEntries(sevenQuestionFixture.slice(0, 6).map((question) => [question.id, { value: 'answered' }]));
+const beforeFinalAnswer = getQuestionCompletionProgress(sevenQuestionFixture, sixCompletedAnswers);
+assert(beforeFinalAnswer.completed === 6 && beforeFinalAnswer.total === 7 && beforeFinalAnswer.percent === 86, 'the seventh active question shows 6 of 7 completed and 86 percent before its answer is submitted');
+const afterFinalAnswer = getQuestionCompletionProgress(sevenQuestionFixture, { ...sixCompletedAnswers, q7: { value: 'answered' } });
+assert(afterFinalAnswer.completed === 7 && afterFinalAnswer.total === 7 && afterFinalAnswer.percent === 100, 'progress reaches 7 of 7 and 100 percent after the final answer is submitted');
+const firstAnswerProgress = getQuestionCompletionProgress(sevenQuestionFixture, { q1: { value: 'answered' } });
+assert(firstAnswerProgress.completed === 1 && firstAnswerProgress.total === 7 && firstAnswerProgress.percent === 14, 'one completed answer out of seven rounds to 14 percent');
+const noAnswersProgress = getQuestionCompletionProgress(sevenQuestionFixture, {});
+assert(noAnswersProgress.completed === 0 && noAnswersProgress.total === 7 && noAnswersProgress.percent === 0, 'no completed answers produce zero progress');
+const emptyCompletionProgress = getQuestionCompletionProgress([], {});
+assert(emptyCompletionProgress.completed === 0 && emptyCompletionProgress.total === 0 && emptyCompletionProgress.percent === 0, 'empty visible question list has zero progress without division errors');
 const shortBranch = getVisibleQuestions({ blurred_vision: { value: 'no' } });
+const shortBranchProgress = getQuestionCompletionProgress(shortBranch, { [shortBranch[0].id]: { value: 'yes' } });
+assert(shortBranchProgress.completed === 1 && shortBranchProgress.percent === Math.round(100 / shortBranch.length), 'completed-question percentage uses the current short conditional branch total');
 const longBranch = getVisibleQuestions({ blurred_vision: { value: 'yes' } });
-assert(getQuestionPositionProgress(shortBranch, shortBranch[0].id).percent === Math.round(100 / shortBranch.length), 'first question percentage uses the currently visible short branch total');
-assert(getQuestionPositionProgress(longBranch, longBranch[0].id).percent === Math.round(100 / longBranch.length), 'first question percentage recalculates when conditional questions are visible');
+const longBranchProgress = getQuestionCompletionProgress(longBranch, { [longBranch[0].id]: { value: 'yes' } });
+assert(longBranchProgress.completed === 1 && longBranchProgress.percent === Math.round(100 / longBranch.length), 'completed-question percentage recalculates when conditional questions are visible');
 
 console.log('\n=== Traceability schema and non-diagnostic output ===');
 for (const point of rameshResult.discussionPoints) {
