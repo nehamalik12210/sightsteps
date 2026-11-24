@@ -58,7 +58,7 @@ export default function Intake() {
       ? filtered
       : filtered.filter((question) => demoPersona.demoQuestionIds.includes(question.id));
 
-    return demoFiltered.map((question) => getQuestionForActivities(question, activities));
+    return demoFiltered.map((question) => getQuestionForActivities(question, activities, answers));
   }, [answers, activities, isDemo, demoPersona]);
 
   const currentOptions = currentQuestion?.options || [];
