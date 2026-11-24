@@ -32,7 +32,7 @@ const strings = {
   'activities.primaryDescription': { en: 'Choose one from the activities you selected.', hi: 'अपनी चुनी हुई गतिविधियों में से एक चुनें।' },
 
   'intake.title': { en: 'Vision Questions', hi: 'दृष्टि संबंधी सवाल' },
-  'intake.questionOf': { en: 'Question {current} of {total}', hi: 'सवाल {current} / {total}' },
+  'intake.questionOf': { en: 'Completed {current} of {total}', hi: 'पूरे किए गए सवाल {current} / {total}' },
   'intake.note.placeholder': { en: 'Type here (optional)...', hi: 'यहाँ लिखें (वैकल्पिक)...' },
   'intake.note.skip': { en: 'Skip', hi: 'छोड़ें' },
   'intake.note.save': { en: 'Save', hi: 'सहेजें' },
