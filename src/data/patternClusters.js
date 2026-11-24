@@ -15,15 +15,15 @@
 const clusters = [
   {
     id: 'near-vision-strain',
-    memberIds: ['presbyopia', 'close-work-headache', 'overdue-exam'],
+    memberIds: ['presbyopia', 'close-work-headache'],
     minMatch: 2,
     title: {
       en: 'Near-vision and strain indicators',
       hi: 'निकट-दृष्टि और तनाव संकेतक',
     },
     summary: {
-      en: 'Multiple patterns in your responses relate to near-vision difficulty and visual strain during close work. These often share common factors and may be addressed together in a single comprehensive examination.',
-      hi: 'आपके जवाबों में कई पैटर्न निकट-दृष्टि कठिनाई और पास के काम के दौरान तनाव से संबंधित हैं। इनमें अक्सर सामान्य कारक होते हैं और इन्हें एक व्यापक जाँच में एक साथ संबोधित किया जा सकता है।',
+      en: 'The matched patterns connect your reported near-vision blur with your reported headaches, close-up work or squinting. Some answers can contribute to more than one pattern, so these matches are overlapping discussion prompts, not independent confirmations.',
+      hi: 'मिले हुए पैटर्न आपके बताए निकट-दृष्टि धुंधलेपन को सिरदर्द, पास के काम या आँखें सिकोड़ने के आपके जवाबों से जोड़ते हैं। कुछ जवाब एक से अधिक पैटर्न में शामिल हो सकते हैं; इसलिए ये आपस में जुड़े चर्चा-विषय हैं, स्वतंत्र पुष्टि नहीं।',
     },
     icon: 'link',
   },
@@ -36,8 +36,8 @@ const clusters = [
       hi: 'स्क्रीन-संबंधी संकेतक',
     },
     summary: {
-      en: 'Two patterns in your responses relate to screen use and its effects on your vision. These often share underlying factors such as viewing distance, screen time duration and break habits that an eye-care professional can assess together.',
-      hi: 'आपके जवाबों में दो पैटर्न स्क्रीन उपयोग और आपकी दृष्टि पर इसके प्रभावों से संबंधित हैं। इनमें अक्सर अंतर्निहित कारक जैसे देखने की दूरी, स्क्रीन समय और ब्रेक की आदतें होती हैं जिनका नेत्र देखभाल पेशेवर एक साथ मूल्यांकन कर सकते हैं।',
+      en: 'The matched patterns both include your reported screen use, and one also uses your report of headaches during screen use. They reuse some of the same answers, so they are overlapping discussion prompts rather than independent confirmations.',
+      hi: 'मिले हुए दोनों पैटर्न में आपका स्क्रीन उपयोग शामिल है और एक में स्क्रीन देखते समय सिरदर्द का आपका जवाब भी शामिल है। इनमें कुछ वही जवाब दोबारा उपयोग होते हैं, इसलिए ये स्वतंत्र पुष्टि नहीं बल्कि जुड़े हुए चर्चा-विषय हैं।',
     },
     icon: 'link',
   },
@@ -50,8 +50,8 @@ const clusters = [
       hi: 'कम रोशनी में दृष्टि के अनुभव',
     },
     summary: {
-      en: 'More than one response pattern relates to low-light difficulty or your eye-examination history. These are participant-reported experiences and background details; an eye-care professional can decide whether further assessment is appropriate.',
-      hi: 'एक से अधिक उत्तर-पैटर्न कम रोशनी में कठिनाई या आपकी पिछली नेत्र-जाँच के इतिहास से संबंधित हैं। ये प्रतिभागी द्वारा बताए गए अनुभव और पृष्ठभूमि विवरण हैं; आगे की जाँच उपयुक्त है या नहीं, यह नेत्र-देखभाल पेशेवर तय कर सकते हैं।',
+      en: 'More than one discussion pattern relates to your reported night-vision difficulty, squinting or examination history. Some patterns share the same reported answers; a cluster is an organisational summary, not additional or independent evidence.',
+      hi: 'एक से अधिक चर्चा-पैटर्न आपकी बताई रात में देखने की कठिनाई, आँखें सिकोड़ने या नेत्र-जाँच के इतिहास से जुड़े हैं। कुछ पैटर्न में वही जवाब साझा हो सकते हैं; क्लस्टर केवल जानकारी व्यवस्थित करता है, यह अतिरिक्त या स्वतंत्र प्रमाण नहीं है।',
     },
     icon: 'link',
   },
@@ -64,7 +64,9 @@ const clusters = [
  * @returns {Array<{id, title, summary, icon, matchedMembers: string[]}>}
  */
 export function evaluateClusters(matchedPatternIds = []) {
-  const idSet = new Set(matchedPatternIds);
+  const idSet = new Set(Array.isArray(matchedPatternIds)
+    ? matchedPatternIds.filter((id) => typeof id === 'string')
+    : []);
   return clusters
     .map((cluster) => {
       const matchedMembers = cluster.memberIds.filter((id) => idSet.has(id));
