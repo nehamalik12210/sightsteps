@@ -10,12 +10,50 @@
  *   ❌ "You have…" / "You suffer from…" / "Diagnosis"
  */
 
+const EXPERIENCE_ANSWER_VALUES = {
+  blurred_vision: ['yes', 'sometimes'],
+  headaches: ['often', 'sometimes'],
+  squinting: ['yes', 'sometimes'],
+  night_vision: ['yes', 'sometimes'],
+};
+
+function hasReportedExperience(answers, experienceId) {
+  return (EXPERIENCE_ANSWER_VALUES[experienceId] || [])
+    .includes(answers?.[experienceId]?.value);
+}
+
+function getExperienceContext(answers, experienceId) {
+  if (answers?.primary_concern?.value === experienceId) {
+    return Array.isArray(answers?.experience_context?.value)
+      ? answers.experience_context.value
+      : [];
+  }
+  const selectedAdditional = Array.isArray(answers?.additional_concerns?.value)
+    && answers.additional_concerns.value.includes(experienceId);
+  if (selectedAdditional && hasReportedExperience(answers, experienceId)) {
+    const value = answers?.[`additional_experience_${experienceId}_context`]?.value;
+    return Array.isArray(value) ? value : [];
+  }
+  return [];
+}
+
+function getExperienceContextSourceKeys(answers, experienceId) {
+  if (answers?.primary_concern?.value === experienceId) {
+    return ['primary_concern', 'experience_context'];
+  }
+  const selectedAdditional = Array.isArray(answers?.additional_concerns?.value)
+    && answers.additional_concerns.value.includes(experienceId);
+  return selectedAdditional && hasReportedExperience(answers, experienceId)
+    ? ['additional_concerns', `additional_experience_${experienceId}_context`]
+    : [];
+}
+
 const patterns = [
   {
     id: 'screen-strain',
     title: {
-      en: 'Screen-related strain vs. uncorrected refractive error',
-      hi: 'स्क्रीन से जुड़ा तनाव बनाम अनसुधारित अपवर्तन दोष',
+      en: 'Screen use, distance blur and examination history',
+      hi: 'स्क्रीन उपयोग, दूर का धुंधलापन और जाँच का इतिहास',
     },
     description: {
       en: 'Your responses suggest a combination of heavy screen use, blurred distance vision and infrequent eye examinations. These factors together may be worth discussing with an eye-care professional to determine whether your current vision needs have been assessed recently.',
@@ -28,20 +66,21 @@ const patterns = [
     icon: 'devices',
     triggers: (answers) => {
       const screenHigh = ['moderate', 'high'].includes(answers.screen_hours?.value);
+      const blurReported = hasReportedExperience(answers, 'blurred_vision');
       const blurFar = ['far', 'both'].includes(answers.blur_distance?.value);
       const noRecentExam = ['old', 'very_old', 'never'].includes(answers.eye_exam?.value);
-      return screenHigh && blurFar && noRecentExam;
+      return screenHigh && blurReported && blurFar && noRecentExam;
     },
-    sourceKeys: ['screen_hours', 'blur_distance', 'eye_exam'],
+    sourceKeys: ['screen_hours', 'blurred_vision', 'blur_distance', 'eye_exam'],
   },
   {
     id: 'night-vision',
     title: {
-      en: 'Night vision changes',
-      hi: 'रात की दृष्टि में बदलाव',
+      en: 'Night-vision difficulty and driving context',
+      hi: 'रात में देखने की कठिनाई और ड्राइविंग का संदर्भ',
     },
     description: {
-      en: 'Your responses suggest difficulty seeing in low light, combined with activities such as driving and an age group where night-vision changes are more commonly reported. This combination may be worth raising with an eye-care professional.',
+      en: 'You reported difficulty seeing at night or in low light and selected night vision as the main experience you want to discuss. You also selected driving or travelling as a situation or activity where you notice this experience. These details can be discussed with an eye-care professional; they do not identify a cause.',
       hi: 'आपके जवाब कम रोशनी में देखने में कठिनाई, ड्राइविंग जैसी गतिविधियों और उस आयु वर्ग का संयोजन सुझाते हैं जहाँ रात की दृष्टि में बदलाव अधिक बताए जाते हैं। यह संयोजन नेत्र देखभाल पेशेवर से चर्चा के लायक हो सकता है।',
     },
     discussionPrompt: {
@@ -50,25 +89,28 @@ const patterns = [
     },
     icon: 'dark_mode',
     triggers: (answers) => {
-      const nightIssue = ['yes', 'sometimes'].includes(answers.night_vision?.value);
+      const nightIssue = hasReportedExperience(answers, 'night_vision');
+      const isMainExperience = answers.primary_concern?.value === 'night_vision';
       const olderAge = ['middle', 'senior'].includes(answers.age_group?.value);
-      // Driving context from affected activities or primary activity
-      const affectedActivities = Array.isArray(answers.affected_activities?.value) ? answers.affected_activities.value : [];
-      const hasDriving = affectedActivities.includes('driving');
-      const contextValues = Array.isArray(answers.experience_context?.value) ? answers.experience_context.value : [];
-      const hasLowLightContext = contextValues.includes('low_light') || contextValues.includes('driving');
-      return nightIssue && olderAge && (hasDriving || hasLowLightContext);
+      const contexts = getExperienceContext(answers, 'night_vision');
+      const affectedActivities = Array.isArray(answers.affected_activities?.value)
+        ? answers.affected_activities.value
+        : [];
+      // Activity impact is asked about the main experience only.
+      const hasDrivingContext = isMainExperience
+        && (contexts.includes('driving') || affectedActivities.includes('driving'));
+      return nightIssue && isMainExperience && olderAge && hasDrivingContext;
     },
-    sourceKeys: ['night_vision', 'age_group', 'affected_activities', 'experience_context'],
+    sourceKeys: ['night_vision', 'primary_concern', 'age_group', 'experience_context', 'affected_activities'],
   },
   {
     id: 'close-work-headache',
     title: {
-      en: 'Uncorrected refractive error or accommodative strain',
-      hi: 'अनसुधारित अपवर्तन दोष या समंजन तनाव',
+      en: 'Headaches, close-up work and squinting reported together',
+      hi: 'सिरदर्द, पास का काम और आँखें सिकोड़ने का साथ में बताया जाना',
     },
     description: {
-      en: 'Your responses suggest a combination of headaches around visual activities, frequent close-up work and squinting. Together, these may point toward uncorrected refractive error or accommodative strain — worth discussing with an eye-care professional.',
+      en: 'You reported headaches, extended periods of close-up work and squinting. These are separate reported experiences and habits; their combination does not establish that one causes another. You can describe each to an eye-care professional.',
       hi: 'आपके जवाब दृष्टि गतिविधियों के दौरान सिरदर्द, नियमित पास का काम और आँखें सिकोड़ने का संयोजन सुझाते हैं। ये मिलकर अनसुधारित अपवर्तन दोष या समंजन तनाव की ओर इशारा कर सकते हैं — नेत्र देखभाल पेशेवर से चर्चा के योग्य।',
     },
     discussionPrompt: {
@@ -109,11 +151,11 @@ const patterns = [
   {
     id: 'presbyopia',
     title: {
-      en: 'Presbyopia-related changes',
-      hi: 'प्रेसबायोपिया-संबंधी बदलाव',
+      en: 'Near-vision changes reported with age and over time',
+      hi: 'आयु और समय के साथ बताए गए निकट-दृष्टि बदलाव',
     },
     description: {
-      en: 'Your responses suggest difficulty with near objects, combined with an age group where presbyopia (age-related near-vision changes) is commonly reported, and a worsening trend over time. These together may be worth discussing with an eye-care professional.',
+      en: 'You reported near-vision blur, selected an age group and said the experience has become more noticeable. These responses describe your experience over time; they do not establish an age-related eye condition.',
       hi: 'आपके जवाब पास की वस्तुओं में कठिनाई, उस आयु वर्ग जहाँ प्रेसबायोपिया (उम्र-संबंधी निकट-दृष्टि परिवर्तन) आमतौर पर बताया जाता है, और समय के साथ बिगड़ने की प्रवृत्ति का संयोजन सुझाते हैं। नेत्र देखभाल पेशेवर से चर्चा करना उचित हो सकता है।',
     },
     discussionPrompt: {
@@ -122,21 +164,23 @@ const patterns = [
     },
     icon: 'menu_book',
     triggers: (answers) => {
+      const blurIsMainExperience = answers.primary_concern?.value === 'blurred_vision';
+      const blurReported = hasReportedExperience(answers, 'blurred_vision');
       const nearBlur = ['near', 'both'].includes(answers.blur_distance?.value);
       const olderAge = ['middle', 'senior'].includes(answers.age_group?.value);
       const worsening = answers.experience_change?.value === 'more_noticeable';
-      return nearBlur && olderAge && worsening;
+      return blurIsMainExperience && blurReported && nearBlur && olderAge && worsening;
     },
-    sourceKeys: ['blur_distance', 'age_group', 'experience_change'],
+    sourceKeys: ['primary_concern', 'blurred_vision', 'blur_distance', 'age_group', 'experience_change'],
   },
   {
     id: 'digital-eye-strain',
     title: {
-      en: 'Digital eye strain',
-      hi: 'डिजिटल आँखों का तनाव',
+      en: 'Frequent screen use and headaches during screen use',
+      hi: 'स्क्रीन उपयोग के दौरान सिरदर्द और अधिक स्क्रीन समय',
     },
     description: {
-      en: 'Your responses suggest frequent screen use combined with headaches around visual activities. This combination is commonly associated with digital eye strain and may be worth discussing with an eye-care professional.',
+      en: 'You reported more than six hours of screen use per day and headaches that you also selected as occurring during screen use. These responses do not establish a cause, but the combination may be useful to discuss with an eye-care professional.',
       hi: 'आपके जवाब स्क्रीन के बार-बार उपयोग और दृष्टि गतिविधियों के दौरान सिरदर्द का संयोजन सुझाते हैं। यह संयोजन आमतौर पर डिजिटल आँखों के तनाव से जुड़ा होता है और नेत्र देखभाल पेशेवर से चर्चा के योग्य हो सकता है।',
     },
     discussionPrompt: {
@@ -146,19 +190,24 @@ const patterns = [
     icon: 'monitor_heart',
     triggers: (answers) => {
       const highScreen = answers.screen_hours?.value === 'high';
-      const headaches = ['often', 'sometimes'].includes(answers.headaches?.value);
-      return highScreen && headaches;
+      const headaches = hasReportedExperience(answers, 'headaches');
+      const headacheContexts = getExperienceContext(answers, 'headaches');
+      return highScreen && headaches && headacheContexts.includes('screens');
     },
-    sourceKeys: ['screen_hours', 'headaches'],
+    sourceKeys: (answers) => [
+      'screen_hours',
+      'headaches',
+      ...getExperienceContextSourceKeys(answers, 'headaches'),
+    ],
   },
   {
     id: 'low-light-contrast',
     title: {
-      en: 'Low-light vision experiences',
-      hi: 'कम रोशनी में दृष्टि के अनुभव',
+      en: 'Co-reported low-light difficulty and squinting',
+      hi: 'कम रोशनी में कठिनाई और आँखें सिकोड़ने की दोनों रिपोर्ट',
     },
     description: {
-      en: 'You reported difficulty seeing in low-light situations and squinting in those situations. These are experiences to describe to an eye-care professional; they do not identify a cause.',
+      en: 'You reported difficulty seeing at night or in low light, and separately reported squinting to see clearly. The questionnaire does not establish that squinting occurs in low light or that the experiences share a cause. You can describe both experiences to an eye-care professional.',
       hi: 'आपने कम रोशनी की स्थितियों में देखने में कठिनाई और उन स्थितियों में आँखें सिकोड़ने की बात बताई। इन अनुभवों के बारे में नेत्र-देखभाल पेशेवर को बताएँ; ये अपने आप किसी कारण की पहचान नहीं करते।',
     },
     discussionPrompt: {
@@ -167,13 +216,11 @@ const patterns = [
     },
     icon: 'contrast',
     triggers: (answers) => {
-      const nightIssue = ['yes', 'sometimes'].includes(answers.night_vision?.value);
-      const squinting = ['yes', 'sometimes'].includes(answers.squinting?.value);
-      const contexts = Array.isArray(answers.experience_context?.value) ? answers.experience_context.value : [];
-      const explicitlyLowLight = contexts.includes('low_light');
-      return nightIssue && explicitlyLowLight && squinting;
+      const nightIssue = hasReportedExperience(answers, 'night_vision');
+      const squinting = hasReportedExperience(answers, 'squinting');
+      return nightIssue && squinting;
     },
-    sourceKeys: ['night_vision', 'experience_context', 'squinting'],
+    sourceKeys: ['night_vision', 'squinting'],
   },
   {
     id: 'overdue-exam',
@@ -182,7 +229,7 @@ const patterns = [
       hi: 'पेशेवर जाँच के बिना लंबी अवधि',
     },
     description: {
-      en: 'Your responses suggest that you have not had a professional eye examination recently, while also reporting one or more vision-related experiences. Routine examinations can help detect changes early and are worth discussing.',
+      en: 'You reported that your last professional eye examination was more than three years ago or that you have never had one, alongside two or more reported vision experiences. You can ask an eye-care professional whether an examination is appropriate for you.',
       hi: 'आपके जवाब सुझाते हैं कि आपने हाल ही में पेशेवर आँखों की जाँच नहीं करवाई है, साथ ही एक या अधिक दृष्टि-संबंधी अनुभव भी बताए हैं। नियमित जाँच शुरुआती बदलावों का पता लगाने में मदद कर सकती है।',
     },
     discussionPrompt: {
