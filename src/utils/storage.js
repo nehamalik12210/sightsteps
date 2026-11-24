@@ -97,6 +97,10 @@ export function createSessionRecord(state) {
     visionTimelineEntries: normalizeVisionTimelineEntries(state.visionTimelineEntries),
     discussionPriorities: Array.isArray(state.discussionPriorities) ? state.discussionPriorities.slice(0, 2) : [],
     questionsToAsk: typeof state.questionsToAsk === 'string' ? state.questionsToAsk : '',
+    conversationReview: {
+      confirmed: Boolean(state.conversationReview?.confirmed),
+      correction: typeof state.conversationReview?.correction === 'string' ? state.conversationReview.correction.slice(0, 500) : '',
+    },
     assistedCompletion: Boolean(state.assistedCompletion),
     kioskMode: Boolean(state.kioskMode),
   };
