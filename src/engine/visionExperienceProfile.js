@@ -91,7 +91,7 @@ function buildMainExperience(answers, reportedExperiences) {
   const mainLabel = localizedLabel(selected.label, answerLabel(answers, mainId));
   const onset = answerLabel(answers, 'experience_onset');
   const change = answerLabel(answers, 'experience_change');
-  const frequency = answerLabel(answers, 'experience_frequency');
+  const frequency = answerLabel(answers, 'experience_frequency') || (mainId === 'headaches' ? answerLabel(answers, mainId) : null);
   const eye = mainId === 'headaches' ? null : answerLabel(answers, 'which_eye');
 
   const buildNarrative = (language) => {
@@ -143,7 +143,10 @@ function buildAdditionalExperiences(reportedExperiences, mainId, answers) {
     .map((item) => {
       const prefix = 'additional_experience_' + item.value;
       const onset = answerLabel(answers, prefix + '_onset');
-      const frequency = answerLabel(answers, prefix + '_frequency');
+      // Headache frequency is already captured in the original headaches response.
+      // Prefer a legacy detailed answer when resuming an older saved session.
+      const frequency = answerLabel(answers, prefix + '_frequency')
+        || (item.value === 'headaches' ? answerLabel(answers, item.value) : null);
       const eye = item.value === 'headaches' ? null : answerLabel(answers, prefix + '_eye');
       const contextValues = Array.isArray(answers?.[prefix + '_context']?.value)
         ? answers[prefix + '_context'].value.filter((value) => typeof value === 'string')
