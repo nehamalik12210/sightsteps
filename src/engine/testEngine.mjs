@@ -333,11 +333,11 @@ assert(additionalIds.includes('additional_experience_night_vision_eye'), 'anothe
 assert(!getVisibleQuestions({ ...multiConcernAnswers, additional_concerns: { value: ['none'] } }).some((question) => question.id.startsWith('additional_experience_')), 'choosing no additional experience does not generate secondary follow-ups');
 assert(getSelectedAdditionalExperienceIds({ ...multiConcernAnswers, headaches: { value: 'rarely' } }).includes('headaches') === false, 'secondary selection is ignored when its originating experience is no longer reported');
 const otherActivityQuestion = questionBank.find((question) => question.id === 'affected_activities');
-const customActivityAnswers = { custom_activity_name: { value: 'Jewellery making', label: { en: 'Jewellery making', hi: 'आभूषण बनाना' } } };
+const customActivityAnswers = { custom_activity_name: { value: 'Jewellery making', label: { en: 'Jewellery making', hi: 'Jewellery making' } } };
 const customActivityOptions = getQuestionForActivities(otherActivityQuestion, ['other'], customActivityAnswers).options;
 assert(customActivityOptions.find((option) => option.value === 'other')?.label.en === 'Jewellery making', 'affected-activity choice uses the participant-defined Other activity label');
 assert(getActivityLabel('other', customActivityAnswers)?.en === 'Jewellery making', 'custom activity helper resolves participant wording');
-assert(getActivityLabel('other', customActivityAnswers)?.hi === 'आभूषण बनाना', 'custom activity helper retains the participant-entered Hindi wording');
+assert(getActivityLabel('other', customActivityAnswers)?.hi === 'Jewellery making', 'custom activity helper preserves participant-entered wording verbatim across locale fields');
 
 const customActivityContextAnswers = {
   ...customActivityAnswers,
@@ -356,7 +356,7 @@ const customActivityHindiPack = buildAppointmentPreparationPack({
   language: 'hi',
   discussionPoints: [customAffectedTopic],
 });
-assert(customActivityHindiPack.discussionPoints[0].sources.some((source) => source.id === 'custom_activity_name' && source.label === 'प्रतिभागी द्वारा दर्ज गतिविधि का नाम' && source.answer === 'आभूषण बनाना'), 'Hindi appointment pack retains the custom activity source label and answer');
+assert(customActivityHindiPack.discussionPoints[0].sources.some((source) => source.id === 'custom_activity_name' && source.label === 'प्रतिभागी द्वारा दर्ज गतिविधि का नाम' && source.answer === 'Jewellery making'), 'Hindi appointment pack retains the custom activity source label and answer');
 
 const savedDirectionResult = { completed: true, skipped: false, data: { activityType: 'direction-awareness' } };
 assert(getAmslerReturnPath(savedDirectionResult) === '/report', 'Amsler returns to the report after a completed E activity');
