@@ -22,8 +22,8 @@ const clusters = [
       hi: 'निकट-दृष्टि और तनाव संकेतक',
     },
     summary: {
-      en: 'The matched patterns group two different sets of details you reported: near-vision blur with age and change over time, and headaches alongside close-up work and squinting. They may be useful to discuss together, but the grouping does not show that one experience causes another or that either pattern confirms a condition.',
-      hi: 'मिले हुए पैटर्न आपके द्वारा बताए गए दो अलग-अलग विवरणों को साथ रखते हैं: आयु और समय के साथ बदलाव के संदर्भ में निकट-दृष्टि का धुंधलापन, तथा पास के काम और आँखें सिकोड़ने के साथ सिरदर्द। इन पर साथ में चर्चा की जा सकती है, लेकिन यह समूह यह नहीं बताता कि एक अनुभव दूसरे का कारण है या कोई पैटर्न किसी स्थिति की पुष्टि करता है।',
+      en: 'The matched patterns group two different sets of details you reported: near-vision blur with age and change over time, and headaches alongside close-up work and squinting. They may be useful to discuss together; this grouping does not say that one experience explains the other.',
+      hi: 'मिले हुए पैटर्न आपके द्वारा बताए गए दो अलग-अलग विवरणों को साथ रखते हैं: आयु और समय के साथ बदलाव के संदर्भ में निकट-दृष्टि का धुंधलापन, तथा पास के काम और आँखें सिकोड़ने के साथ सिरदर्द। इन पर साथ में चर्चा की जा सकती है; यह समूह यह नहीं कहता कि एक अनुभव दूसरे का कारण है।',
     },
     icon: 'link',
   },
