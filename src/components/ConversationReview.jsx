@@ -1,3 +1,5 @@
+import './ConversationReview.css';
+
 export default function ConversationReview({ value = {}, onChange, language = 'en' }) {
   const hi = language === 'hi';
   const correction = typeof value.correction === 'string' ? value.correction : '';
