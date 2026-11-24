@@ -26,6 +26,7 @@ export default function ActivityProfile() {
     answers,
     setActivities,
     setPrimaryActivity,
+    setAnswer,
     clearAnswers,
     isDemo,
     demoPersona,
@@ -36,13 +37,16 @@ export default function ActivityProfile() {
   const [step, setStep] = useState(savedActivities?.length && savedPrimary ? 'primary' : 'select');
   const [primary, setPrimary] = useState(savedPrimary || null);
   const [pendingProfile, setPendingProfile] = useState(null);
+  const [customActivity, setCustomActivity] = useState(answers?.custom_activity_name?.value || '');
+  const [customActivityError, setCustomActivityError] = useState('');
 
   useEffect(() => {
     if (!isHydrated) return;
     setSelected(new Set(savedActivities || []));
     setPrimary(savedPrimary || null);
+    setCustomActivity(answers?.custom_activity_name?.value || '');
     setStep(savedActivities?.length && savedPrimary ? 'primary' : 'select');
-  }, [isHydrated]);
+  }, [isHydrated, answers?.custom_activity_name?.value]);
 
   useEffect(() => {
     if (!isDemo || !demoPersona) return;
@@ -85,6 +89,11 @@ export default function ActivityProfile() {
         setPrimary(null);
         setPrimaryActivity(null);
       }
+      if (id === 'other') {
+        clearAnswers(['custom_activity_name']);
+        setCustomActivity('');
+        setCustomActivityError('');
+      }
     } else {
       next.add(id);
     }
@@ -95,6 +104,17 @@ export default function ActivityProfile() {
     if (pendingProfile || !selected.size) return;
 
     const selectedValues = [...selected];
+    if (selectedValues.includes('other')) {
+      const customLabel = customActivity.trim().slice(0, 80);
+      if (!customLabel) {
+        setCustomActivityError(lang === 'hi' ? 'कृपया अपनी अन्य गतिविधि लिखें।' : 'Please describe your other activity.');
+        return;
+      }
+      setAnswer('custom_activity_name', customLabel, { en: customLabel, hi: customLabel });
+      setCustomActivityError('');
+    } else if (answers?.custom_activity_name) {
+      clearAnswers(['custom_activity_name']);
+    }
     const staleActivityAnswers = getActivityDependentAnswerIds(answers, savedActivities, selectedValues);
     if (staleActivityAnswers.length) clearAnswers(staleActivityAnswers);
     if (step === 'select') {
@@ -154,13 +174,30 @@ export default function ActivityProfile() {
                 return (
                   <button key={activity.id} type="button" className={`ap__card${isOn ? ' ap__card--on' : ''}`} onClick={() => toggleActivity(activity.id)} disabled={Boolean(pendingProfile)} aria-pressed={isOn}>
                     <span className="ap__card-icon-wrap" aria-hidden="true"><span className="material-symbols-outlined ap__card-icon">{activity.icon}</span></span>
-                    <span className="ap__card-label">{activity.label[lang] || activity.label.en}</span>
+                    <span className="ap__card-label">{activity.id === 'other' && customActivity.trim() ? (activity.label[lang] || activity.label.en) + ': ' + customActivity.trim() : (activity.label[lang] || activity.label.en)}</span>
                     <span className="ap__card-desc">{activity.desc[lang] || activity.desc.en}</span>
                     {isOn && <span className="material-symbols-outlined ap__card-check" aria-hidden="true">check_circle</span>}
                   </button>
                 );
               })}
             </div>
+            {selected.has('other') && (
+              <div className="ap__custom-activity">
+                <label htmlFor="ap-custom-activity">{lang === 'hi' ? 'आपकी अन्य गतिविधि क्या है?' : 'What is your other everyday activity?'}</label>
+                <input
+                  id="ap-custom-activity"
+                  type="text"
+                  value={customActivity}
+                  maxLength={80}
+                  placeholder={lang === 'hi' ? 'जैसे गहने बनाना, मरम्मत का काम…' : 'e.g. jewellery making, repair work…'}
+                  onChange={(event) => { setCustomActivity(event.target.value); setCustomActivityError(''); }}
+                  aria-invalid={Boolean(customActivityError)}
+                  aria-describedby={customActivityError ? 'ap-custom-activity-error' : undefined}
+                />
+                {customActivityError && <p id="ap-custom-activity-error" className="ap__custom-error" role="alert">{customActivityError}</p>}
+                <p>{lang === 'hi' ? 'आपके अपने शब्द प्रोफ़ाइल और बातचीत सारांश में उपयोग होंगे।' : 'Your own wording will appear in your profile and conversation summary.'}</p>
+              </div>
+            )}
             <p className="ap__context-note">
               <span className="material-symbols-outlined" aria-hidden="true">info</span>
               {lang === 'hi' ? 'यह जानकारी आपकी बातचीत को अधिक उपयोगी बनाने के लिए है। बाद में आप बताएँगे कि इनमें से कौन-सी गतिविधियाँ प्रभावित महसूस होती हैं।' : 'This gives context for your conversation. Later, you can tell us which of these activities feel affected.'}
@@ -180,7 +217,7 @@ export default function ActivityProfile() {
                 return (
                   <button key={activity.id} type="button" className={`ap__primary-row${isPrimary ? ' ap__primary-row--on' : ''}`} onClick={() => setPrimary(activity.id)} disabled={Boolean(pendingProfile)} aria-pressed={isPrimary}>
                     <span className="material-symbols-outlined ap__primary-row-icon" aria-hidden="true">{activity.icon}</span>
-                    <span className="ap__primary-row-label">{activity.label[lang] || activity.label.en}</span>
+                    <span className="ap__primary-row-label">{activity.id === 'other' && customActivity.trim() ? (activity.label[lang] || activity.label.en) + ': ' + customActivity.trim() : (activity.label[lang] || activity.label.en)}</span>
                     <span className="material-symbols-outlined ap__primary-radio" aria-hidden="true">{isPrimary ? 'radio_button_checked' : 'radio_button_unchecked'}</span>
                   </button>
                 );
