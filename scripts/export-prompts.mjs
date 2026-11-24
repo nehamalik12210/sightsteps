@@ -234,8 +234,26 @@ row(
   'यह समीक्षा केवल बातचीत का संदर्भ है। इससे मूल जवाब या चिकित्सकीय व्याख्या नहीं बदलती।',
 );
 
-// ─── 9. Report Notice Strings ────────────────────────────────
-section('10. KEY i18n STRINGS');
+// ─── 10. Source Provenance Labels ─────────────────────────────
+section('10. SOURCE PROVENANCE LABELS');
+row(
+  'Report discussion topic',
+  'Your responses linked to this topic:',
+  'इस विषय से जुड़े आपके जवाब:',
+);
+row(
+  'Report follow-up note',
+  'Your responses linked to this follow-up note:',
+  'इस फॉलो-अप नोट से जुड़े आपके जवाब:',
+);
+row(
+  'Appointment preparation pack',
+  'Your responses linked to this topic:',
+  'इस विषय से जुड़े आपके जवाब:',
+);
+
+// ─── 11. Report Notice Strings ───────────────────────────────
+section('11. KEY i18n STRINGS');
 const keyI18nKeys = [
   'disclaimer.full',
   'patterns.title',
