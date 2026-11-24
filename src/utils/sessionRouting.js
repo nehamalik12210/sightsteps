@@ -30,6 +30,17 @@ export function getResumePath(session = {}) {
   return '/vision';
 }
 
+/**
+ * After the optional Amsler activity, continue to the report when the
+ * direction-awareness activity has already been completed or skipped.
+ * If Amsler was opened earlier in the journey, return to the E activity.
+ */
+export function getAmslerReturnPath(visionResults = null) {
+  const directionActivityComplete = visionResults?.skipped === true
+    || (visionResults?.completed === true && visionResults?.data?.activityType === 'direction-awareness');
+  return directionActivityComplete ? '/report' : '/vision';
+}
+
 /** Return the next visible question, respecting the scripted demo's short flow. */
 export function getPendingSessionQuestion(session = {}) {
   const answers = session.answers || {};
