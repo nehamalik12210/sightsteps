@@ -41,10 +41,13 @@ function buildSourceLink(key, answers) {
   const answer = answers[key];
   if (!hasAnswer(answer)) return null;
   const label = SOURCE_LABELS[key] || { en: key, hi: key };
-  const answerLabel = answer.label || {
-    en: Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value),
-    hi: Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value),
-  };
+  const rawValue = Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value);
+  const answerLabel = answer.label && typeof answer.label === 'object'
+    ? {
+        en: answer.label.en || answer.label.hi || rawValue,
+        hi: answer.label.hi || answer.label.en || rawValue,
+      }
+    : { en: rawValue, hi: rawValue };
   return {
     type: 'question',
     id: key,
@@ -71,7 +74,17 @@ export function evaluatePatterns(answers = {}) {
       }
     })
     .map((pattern) => {
-      const sources = pattern.sourceKeys
+      let sourceKeys = [];
+      try {
+        sourceKeys = typeof pattern.sourceKeys === 'function'
+          ? pattern.sourceKeys(safeAnswers)
+          : pattern.sourceKeys;
+      } catch {
+        sourceKeys = [];
+      }
+      const uniqueSourceKeys = Array.isArray(sourceKeys) ? [...new Set(sourceKeys)] : [];
+      const sources = uniqueSourceKeys
+        .filter((key) => typeof key === 'string' && key.length > 0)
         .map((key) => buildSourceLink(key, safeAnswers))
         .filter(Boolean);
 
