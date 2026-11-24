@@ -199,6 +199,7 @@ const STATIC_COPY_FILES = [
   '../src/pages/VisionActivity.jsx',
   '../src/components/ClinicianBrief.jsx',
   '../src/components/AppointmentPreparationPack.jsx',
+  '../src/components/ConversationReview.jsx',
 ];
 for (const file of STATIC_COPY_FILES) {
   const source = readFileSync(new URL(file, import.meta.url), 'utf8');
