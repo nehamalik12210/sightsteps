@@ -81,3 +81,21 @@
 .clinician-brief__timeline strong { color:var(--color-text); }
 .clinician-brief__timeline li span { grid-column:2; }
 @media print { .clinician-brief__timeline li { break-inside:avoid; } }
+
+.clinician-brief__participant-review > p {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: var(--lh-relaxed);
+  margin: 0 0 4px;
+}
+.clinician-brief__participant-review blockquote {
+  margin: 4px 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-text);
+  font-size: 10px;
+  line-height: var(--lh-relaxed);
+  overflow-wrap: anywhere;
+}
