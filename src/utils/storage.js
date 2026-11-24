@@ -77,7 +77,7 @@ function openDB() {
 /** Pure, testable shape of the record persisted for the active participant. */
 export function createSessionRecord(state) {
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     sessionId: state.sessionId,
     startedAt: state.startedAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
