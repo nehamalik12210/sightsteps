@@ -44,6 +44,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: clinical-review-export
-          path: |\n            exports/clinical-review-export.txt\n            exports/npm-audit.json
+          path: |
+            exports/clinical-review-export.txt
+            exports/npm-audit.json
           if-no-files-found: error
           retention-days: 14
