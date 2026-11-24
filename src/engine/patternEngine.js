@@ -1,13 +1,10 @@
 /**
- * SightSteps — Pattern Detection Engine
+ * SightSteps — transparent participant-response pattern organiser.
  *
- * Evaluates combinations of participant-reported answers to infer clinically
- * meaningful patterns that the participant did not explicitly state.
- *
- * This module makes the app genuinely "intelligent" in the sense the ZEISS
- * "No-Device Vision Intelligence" theme requires: it tells the participant
- * something they didn't already say, backed by source links and framed as
- * a discussion prompt — never a conclusion or diagnosis.
+ * Evaluates predefined combinations of participant-reported answers and
+ * returns the exact source responses that support each discussion prompt.
+ * A match is not a diagnosis, cause assessment, risk score or independent
+ * confirmation of a clinical condition.
  */
 
 import patterns from '../data/patterns.js';
@@ -29,6 +26,9 @@ const SOURCE_LABELS = {
   experience_context: { en: 'Situations reported', hi: 'बताई गई परिस्थितियाँ' },
   affected_activities: { en: 'Activities reported as affected', hi: 'प्रभावित बताई गई गतिविधियाँ' },
   existing_glasses: { en: 'Current vision correction', hi: 'वर्तमान दृष्टि सुधार' },
+  primary_concern: { en: 'Main experience selected for discussion', hi: 'चर्चा के लिए चुना गया मुख्य अनुभव' },
+  additional_concerns: { en: 'Additional experiences selected for discussion', hi: 'चर्चा के लिए चुने गए अन्य अनुभव' },
+  additional_experience_headaches_context: { en: 'Situations where headaches are noticed', hi: 'जिन परिस्थितियों में सिरदर्द महसूस होता है' },
 };
 
 function hasAnswer(answer) {
