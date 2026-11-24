@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
-import { getQuestionForActivities, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import { getQuestionForActivities, getQuestionPositionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import { speakWhenReady, stopSpeaking } from '../utils/tts.js';
 import { getBackNavigationAnswerIds } from '../utils/sessionRouting.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
@@ -62,12 +62,6 @@ export default function Intake() {
   }, [answers, activities, isDemo, demoPersona]);
 
   const currentOptions = currentQuestion?.options || [];
-
-  const progress = useMemo(() => {
-    const total = visibleQuestions.length;
-    const answered = visibleQuestions.filter((question) => isAnswerComplete(answers[question.id])).length;
-    return { answered, total, fraction: total ? answered / total : 0 };
-  }, [answers, visibleQuestions]);
 
   // Find the next unanswered question. Invalid legacy entries with value: undefined
   // are treated as unanswered, so older sessions recover from the previous back bug.
@@ -257,7 +251,7 @@ export default function Intake() {
     return <main className="iq iq--loading" id="main-content" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
   }
 
-  const questionIndex = Math.max(0, visibleQuestions.findIndex((question) => question.id === currentQuestion.id));
+  const progress = getQuestionPositionProgress(visibleQuestions, currentQuestion.id);
   const demoAnswer = isDemo ? demoPersona?.answers?.[currentQuestion.id] : null;
   const isTTSQuestion = typeof window !== 'undefined' && Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
   const stage = STAGE_META[currentQuestion.category] || { en: 'Question', hi: 'सवाल', icon: 'help' };
@@ -283,14 +277,14 @@ export default function Intake() {
         <div className="iq__progress-area">
           <div className="iq__progress-track" role="progressbar"
             aria-label={lang === 'hi' ? 'सवालों की प्रगति' : 'Question progress'}
-            aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress.fraction * 100)}>
-            <div className="iq__progress-fill" style={{ width: `${progress.fraction * 100}%` }} />
+            aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress.percent}>
+            <div className="iq__progress-fill" style={{ width: `${progress.percent}%` }} />
           </div>
           <div className="iq__progress-meta">
             <span className="iq__progress-step">
-              {t('intake.questionOf', lang, { current: questionIndex + 1, total: visibleQuestions.length })}
+              {t('intake.questionOf', lang, { current: progress.current, total: progress.total })}
             </span>
-            <span className="iq__progress-pct">{Math.round(progress.fraction * 100)}%</span>
+            <span className="iq__progress-pct">{progress.percent}%</span>
           </div>
         </div>
       </header>
