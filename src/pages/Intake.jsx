@@ -180,10 +180,14 @@ export default function Intake() {
   const handleMultiToggle = useCallback((optionValue) => {
     if (isDemo) return;
     setMultiSelection((previous) => {
-      const exclusive = ['none', 'unsure'].includes(optionValue) || (currentQuestion?.id === 'experience_context' && optionValue === 'varies');
+      const isExperienceContext = currentQuestion?.id === 'experience_context'
+        || /^additional_experience_.+_context$/.test(currentQuestion?.id || '');
+      const exclusive = ['none', 'unsure'].includes(optionValue) || (isExperienceContext && optionValue === 'varies');
       if (exclusive) return previous.includes(optionValue) ? [] : [optionValue];
 
-      const withoutExclusive = previous.filter((value) => !['none', 'unsure'].includes(value) && !(currentQuestion?.id === 'experience_context' && value === 'varies'));
+      const withoutExclusive = previous.filter((value) => (
+        !['none', 'unsure'].includes(value) && !(isExperienceContext && value === 'varies')
+      ));
       return withoutExclusive.includes(optionValue)
         ? withoutExclusive.filter((value) => value !== optionValue)
         : [...withoutExclusive, optionValue];
