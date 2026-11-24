@@ -110,6 +110,28 @@ export default function ActivityProfile() {
         setCustomActivityError(lang === 'hi' ? 'कृपया अपनी अन्य गतिविधि लिखें।' : 'Please describe your other activity.');
         return;
       }
+      const previousCustomLabel = typeof answers?.custom_activity_name?.value === 'string'
+        ? answers.custom_activity_name.value.trim()
+        : '';
+      if (previousCustomLabel && previousCustomLabel !== customLabel) {
+        const affected = Array.isArray(answers?.affected_activities?.value) ? answers.affected_activities.value : [];
+        if (affected.includes('other')) {
+          const labels = affected
+            .filter((id) => id !== 'none' && id !== 'unsure')
+            .map((id) => {
+              const activity = ACTIVITY_OPTIONS.find((item) => item.id === id);
+              return activity?.label?.en || id;
+            });
+          const labelsHi = affected
+            .filter((id) => id !== 'none' && id !== 'unsure')
+            .map((id) => {
+              const activity = ACTIVITY_OPTIONS.find((item) => item.id === id);
+              return activity?.label?.hi || id;
+            });
+          setAnswer('affected_activities', affected, { en: labels.join(', '), hi: labelsHi.join(', ') });
+        }
+        clearAnswers(['activity_impact_other', 'activity_impact_frequency_other']);
+      }
       setAnswer('custom_activity_name', customLabel, { en: customLabel, hi: customLabel });
       setCustomActivityError('');
     } else if (answers?.custom_activity_name) {
