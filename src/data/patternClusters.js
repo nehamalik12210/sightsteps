@@ -43,15 +43,15 @@ const clusters = [
   },
   {
     id: 'low-light-age-cluster',
-    memberIds: ['night-vision', 'low-light-contrast', 'overdue-exam'],
+    memberIds: ['night-vision', 'low-light-contrast'],
     minMatch: 2,
     title: {
       en: 'Low-light vision experiences',
       hi: 'कम रोशनी में दृष्टि के अनुभव',
     },
     summary: {
-      en: 'More than one discussion pattern relates to your reported night-vision difficulty, squinting or examination history. Some patterns share the same reported answers; a cluster is an organisational summary, not additional or independent evidence.',
-      hi: 'एक से अधिक चर्चा-पैटर्न आपकी बताई रात में देखने की कठिनाई, आँखें सिकोड़ने या नेत्र-जाँच के इतिहास से जुड़े हैं। कुछ पैटर्न में वही जवाब साझा हो सकते हैं; क्लस्टर केवल जानकारी व्यवस्थित करता है, यह अतिरिक्त या स्वतंत्र प्रमाण नहीं है।',
+      en: 'Both matched patterns relate to your reported night-vision difficulty: one includes the driving context linked to that experience and the other records squinting separately. The patterns may reuse the same night-vision response, so this grouping is not additional or independent evidence.',
+      hi: 'दोनों मिले हुए पैटर्न आपकी बताई रात में देखने की कठिनाई से जुड़े हैं: एक में उसी अनुभव से जुड़ा ड्राइविंग का संदर्भ है और दूसरे में अलग से बताई गई आँखें सिकोड़ने की बात है। पैटर्न रात में देखने की कठिनाई वाले उसी जवाब का पुनः उपयोग कर सकते हैं; इसलिए यह समूह अतिरिक्त या स्वतंत्र प्रमाण नहीं है।',
     },
     icon: 'link',
   },
