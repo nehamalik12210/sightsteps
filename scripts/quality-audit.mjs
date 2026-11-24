@@ -264,7 +264,7 @@ const timelineCssSource = read('src/pages/VisionTimeline.css');
 const reportCssSource = read('src/pages/Report.css');
 check(appSource.includes('path="/timeline"') && appSource.includes('VisionTimeline'), 'participant timeline has a guarded application route');
 check(contextSource.includes('visionTimelineEntries') && contextSource.includes('setVisionTimelineEntries'), 'timeline is part of shared application state');
-check(storageSource.includes('visionTimelineEntries') && storageSource.includes('schemaVersion: 4'), 'timeline entries persist in the versioned local session record');
+check(storageSource.includes('visionTimelineEntries') && storageSource.includes('conversationReview') && storageSource.includes('schemaVersion: 5'), 'timeline entries persist in the versioned local session record');
 check(timelineUtilitySource.includes('normalizeVisionTimelineEntries') && timelineUtilitySource.includes('MAX_VISION_TIMELINE_ENTRIES'), 'timeline data is sanitized and record count is bounded');
 check(/const seenIds = new Set\(\)/.test(timelineUtilitySource) && /normalizeVisionTimelineEntries\(timelineEntries\)/.test(appointmentPackSource), 'timeline IDs are deduplicated before they enter the report or appointment pack');
 check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineUtilitySource.includes('futureDate'), 'timeline validation rejects invalid and future dates');
