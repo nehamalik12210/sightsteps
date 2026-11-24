@@ -326,7 +326,7 @@ const multiConcernAnswers = {
 const multiConcernQuestions = getVisibleQuestions(multiConcernAnswers);
 const additionalIds = multiConcernQuestions.map((question) => question.id);
 assert(additionalIds.includes('additional_experience_headaches_onset'), 'selecting headaches as a secondary concern creates its own onset question');
-assert(additionalIds.includes('additional_experience_headaches_frequency'), 'secondary headache follow-up includes frequency');
+assert(!additionalIds.includes('additional_experience_headaches_frequency'), 'secondary headache reuses the frequency already captured by its original response');
 assert(additionalIds.includes('additional_experience_headaches_context'), 'secondary headache follow-up includes context');
 assert(!additionalIds.includes('additional_experience_headaches_eye'), 'secondary headache follow-up does not ask an inapplicable eye-side question');
 assert(additionalIds.includes('additional_experience_night_vision_eye'), 'another secondary experience includes an eye-side follow-up');
@@ -448,12 +448,41 @@ for (const [questionId, value] of experienceSources) {
   assert(visible.some((question) => question.id === 'primary_concern'), `${questionId}=${value} reveals main concern selection`);
   const concernFollowUps = getVisibleQuestions({ [questionId]: { value }, primary_concern: { value: questionId } });
   const expectedFollowUps = questionId === 'headaches'
-    ? ['experience_onset', 'experience_change', 'experience_context', 'experience_frequency', 'affected_activities']
+    ? ['experience_onset', 'experience_change', 'experience_context', 'affected_activities']
     : ['experience_onset', 'experience_change', 'experience_context', 'experience_frequency', 'which_eye', 'affected_activities'];
   for (const followUpId of expectedFollowUps) {
     assert(concernFollowUps.some((question) => question.id === followUpId), `${questionId}=${value} reveals ${followUpId} after main concern selection`);
   }
 }
+const headacheMainQuestions = getVisibleQuestions({
+  headaches: { value: 'often' },
+  primary_concern: { value: 'headaches' },
+});
+assert(!headacheMainQuestions.some((question) => question.id === 'experience_frequency'), 'main headache frequency is not asked twice');
+const blurMainContext = getVisibleQuestions({
+  blurred_vision: { value: 'yes' },
+  primary_concern: { value: 'blurred_vision' },
+}).find((question) => question.id === 'experience_context');
+assert(!blurMainContext.options.some((option) => ['near_tasks', 'distance_tasks'].includes(option.value)), 'main blur context does not repeat the separately captured near/far distance');
+const nightMainContext = getVisibleQuestions({
+  night_vision: { value: 'yes' },
+  primary_concern: { value: 'night_vision' },
+}).find((question) => question.id === 'experience_context');
+assert(!nightMainContext.options.some((option) => option.value === 'low_light'), 'main night-vision context does not repeat the initial low-light question');
+const secondaryBlurContext = getVisibleQuestions({
+  blurred_vision: { value: 'yes' },
+  headaches: { value: 'sometimes' },
+  primary_concern: { value: 'headaches' },
+  additional_concerns: { value: ['blurred_vision'] },
+}).find((question) => question.id === 'additional_experience_blurred_vision_context');
+assert(!secondaryBlurContext.options.some((option) => ['near_tasks', 'distance_tasks'].includes(option.value)), 'secondary blur context does not repeat the separately captured near/far distance');
+const secondaryNightContext = getVisibleQuestions({
+  night_vision: { value: 'yes' },
+  headaches: { value: 'sometimes' },
+  primary_concern: { value: 'headaches' },
+  additional_concerns: { value: ['night_vision'] },
+}).find((question) => question.id === 'additional_experience_night_vision_context');
+assert(!secondaryNightContext.options.some((option) => option.value === 'low_light'), 'secondary night-vision context does not repeat the initial low-light question');
 const noReportedExperience = getVisibleQuestions({
   blurred_vision: { value: 'no' },
   headaches: { value: 'rarely' },
@@ -1045,6 +1074,24 @@ assert(secondaryHeadaches.contexts[0].id === 'near_tasks' && secondaryHeadaches.
 assert(secondaryHeadaches.sourceIds.includes('additional_experience_headaches_context'), 'secondary experience links to its own context source answer');
 assert(secondaryNightVision.eye.en === 'Both eyes' && secondaryNightVision.contexts[0].id === 'low_light', 'profile retains a second secondary experience eye-side and context');
 assert(secondaryProfile.additionalExperiences.find((item) => item.id === 'squinting').selectedForDiscussion === false, 'reported but unselected experiences remain distinct from selected discussion topics');
+const secondaryHeadacheFallbackProfile = buildVisionExperienceProfile({
+  ...multiConcernAnswers,
+  additional_experience_headaches_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
+  additional_experience_headaches_context: { value: ['screens'], label: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' } },
+});
+const secondaryHeadacheFallback = secondaryHeadacheFallbackProfile.additionalExperiences.find((item) => item.id === 'headaches');
+assert(secondaryHeadacheFallback.frequency.en === 'Sometimes', 'secondary headache profile reuses its original reported frequency');
+assert(secondaryHeadacheFallback.sourceIds.includes('headaches'), 'secondary headache frequency provenance points to the original response');
+
+const mainHeadacheProfile = buildVisionExperienceProfile({
+  headaches: { value: 'often', label: { en: 'Often', hi: 'अक्सर' } },
+  primary_concern: { value: 'headaches', label: { en: 'Headaches around visual activities', hi: 'दृष्टि से जुड़ी गतिविधियों के दौरान सिरदर्द' } },
+  experience_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
+  experience_change: { value: 'unchanged', label: { en: 'It feels about the same', hi: 'यह लगभग पहले जैसा है' } },
+  experience_context: { value: ['screens'], label: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' } },
+});
+assert(mainHeadacheProfile.mainExperience.frequency.en === 'Often', 'main headache profile reuses its original reported frequency');
+
 const secondaryCompactSummary = buildCompactExperienceSummary(secondaryProfile, 'en', 500, 3);
 assert(secondaryCompactSummary.includes('Also to discuss — Headaches around visual activities'), 'compact profile summary includes a selected secondary experience');
 const customActivityProfile = buildVisionExperienceProfile(customActivityContextAnswers);
