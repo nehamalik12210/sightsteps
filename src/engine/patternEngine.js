@@ -28,8 +28,35 @@ const SOURCE_LABELS = {
   existing_glasses: { en: 'Current vision correction', hi: 'वर्तमान दृष्टि सुधार' },
   primary_concern: { en: 'Main experience selected for discussion', hi: 'चर्चा के लिए चुना गया मुख्य अनुभव' },
   additional_concerns: { en: 'Additional experiences selected for discussion', hi: 'चर्चा के लिए चुने गए अन्य अनुभव' },
-  additional_experience_headaches_context: { en: 'Situations where headaches are noticed', hi: 'जिन परिस्थितियों में सिरदर्द महसूस होता है' },
 };
+
+const ADDITIONAL_EXPERIENCE_LABELS = {
+  blurred_vision: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' },
+  headaches: { en: 'Headaches', hi: 'सिरदर्द' },
+  squinting: { en: 'Squinting to see clearly', hi: 'स्पष्ट देखने के लिए आँखें सिकोड़ना' },
+  night_vision: { en: 'Night or low-light vision difficulty', hi: 'रात या कम रोशनी में देखने की कठिनाई' },
+};
+
+const ADDITIONAL_DETAIL_LABELS = {
+  onset: { en: 'When first noticed', hi: 'पहली बार कब महसूस हुआ' },
+  frequency: { en: 'Frequency', hi: 'आवृत्ति' },
+  context: { en: 'Situations where it is noticed', hi: 'जिन परिस्थितियों में यह महसूस होता है' },
+  eye: { en: 'Eye(s) involved', hi: 'किस आँख में' },
+};
+
+function getSourceLabel(key) {
+  if (SOURCE_LABELS[key]) return SOURCE_LABELS[key];
+  const match = key.match(/^additional_experience_(.+)_(onset|frequency|context|eye)$/);
+  if (match) {
+    const experience = ADDITIONAL_EXPERIENCE_LABELS[match[1]] || { en: match[1], hi: match[1] };
+    const detail = ADDITIONAL_DETAIL_LABELS[match[2]];
+    if (detail) return {
+      en: `${experience.en} — ${detail.en}`,
+      hi: `${experience.hi} — ${detail.hi}`,
+    };
+  }
+  return { en: key, hi: key };
+}
 
 function hasAnswer(answer) {
   if (!answer || answer.value === undefined || answer.value === null) return false;
@@ -40,7 +67,7 @@ function hasAnswer(answer) {
 function buildSourceLink(key, answers) {
   const answer = answers[key];
   if (!hasAnswer(answer)) return null;
-  const label = SOURCE_LABELS[key] || { en: key, hi: key };
+  const label = getSourceLabel(key);
   const rawValue = Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value);
   const answerLabel = answer.label && typeof answer.label === 'object'
     ? {
