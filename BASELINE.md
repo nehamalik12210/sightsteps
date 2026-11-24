@@ -58,8 +58,9 @@ The `npm audit` artifact reports four moderate findings, all in the development-
 - `GHSA-3g3m-2fjr-6pw4` affects glob `>=9.0.0 <=14.0.1`; the advisory reports a fix in glob 14.0.2.
 - `GHSA-g3hv-75wg-m249` affects minimatch `>=7.0.0 <11.0.1`; the advisory reports a fix in minimatch 11.0.1.
 - The current Workbox dependency ranges require glob `^11.0.1` and minimatch `^10.1.1`, so the advisory fixed versions are outside the declared ranges. npm's `fixAvailable` suggestion points to `vite-plugin-pwa@1.1.0` and marks it as a major change even though the lockfile has 2.0.0; this appears to be a downgrade and has not been applied.
-- Upstream Workbox issue [GoogleChrome/workbox#3599](https://github.com/GoogleChrome/workbox/issues/3599) documents the same semver-range blocker for `workbox-build@7.4.1`; the issue was still open when checked on 25 November 2026. Its discussion describes candidate upstream work but does not establish a released compatible fix for the complete dependency tree.
-- No `npm audit fix`, forced upgrade or dependency override was applied. A compatible Workbox/plugin release or a deliberately tested override needs evaluation before remediation.
+- Upstream Workbox issue [#3599](https://github.com/GoogleChrome/workbox/issues/3599) documents the same semver-range blocker for `workbox-build@7.4.1`; it was open when checked on 25 November 2026, and the discussion does not establish a released compatible fix for the complete dependency tree.
+- Do not force `minimatch@11` into the current `glob@11` tree: Workbox issue [#3594](https://github.com/GoogleChrome/workbox/issues/3594) reports that this unsupported override can make `glob@11.1.0` return no matches and cause Workbox to generate an empty precache manifest on Linux. This is a separate compatibility report, not a failure of Workbox's default supported dependency tree.
+- No `npm audit fix`, forced upgrade or dependency override was applied. Wait for compatible upstream dependency ranges or a properly tested supported release path; do not mask these advisories with a forced major downgrade or an unsupported minimatch override.
 
 The dependency report is a build/development dependency audit, not evidence that these packages execute in the deployed browser bundle. Treat it as an outstanding supply-chain maintenance item, not as zero-risk.
 
