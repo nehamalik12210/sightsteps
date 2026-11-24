@@ -16,7 +16,7 @@ import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
 import { buildDirectionAwarenessResult } from '../utils/visionActivity.js';
-import { evaluatePatterns } from './patternEngine.js';
+import { evaluatePatterns, resolvePatternSourceKeys } from './patternEngine.js';
 import patternDefinitions from '../data/patterns.js';
 import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
 import {
@@ -641,6 +641,7 @@ for (const cluster of clusterDefinitions) {
 const definitionIds = patternDefinitions.map((pattern) => pattern.id);
 assert(definitionIds.length === 8 && new Set(definitionIds).size === definitionIds.length, 'all eight pattern definitions have unique stable IDs');
 for (const definition of patternDefinitions) {
+  assert(Array.isArray(resolvePatternSourceKeys(definition, rameshAnswers)), definition.id + ' resolves source keys for the demo scenario');
   assert(Boolean(definition.title?.en && definition.title?.hi), `${definition.id} has bilingual title`);
   assert(Boolean(definition.description?.en && definition.description?.hi), `${definition.id} has bilingual explanation`);
   assert(Boolean(definition.discussionPrompt?.en && definition.discussionPrompt?.hi), `${definition.id} has bilingual discussion prompt`);
