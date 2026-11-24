@@ -14,7 +14,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { evaluateAnswers } from '../src/engine/ruleEngine.js';
-import { evaluatePatterns } from '../src/engine/patternEngine.js';
+import { evaluatePatterns, resolvePatternSourceKeys } from '../src/engine/patternEngine.js';
 import patterns from '../src/data/patterns.js';
 import clusters from '../src/data/patternClusters.js';
 import strings from '../src/data/i18n.js';
@@ -58,7 +58,12 @@ for (const pattern of patterns) {
   row('Title', loc(pattern.title, 'en'), loc(pattern.title, 'hi'));
   row('Description', loc(pattern.description, 'en'), loc(pattern.description, 'hi'));
   row('Discussion Prompt', loc(pattern.discussionPrompt, 'en'), loc(pattern.discussionPrompt, 'hi'));
-  lines.push(`  Source keys: ${pattern.sourceKeys.join(', ')}`);
+  const exampleSourceKeys = resolvePatternSourceKeys(pattern, rameshPersona.answers);
+  const sourceKeyLabel = typeof pattern.sourceKeys === 'function'
+    ? 'Source keys resolved for scripted Ramesh answers: '
+    : 'Source keys: ';
+  lines.push(sourceKeyLabel
+    + (exampleSourceKeys.join(', ') || 'No keys resolve for this scenario. Dynamic keys depend on the participant-selected experience/context.'));
   lines.push('');
 }
 
