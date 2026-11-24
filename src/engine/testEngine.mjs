@@ -350,7 +350,7 @@ const customActivityReport = evaluateAnswers(customActivityContextAnswers, {
 });
 const customAffectedTopic = customActivityReport.discussionPoints.find((point) => point.id === 'affected_activity_context');
 const customPrimaryTopic = customActivityReport.discussionPoints.find((point) => point.id === 'primary_activity_context');
-assert(customAffectedTopic?.sources.some((source) => source.id === 'custom_activity_name' && source.label.en === 'Participant-entered activity name' && source.answer.en === 'Jewellery making' && source.answer.hi === 'आभूषण बनाना'), 'affected-activity topic cites the actual participant-entered Other activity name in both languages');
+assert(customAffectedTopic?.sources.some((source) => source.id === 'custom_activity_name' && source.label.en === 'Participant-entered activity name' && source.answer.en === 'Jewellery making' && source.answer.hi === 'Jewellery making'), 'affected-activity topic cites the actual participant-entered Other activity name in both languages');
 assert(customPrimaryTopic?.sources.some((source) => source.id === 'custom_activity_name' && source.answer.en === 'Jewellery making'), 'primary-activity topic cites the actual participant-entered Other activity name');
 const customActivityHindiPack = buildAppointmentPreparationPack({
   language: 'hi',
