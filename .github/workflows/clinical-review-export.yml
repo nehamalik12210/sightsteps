@@ -36,10 +36,14 @@ jobs:
         run: npm ci
       - name: Generate bilingual clinical review export
         run: npm run export-review
+      - name: Capture dependency audit report
+        run: |
+          mkdir -p exports
+          npm audit --json > exports/npm-audit.json || true
       - name: Upload export artifact
         uses: actions/upload-artifact@v4
         with:
           name: clinical-review-export
-          path: exports/clinical-review-export.txt
+          path: |\n            exports/clinical-review-export.txt\n            exports/npm-audit.json
           if-no-files-found: error
           retention-days: 14
