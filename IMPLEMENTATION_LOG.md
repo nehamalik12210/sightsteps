@@ -88,3 +88,26 @@
 - Added explicit assertions that all nine lazy page imports resolve and that the shared Suspense fallback and post-load focus handoff exist.
 - Verified on production deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0`): **2,522 quality checks passed, 0 failed; 849 engine tests passed, 0 failed; clinical-language audit passed** (22 JSX files / 2,625 copy fragments). Build completed; 100 modules transformed.
 - Direct production requests to `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 with the SPA shell. This verifies the server-side fallback response only, not client rendering or browser interaction.
+
+### Change 13 — Questionnaire duplicate-question cleanup
+- Removed the separate main and secondary headache-frequency follow-up because the initial headache question already records frequency; the original response is reused in the structured experience profile and rule-engine profile.
+- Removed near-task and distance-task choices from blurred-vision context follow-ups because blur distance is already collected separately. Removed the repeated low-light context choice for night-vision follow-ups because the initial night-vision response already establishes that context.
+- Clarified the close-up-work question and the activity-avoidance option. Corrected secondary follow-up ordering so it no longer depends on the headache-frequency question being present.
+- Added regression checks for main/secondary headache frequency reuse, removed context options and secondary-follow-up ordering.
+- A representative single-experience path exposes 21 visible questions; a representative multiple-experience/activity path exposes 30. The additional conditional questions collect separate onset/context/activity-impact details; they are not identical copies of earlier answers.
+- Source commits: dc0bcc6970fb82c1becc2f921d3a478126f5dfdc, 6773924f0a6ad95de4bc53c1f4f716e0dad01bdb, e6ecbdf7ef34069f0887b4ae3904ac933f505ebe, 81270320a2bd63d2b80448b6722232913c22bf26, 2a4fdaf427c18d81732a3e101eca46972a8f2983.
+
+### Change 14 — Pattern context attribution and cluster membership
+- Pattern triggers now verify that the corresponding experience is actually reported before using its distance, eye-side, onset or context details. Driving/screen context is attributed to the relevant main or selected additional experience rather than borrowed from a different symptom.
+- Pattern descriptions and discussion prompts were made more explicit about what was separately reported and avoid implying an established cause. Dynamic pattern source keys preserve the actual context-answer ID for secondary experiences.
+- Removed generic overdue-exam membership from the near-vision and low-light clusters. A cluster now requires its two specific member patterns; generic examination history cannot fill a missing member. Cluster text explains that overlapping matches are not independent confirmations.
+- Regression coverage includes stale answers, unrelated primary experiences, borrowed context, dynamic source provenance, cluster membership and incomplete pattern triggers.
+- Source commits: a887d2b6cd3a6b248e24f29f2df34e284a5602f3, 579e73de69ec338aab7a532befb92ee765d38f22, ee2dd6b36303ad6292dc6d1eb2cde40307aa4fdc, 1d8905272a79d7be0548e4bb862d8c36f6b28dff, 9b5febd7c1e4266b77aa38ec4c81aef6b2724620, f85d2ae7beb706b20e039eeb19b922c010c77b05, cc676978124d061abdc5fe1ec931bd158112fbe3, af2f541371317b4f5814146a98749e72fa27360a, 343c986a04df184e0882ff8fe3eb8516685e4a63, 1c43e08d76342020474a96b22a265b5d5e3bb228.
+
+### Change 15 — Dynamic pattern source-key export compatibility
+- A separate npm run export-review run exposed that scripts/export-prompts.mjs assumed every sourceKeys value was a static array and crashed when a pattern used a participant-context function.
+- Added shared resolvePatternSourceKeys logic in src/engine/patternEngine.js; runtime pattern evaluation and the clinical-review exporter now use the same resolver. The exporter labels function-based keys as resolved for the scripted Ramesh answers.
+- Added a regression assertion for source-key resolution across every pattern definition.
+- Source commits: 9fa332a13135b6bc35cf280406cdbcac34e706bd, d82f18a094a44ac49274884df11c471c13b2aef1, ae31b03c81475ab1ba022986493719eefb6abd74.
+- Verified on exact main revision ae31b03...: 961 engine tests, 2,524 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules), and review export completed (965 lines reported by the exporter; 8 patterns, 4 Ramesh matches, 10 discussion prompts, 2 follow-up notes).
+- Vercel has not deployed this source revision: the current status check reports a build-rate-limit. The latest READY production deployment remains the older 92a4d0da... revision. Browser rendering, print preview, real-device and independent clinical review remain outstanding.
