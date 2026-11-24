@@ -43,7 +43,7 @@ Before using the report, participants can confirm that the Conversation Map refl
 An optional, one-eye-at-a-time activity that records areas the participant chooses to flag on a 20×20 grid. A standard 85.6 mm card is used for on-screen size calibration; the activity is blocked unless the calibrated 10 cm square fits within both visible viewport dimensions with reserved space for controls. Wide but short landscape-phone viewports are blocked. This screen-fit guard does not validate physical display calibration. It does not test, interpret, diagnose or rule out vision changes. A result with no flagged areas is not evidence that vision is normal. Physical calibration on a range of real devices remains to be validated.
 
 ### 🩺 Clinician Brief
-A one-page, print-optimised summary designed for a clinician's two-minute scan, containing inferred patterns, observation groups, Amsler results, discussion prompts and source references.
+A compact, print-optimised summary designed for a clinician's two-minute scan, containing inferred patterns, observation groups, Amsler results, discussion prompts and source references. Actual page count remains subject to browser print-preview validation.
 
 ### 🌐 Bilingual Journey
 Full English and Hindi support across onboarding, questions, patterns, discussion prompts, Amsler wording, clinician brief, and report content.
@@ -137,8 +137,8 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 
 | Command | What it does |
 |---|---|
-| `npm run audit` | 2,519 static project, data and feature checks |
-| `npm test` | 842 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
+| `npm run audit` | 2,522 static project, data and feature checks |
+| `npm test` | 849 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -190,11 +190,11 @@ sightsteps/
 ├── scripts/
 │   ├── clinical-language-audit.mjs   # Forbidden-phrase scanner (CI gate)
 │   ├── export-prompts.mjs            # Clinical review export generator
-│   └── quality-audit.mjs             # 2,230+ static checks
+│   └── quality-audit.mjs             # Static quality and dynamic-import checks (2,522)
 ├── src/
 │   ├── components/
 │   │   ├── AccessibilityControls.jsx  # Text size, contrast, motion, touch targets
-│   │   ├── AppointmentPreparationPack.jsx  # One-page printable summary
+│   │   ├── AppointmentPreparationPack.jsx  # Compact printable summary
 │   │   ├── ClinicianBrief.jsx         # Print-optimised clinician overlay
 │   │   ├── ConversationReview.jsx     # Participant confirmation and correction
 │   │   ├── KioskGuard.jsx             # Shared-device inactivity timeout
@@ -211,7 +211,7 @@ sightsteps/
 │   ├── engine/
 │   │   ├── patternEngine.js           # Pattern detection / inference engine
 │   │   ├── ruleEngine.js              # Deterministic rules engine
-│   │   └── testEngine.mjs             # 634+ regression tests
+│   │   └── testEngine.mjs             # Engine and utility regression tests (849)
 │   ├── pages/
 │   │   ├── ActivityProfile.jsx        # Everyday activity selection
 │   │   ├── AmslerGrid.jsx             # Amsler grid self-monitoring activity
