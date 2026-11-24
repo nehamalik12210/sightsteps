@@ -64,6 +64,25 @@ function hasAnswer(answer) {
   return typeof answer.value === 'string' ? answer.value.trim().length > 0 : true;
 }
 
+/**
+ * Resolve static or participant-context-dependent source keys for a pattern.
+ * Keeping this shared ensures the app and clinical-review export cite the same inputs.
+ */
+export function resolvePatternSourceKeys(pattern, answers = {}) {
+  if (!pattern || typeof pattern !== 'object') return [];
+  let sourceKeys = [];
+  try {
+    sourceKeys = typeof pattern.sourceKeys === 'function'
+      ? pattern.sourceKeys(answers)
+      : pattern.sourceKeys;
+  } catch {
+    return [];
+  }
+  return Array.isArray(sourceKeys)
+    ? [...new Set(sourceKeys)].filter((key) => typeof key === 'string' && key.trim().length > 0)
+    : [];
+}
+
 function buildSourceLink(key, answers) {
   const answer = answers[key];
   if (!hasAnswer(answer)) return null;
@@ -101,17 +120,7 @@ export function evaluatePatterns(answers = {}) {
       }
     })
     .map((pattern) => {
-      let sourceKeys = [];
-      try {
-        sourceKeys = typeof pattern.sourceKeys === 'function'
-          ? pattern.sourceKeys(safeAnswers)
-          : pattern.sourceKeys;
-      } catch {
-        sourceKeys = [];
-      }
-      const uniqueSourceKeys = Array.isArray(sourceKeys) ? [...new Set(sourceKeys)] : [];
-      const sources = uniqueSourceKeys
-        .filter((key) => typeof key === 'string' && key.length > 0)
+      const sources = resolvePatternSourceKeys(pattern, safeAnswers)
         .map((key) => buildSourceLink(key, safeAnswers))
         .filter(Boolean);
 
