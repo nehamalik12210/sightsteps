@@ -29,11 +29,18 @@ export default function VisionActivity() {
   const navigate = useNavigate();
   const { language, skipVision, setVisionResults, visionResults, isDemo, demoPersona } = useApp();
   const lang = language || 'en';
-  const [phase, setPhase] = useState('intro');
+  const savedDirectionResults = visionResults?.completed
+    && visionResults?.data?.activityType === 'direction-awareness'
+    ? visionResults.data
+    : null;
+  const [phase, setPhase] = useState(() => (savedDirectionResults ? 'results' : 'intro'));
   const [currentEye, setCurrentEye] = useState('left');
   const [trialIndex, setTrialIndex] = useState(0);
   const [direction, setDirection] = useState(randomDirection);
-  const [results, setResults] = useState({ left: [], right: [] });
+  const [results, setResults] = useState(() => ({
+    left: Array.isArray(savedDirectionResults?.left?.trials) ? savedDirectionResults.left.trials : [],
+    right: Array.isArray(savedDirectionResults?.right?.trials) ? savedDirectionResults.right.trials : [],
+  }));
   const [feedback, setFeedback] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
   const [reportPending, setReportPending] = useState(false);
