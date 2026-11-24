@@ -8,8 +8,9 @@
  * Run: node scripts/clinical-language-audit.mjs
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { relative, sep } from 'node:path';
+import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { parse } from '@babel/parser';
 import { evaluateAnswers } from '../src/engine/ruleEngine.js';
@@ -432,6 +433,41 @@ const templateFixtureCopy = extractVisibleCopy(templateFixtureAst, 'template-fix
 if (!templateFixtureCopy.some((item) => item.text.includes('You have treatment'))) {
   console.error('  FAIL: JSX extractor missed a template-literal UI string.');
   violations += 1;
+}
+
+console.log('Checking recursive discovery of a newly added nested JSX component...');
+const discoveryFixtureRoot = mkdtempSync(join(tmpdir(), 'sightsteps-copy-discovery-'));
+try {
+  const nestedFeatureDirectory = join(discoveryFixtureRoot, 'new-feature');
+  mkdirSync(nestedFeatureDirectory, { recursive: true });
+  const newComponentPath = join(nestedFeatureDirectory, 'NewFeature.jsx');
+  writeFileSync(
+    newComponentPath,
+    'export default function NewFeature() { return <main><p>You have glaucoma</p></main>; }',
+    'utf8',
+  );
+
+  const discoveredFixtureFiles = discoverJsxFiles(discoveryFixtureRoot);
+  if (discoveredFixtureFiles.length !== 1 || discoveredFixtureFiles[0] !== newComponentPath) {
+    console.error('  FAIL: Recursive discovery missed a newly added nested JSX component.');
+    violations += 1;
+  } else {
+    const newComponentSource = readFileSync(newComponentPath, 'utf8');
+    const newComponentAst = parse(newComponentSource, { sourceType: 'unambiguous', plugins: ['jsx'] });
+    const newComponentCopy = extractVisibleCopy(newComponentAst, 'new-feature/NewFeature.jsx');
+    const newComponentViolations = newComponentCopy.flatMap((item) =>
+      findClinicalViolations(item.label, item.text),
+    );
+    if (!newComponentViolations.some((item) => item.phrase === 'you have')) {
+      console.error('  FAIL: Newly discovered JSX component text was not passed through the clinical detector.');
+      violations += 1;
+    }
+  }
+} catch (error) {
+  console.error('  FAIL: Recursive JSX discovery fixture could not run: ' + error.message);
+  violations += 1;
+} finally {
+  rmSync(discoveryFixtureRoot, { recursive: true, force: true });
 }
 
 // 10. Guard against known misleading reassurance and Amsler result labels.
