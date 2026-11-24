@@ -43,7 +43,34 @@ The activity records only regions a participant manually flags; it must not be d
 
 **Review questions:** Is the wording and participant guidance appropriate? Is this implementation appropriate for home self-monitoring? What additional device and viewing-condition validation is required before any clinical-context use?
 
-### 3. Discussion Prompts (all generated output)
+### 3. Adaptive Additional-Experience Follow-Ups and Custom Activity Wording
+
+The questionnaire allows a participant to select additional experiences they would also like to discuss. Each selected experience has its own follow-up questions for:
+- When it was first noticed
+- How often it is noticed
+- Situations in which it is noticed
+- Eye-side, except for the headache experience
+
+The participant can select “No other experience to add” or “Not sure”. These follow-ups are optional to the extent allowed by the guided question flow and remain linked to their own answer IDs.
+
+Participants can also enter a custom name when choosing the “Other” everyday activity option. That text is reused in follow-up questions and summaries as participant-authored wording.
+
+**Review questions:**
+- Are the follow-up questions clear, neutral and proportionate for additional experiences?
+- Is the question wording suitable in both English and Hindi?
+- Does the optional nature of these questions remain clear, without implying that selection or answers establish a clinical relationship?
+- Is reuse of participant-entered activity names understandable and safe in the report?
+
+### 4. Participant Review and Correction
+
+Before using the Conversation Map, participants can confirm that the summary reflects what they wanted to share or enter an optional correction/addition (up to 500 characters). This review is stored separately from original questionnaire answers and is included in the Appointment Preparation Pack and Clinician Brief as participant-authored context.
+
+**Review questions:**
+- Is it clear that this is a communication/accuracy check, not a clinical sign-off?
+- Does the correction field give participants enough control without implying that their correction changes a clinical interpretation?
+- Is the confirmation wording neutral and understandable in both languages?
+
+### 5. Discussion Prompts (all generated output)
 Every pattern and discussion point uses non-diagnostic language:
 - "Your responses suggest..." (never "You have...")
 - "Worth discussing with an eye-care professional" (never "You need treatment")
@@ -100,6 +127,9 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 | 2026-11-24 | Export script and review kit created | Phase 3 roadmap |
 | 2026-11-24 | Report integrated: patterns, Amsler, clinician brief | Integration |
 | 2026-11-24 | README updated with new features | Phase 6 hygiene |
+| 2026-11-24 | Adaptive follow-ups added for selected additional experiences | Improve participant-specific context without clinical scoring |
+| 2026-11-24 | Participant-defined activity wording added to impact questions and summaries | Preserve the participant's own everyday context |
+| 2026-11-24 | Participant review and correction added to Conversation Map and exports | Allow participants to correct their communication summary |
 
 ## Reviewer Feedback
 _To be completed after formal clinical review._
