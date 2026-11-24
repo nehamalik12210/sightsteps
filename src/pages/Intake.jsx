@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
-import { getQuestionForActivities, getQuestionPositionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import { getQuestionCompletionProgress, getQuestionForActivities, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import { speakWhenReady, stopSpeaking } from '../utils/tts.js';
 import { getBackNavigationAnswerIds } from '../utils/sessionRouting.js';
 import VoiceNoteField from '../components/VoiceNoteField.jsx';
@@ -251,7 +251,7 @@ export default function Intake() {
     return <main className="iq iq--loading" id="main-content" tabIndex="-1" aria-live="polite"><p>{t('common.loading', lang)}</p></main>;
   }
 
-  const progress = getQuestionPositionProgress(visibleQuestions, currentQuestion.id);
+  const progress = getQuestionCompletionProgress(visibleQuestions, answers);
   const demoAnswer = isDemo ? demoPersona?.answers?.[currentQuestion.id] : null;
   const isTTSQuestion = typeof window !== 'undefined' && Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
   const stage = STAGE_META[currentQuestion.category] || { en: 'Question', hi: 'सवाल', icon: 'help' };
@@ -282,7 +282,7 @@ export default function Intake() {
           </div>
           <div className="iq__progress-meta">
             <span className="iq__progress-step">
-              {t('intake.questionOf', lang, { current: progress.current, total: progress.total })}
+              {t('intake.questionOf', lang, { current: progress.completed, total: progress.total })}
             </span>
             <span className="iq__progress-pct">{progress.percent}%</span>
           </div>
