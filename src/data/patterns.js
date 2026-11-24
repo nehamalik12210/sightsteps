@@ -76,8 +76,8 @@ const patterns = [
       hi: 'रात में देखने की कठिनाई और ड्राइविंग का संदर्भ',
     },
     description: {
-      en: 'You reported difficulty seeing at night or in low light. In the context linked to that specific experience, you also selected driving or travelling. These details can be discussed with an eye-care professional; they do not identify a cause.',
-      hi: 'आपने रात या कम रोशनी में देखने में कठिनाई बताई। इसी अनुभव से जुड़े संदर्भ में आपने ड्राइविंग या यात्रा भी चुनी। इन बातों पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है; ये किसी कारण की पहचान नहीं करतीं।',
+      en: 'Your responses include night-vision difficulty, an age group, and driving or travelling in the context specifically linked to that experience. This combination can be discussed with an eye-care professional; it does not identify a cause.',
+      hi: 'आपके जवाबों में रात या कम रोशनी में देखने की कठिनाई, चुना गया आयु वर्ग और उसी अनुभव से जुड़ा ड्राइविंग या यात्रा का संदर्भ शामिल है। इस संयोजन पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है; यह किसी कारण की पहचान नहीं करता।',
     },
     discussionPrompt: {
       en: 'You may want to describe your low-light experiences to an eye-care professional and ask whether any further assessment is appropriate for your age group.',
@@ -115,8 +115,8 @@ const patterns = [
       hi: 'आपने सिरदर्द, लंबे समय तक पास से काम और आँखें सिकोड़ने की बात बताई। ये अलग-अलग बताए गए अनुभव और आदतें हैं; इनका संयोजन यह साबित नहीं करता कि एक दूसरे का कारण है। आप हर अनुभव के बारे में नेत्र देखभाल पेशेवर को बता सकते हैं।',
     },
     discussionPrompt: {
-      en: 'You may want to ask whether a refraction check would be appropriate, given your reported headaches and close-work habits.',
-      hi: 'आप पूछना चाह सकते हैं कि क्या आपके बताए गए सिरदर्द और पास के काम की आदतों को देखते हुए एक अपवर्तन जाँच उचित होगी।',
+      en: 'You may want to describe the headaches, close-up work and squinting you reported, and ask what kind of eye examination is appropriate.',
+      hi: 'आप अपने बताए सिरदर्द, पास के काम और आँखें सिकोड़ने के बारे में बता सकते हैं और पूछ सकते हैं कि किस प्रकार की नेत्र-जाँच उपयुक्त होगी।',
     },
     icon: 'neurology',
     triggers: (answers) => {
@@ -188,8 +188,8 @@ const patterns = [
       hi: 'आपने प्रतिदिन छह घंटे से अधिक स्क्रीन उपयोग और स्क्रीन देखते समय होने वाले सिरदर्द की बात बताई। ये जवाब किसी कारण को स्थापित नहीं करते, लेकिन इस संयोजन पर नेत्र देखभाल पेशेवर से चर्चा की जा सकती है।',
     },
     discussionPrompt: {
-      en: 'You may want to describe your screen setup, viewing distance and break habits to your eye-care professional and ask whether any adjustment or correction could help.',
-      hi: 'आप अपने स्क्रीन सेटअप, देखने की दूरी और ब्रेक की आदतों के बारे में नेत्र देखभाल पेशेवर को बताना और पूछना चाह सकते हैं कि क्या कोई समायोजन या सुधार सहायक हो सकता है।',
+      en: 'You may want to describe your screen setup, viewing distance and when the headaches occur, and ask whether any adjustment or correction could help.',
+      hi: 'आप अपने स्क्रीन सेटअप, देखने की दूरी और सिरदर्द कब होता है, यह नेत्र देखभाल पेशेवर को बता सकते हैं और पूछ सकते हैं कि क्या कोई समायोजन या सुधार सहायक हो सकता है।',
     },
     icon: 'monitor_heart',
     triggers: (answers) => {
@@ -237,8 +237,8 @@ const patterns = [
       hi: 'आपने बताया कि आपकी पिछली पेशेवर नेत्र-जाँच को तीन वर्ष से अधिक हो चुके हैं या आपने कभी ऐसी जाँच नहीं करवाई, साथ ही दो या अधिक दृष्टि-संबंधी अनुभव बताए। आप नेत्र देखभाल पेशेवर से पूछ सकते हैं कि आपके लिए जाँच उपयुक्त है या नहीं।',
     },
     discussionPrompt: {
-      en: 'You may want to ask an eye-care professional about scheduling a comprehensive eye examination.',
-      hi: 'आप नेत्र देखभाल पेशेवर से एक व्यापक आँखों की जाँच शेड्यूल करने के बारे में पूछना चाह सकते हैं।',
+      en: 'You may want to ask an eye-care professional what kind of examination, if any, is appropriate based on the experiences you reported.',
+      hi: 'आप अपने बताए अनुभवों के आधार पर नेत्र देखभाल पेशेवर से पूछ सकते हैं कि कौन-सी जाँच, यदि कोई हो, उपयुक्त है।',
     },
     icon: 'event_upcoming',
     triggers: (answers) => {
