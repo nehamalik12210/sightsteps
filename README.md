@@ -1,6 +1,6 @@
 # SightSteps
 
-**SightSteps infers clinically grounded vision patterns from self-reported experiences — without a camera, specialised hardware, or diagnostic claims — and prepares a bilingual, accessible conversation brief for an eye-care professional.**
+**SightSteps organises participant-reported vision experiences into traceable, non-diagnostic discussion patterns — without a camera or specialised hardware — and prepares a bilingual conversation brief for an eye-care professional.**
 
 🔗 **Live:** [sightsteps.vercel.app](https://sightsteps.vercel.app/)
 
@@ -137,8 +137,8 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 
 | Command | What it does |
 |---|---|
-| `npm run audit` | 2,522 static project, data and feature checks |
-| `npm test` | 849 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
+| `npm run audit` | 2,524 static project, data and feature checks |
+| `npm test` | 961 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -251,18 +251,22 @@ sightsteps/
 
 ## Validation Status
 
-The latest verified build completed with:
+The latest exact-source verification completed on main commit ae31b03c81475ab1ba022986493719eefb6abd74 in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
 
 | Check | Result |
 |---|---|
 | Static quality audit | **2,522 passed**, 0 failed |
 | Regression test suite | **849 passed**, 0 failed (incl. custom “Other” activity source traceability in rule-engine topics, experience-profile source IDs and localized appointment-pack provenance) |
-| Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,625 copy fragments scanned, including a nested-new-component discovery fixture |
-| Vite production build | 100 modules transformed; initial JS entry 344.80 kB minified (105.91 kB gzip) |
-| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 147.38 kB (32.22 kB gzip) |
-| PWA service worker | 34 precache entries generated (975.74 KiB) |
+| Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
+| Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (105.99 kB gzip) |
+| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.60 kB (33.13 kB gzip) |
+| PWA service worker | 34 precache entries generated (980.14 KiB) |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device Amsler calibration, responsive visual/print testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
+
+
+
+The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
 
 Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 344.80 kB minified (105.91 kB gzip); the largest route chunk is the Report page at 147.38 kB (32.22 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
