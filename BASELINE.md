@@ -3,8 +3,8 @@
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
 **Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
 **Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
-**Latest verified application-code commit:** `088e3cd9bd610bc9fd1622bb22a00c97f13d4f16`  
-**Latest verified production deployment:** `dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3` (READY; `main`; application-code commit `088e3cd9...`; production alias `https://sightsteps.vercel.app`)  
+**Latest verified application-code commit:** `636ae40629e2017373d330b18b0b836a8e59174d`  
+**Latest READY production deployment containing a previously verified application revision:** `dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3` (READY; `main`; application-code commit `088e3cd9...`; production alias `https://sightsteps.vercel.app`). The Phase 3 source commit below is newer and is **not yet deployed**; its Vercel status currently reports a build-rate-limit failure.  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -36,7 +36,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - Route splitting reduced the initial JavaScript chunk from 581.00 kB minified (158.01 kB gzip) to **344.80 kB (105.91 kB gzip)**, a 40.6% reduction in minified entry size. The largest page chunk is Report at 147.38 kB (32.22 kB gzip); AmslerGrid is 21.91 kB (5.69 kB gzip). No emitted JavaScript chunk exceeds Vite's 500 kB warning threshold.
 - PWA service worker generated **34 precache entries (975.74 KiB)**. The split assets remain included in the precache, preserving the existing precache-based offline strategy; this does not mean the initial page downloads every page chunk at runtime.
 
-## Latest verified source checks — 25 November 2026
+## Previous Phase 2 source checks — 25 November 2026
 
 **Exact application-code revision:** 088e3cd9bd610bc9fd1622bb22a00c97f13d4f16 on main. The repository was checked out at this SHA in an isolated Vercel sandbox; the same application commit is READY in production.
 
@@ -50,6 +50,22 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
 
 **Deployment status:** the build-rate-limit cleared. The latest production deployment is READY as dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3 for application commit 088e3cd9...; the GitHub Vercel status is SUCCESS. The deployment includes the Amsler grid normalization, report-count consistency and regression tests described above. A READY state confirms deployment completion, not a browser-interaction or visual-validation pass. The Phase 2 provenance regression also verifies that overdue-exam only cites the positive symptom answers that actually satisfied its trigger.
+
+## Latest Phase 3 source verification — 25 November 2026
+
+**Exact application-code revision:** `636ae40629e2017373d330b18b0b836a8e59174d` on `main`. A clean isolated Node.js 22.23.5 / npm 10.9.9 Vercel sandbox checkout ran the full validation and evidence-export pipeline.
+
+- `npm ci`: passed; 349 packages installed, 350 audited. Four moderate dependency advisories remain in the existing PWA build toolchain; no forced override was applied.
+- `git diff --check`: passed.
+- `npm run audit`: **2,555 passed, 0 failed**.
+- `npm test`: **1,044 passed, 0 failed**. Includes all five Evidence Pathways relationship types, source IDs, shared-context match/no-match, specific-context handling, temporal/onset links, missing-field logic, bilingual output, stable activity IDs and appointment-pack parity.
+- `npm run clinical-lint`: passed; **23 JSX files / 2,767 copy fragments**, no violations.
+- `npm run build`: passed; **103 modules transformed**. Initial JS entry **346.46 kB (106.33 kB gzip)**; Report chunk **174.63 kB (38.73 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**; PWA generated **34 precache entries (1,007.61 KiB)**.
+- `npm run export-review`: passed; **1,187 lines**, 8 pattern definitions, **5 Ramesh matches**, 10 discussion prompts and 2 follow-up notes. The export includes bilingual relationship explanations, exact answer/timeline IDs and information-gap fields. An explicit sanity check confirmed there is no `activity-impact:undefined` ID.
+
+**Phase 3 implementation summary:** Added the deterministic `visionEvidencePathways` engine, bilingual source-traceable output component and responsive/print styles. The full pathways are computed in the detailed Report; compact pathways appear in the Clinician Brief and Appointment Preparation Pack. The Ramesh demo now shows two distinct experiences (blurred vision and difficulty in low light) sharing the participant-selected driving context, plus unanswered secondary follow-up fields. Activity impacts are shown as separate participant evidence; the UI explicitly avoids assigning them to a particular symptom/context because the questionnaire does not collect that relationship. Timeline entries are shown beside their onset answer, with a clear distinction between participant entry date and medical onset.
+
+**Deployment and visual-verification limits:** The GitHub Vercel status for `636ae406...` currently reports `build-rate-limit`; no READY deployment for this Phase 3 code has been verified. The latest READY deployment recorded above predates Phase 3. Browser-interaction screenshots, bilingual print-preview inspection, assistive-technology testing and independent clinical review remain outstanding. Do not describe Phase 3 as live or visually validated until those checks are completed.
 
 ## Clinical review export verification
 
