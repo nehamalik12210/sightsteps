@@ -13,10 +13,12 @@ import VoiceNoteField from '../components/VoiceNoteField.jsx';
 import AppointmentPreparationPack from '../components/AppointmentPreparationPack.jsx';
 import ClinicianBrief from '../components/ClinicianBrief.jsx';
 import VisionExperienceProfile from '../components/VisionExperienceProfile.jsx';
+import VisionEvidencePathways from '../components/VisionEvidencePathways.jsx';
 import ConversationReview from '../components/ConversationReview.jsx';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
+import { buildVisionEvidencePathways } from '../engine/visionEvidencePathways.js';
 import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import { formatVisionTimelineDate, sortVisionTimelineEntries } from '../utils/visionTimeline.js';
 import './Report.css';
@@ -82,6 +84,10 @@ export default function Report() {
     () => buildVisionExperienceProfile(answers, visionTimelineEntries || []),
     [answers, visionTimelineEntries],
   );
+  const evidencePathways = useMemo(
+    () => buildVisionEvidencePathways(answers, visionTimelineEntries || []),
+    [answers, visionTimelineEntries],
+  );
 
   // Do not redirect while IndexedDB is still restoring the saved session.
   useEffect(() => {
@@ -131,6 +137,7 @@ export default function Report() {
         amslerResults,
         visionResults,
         experienceProfile,
+        evidencePathways,
         conversationReview,
         now: new Date(),
       }));
@@ -254,6 +261,8 @@ export default function Report() {
             language={lang}
           />
         )}
+
+        <VisionEvidencePathways pathways={evidencePathways} language={lang} />
 
         <ConversationReview
           value={conversationReview}
