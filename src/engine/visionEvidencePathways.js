@@ -90,6 +90,7 @@ function missingFieldsForExperience(experience, isMain, answers) {
   const missing = [];
   const onsetKey = isMain ? 'experience_onset' : `additional_experience_${experience.id}_onset`;
   const contextKey = isMain ? 'experience_context' : `additional_experience_${experience.id}_context`;
+  const frequencyKey = isMain ? 'experience_frequency' : `additional_experience_${experience.id}_frequency`;
 
   if (!hasAnswer(answers, onsetKey)) {
     missing.push({
@@ -103,14 +104,14 @@ function missingFieldsForExperience(experience, isMain, answers) {
       label: { en: 'Situations where you notice it', hi: 'वे परिस्थितियाँ जहाँ यह महसूस होता है' },
     });
   }
-  if (isMain && experience.id !== 'headaches' && !hasAnswer(answers, 'experience_frequency')) {
+  if (experience.id !== 'headaches' && !hasAnswer(answers, frequencyKey)) {
     missing.push({
       id: 'frequency',
       label: { en: 'How often you notice it', hi: 'यह कितनी बार महसूस होता है' },
     });
   }
-  // Secondary experiences do not all have a frequency follow-up in the current
-  // questionnaire. Do not report a gap for a question the participant was never asked.
+  // The questionnaire reuses the original headache response as frequency, so
+  // no separate frequency gap is reported for headaches.
   return { missing, onsetKey, contextKey };
 }
 
@@ -248,12 +249,25 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
     const { missing } = missingFieldsForExperience(experience, isMain, safeAnswers);
     if (!missing.length) return [];
     const sourceIds = isMain
-      ? ['primary_concern', experience.id]
-      : ['additional_concerns', experience.id];
+      ? ['primary_concern', experience.id, 'experience_onset', 'experience_frequency', 'experience_context']
+      : ['additional_concerns', experience.id, `additional_experience_${experience.id}_onset`, `additional_experience_${experience.id}_frequency`, `additional_experience_${experience.id}_context`];
     const sourceAnswers = sourceIds
       .map((id) => sourceRecord(
         id,
-        { en: id === 'primary_concern' ? 'Main experience selected' : id === 'additional_concerns' ? 'Additional experience selected' : 'Reported experience response', hi: id === 'primary_concern' ? 'मुख्य अनुभव' : id === 'additional_concerns' ? 'चुना गया अतिरिक्त अनुभव' : 'बताए गए अनुभव का जवाब' },
+        {
+          en: id === 'primary_concern' ? 'Main experience selected'
+            : id === 'additional_concerns' ? 'Additional experience selected'
+              : id === experience.id ? 'Reported experience response'
+                : id.includes('_onset') ? 'When first noticed'
+                  : id.includes('_frequency') ? 'How often noticed'
+                    : id.includes('_context') ? 'Situations selected' : 'Response',
+          hi: id === 'primary_concern' ? 'मुख्य अनुभव'
+            : id === 'additional_concerns' ? 'चुना गया अतिरिक्त अनुभव'
+              : id === experience.id ? 'बताए गए अनुभव का जवाब'
+                : id.includes('_onset') ? 'पहली बार कब महसूस हुआ'
+                  : id.includes('_frequency') ? 'कितनी बार महसूस होता है'
+                    : id.includes('_context') ? 'चुनी गई परिस्थितियाँ' : 'जवाब',
+        },
         safeAnswers,
         localized(experience.label).en,
       ))
