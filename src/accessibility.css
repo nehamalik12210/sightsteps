@@ -54,7 +54,8 @@ select {
 /* The global accessibility control occupies the reserved right edge of page headers. */
 html .iq__progress-area,
 html .ap__progress-wrap,
-html .va__topbar-counter {
+html .va__topbar-counter,
+html .amsler__topbar-counter {
   margin-right: 52px;
 }
 html[data-a11y-scale="115"] .btn,

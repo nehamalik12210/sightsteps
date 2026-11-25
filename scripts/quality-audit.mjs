@@ -320,6 +320,7 @@ check(reportCssSource.includes(':not(.appointment-pack)') && reportCssSource.inc
 check(accessibilityControlsSource.includes('href="#main-content"') && accessibilityControlsSource.includes('Skip to main content'), 'keyboard users can skip directly to the page main content');
 check(accessibilityControlsSource.includes('sightsteps.display-preferences.v1') && accessibilityControlsSource.includes('localStorage'), 'display preferences persist locally and fail safely when storage is unavailable');
 check(accessibilityControlsSource.includes('aria-pressed') && accessibilityControlsSource.includes('aria-labelledby'), 'display settings expose their state and labelled control group');
+check(/html \.amsler__topbar-counter/.test(accessCss) && /margin-right: 52px/.test(accessCss), 'global accessibility control does not overlap the Amsler round counter');
 
 // Pattern detection, Amsler grid, clinician brief and clinical language audit.
 check(existsSync(join(root, 'src/engine/patternEngine.js')), 'pattern detection engine exists');
