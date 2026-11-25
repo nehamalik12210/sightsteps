@@ -131,3 +131,11 @@
 - Added two regression scenarios using different positive symptom pairs; each asserts that both supporting answers are cited and that negative answers are excluded.
 - Verified on exact main commit 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681: **967 regression tests, 2,524 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules; initial JS 345.09 kB / 105.99 kB gzip; Report 151.94 kB / 33.18 kB gzip; Amsler 21.91 kB / 5.69 kB gzip; PWA 34 entries / 980.47 KiB), and review export passed (965 lines reported, 8 pattern definitions, 4 Ramesh matches, 10 discussion prompts, 2 follow-up notes).**
 - This exact source revision is verified in an isolated sandbox. Vercel production deployment remains subject to its build-rate-limit status; do not claim this revision is live until a READY deployment exists.
+
+
+### Change 19 — Production deployment recovered
+- Vercel's earlier build-rate-limit cleared. Application-code commit `8f44a9ccbfb8ff7d1b424b07153daf7878dbb681` reached READY in deployment `dpl_Fi9MYjTSrgSNTXw8WpAkqNitpRpd`.
+- The subsequent documentation commit `4d09c8be02d84e4399c02b4a601290723fe575bb` also reached READY in production deployment `dpl_4hPiACBGmQzwxDpji7azb2fnQHa2`; this deployment includes the application code from `8f44a9cc...`.
+- GitHub Vercel status for `4d09c8be...` is SUCCESS. Deployment build logs show `npm run build` -> `npm run check`, quality audit 2,524 passed, clinical-language audit passed, 100 modules transformed, Vite build completed, and PWA generated 34 entries / 980.47 KiB. The exact-source isolated run at `8f44a9cc...` confirms 967 engine tests and review export success.
+- Live production requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200; the SPA HTML references `/assets/index-B73cZCMz.js`, confirming the new entry bundle is served. This is not a browser-interaction, screenshot, print-layout or clinical validation pass.
+- This supersedes the earlier entries noting that the new code had not yet deployed or that Vercel remained build-rate-limited.
