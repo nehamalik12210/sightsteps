@@ -208,7 +208,7 @@ check(appSource.includes('<OfflineStatus />') && offlineStatusSource.includes("a
 check(/aria-describedby=\{\[countId, privacyId, status \? statusId : null\]/.test(voiceSource), 'voice fields describe the character count, privacy note and recognition status');
 check(/aria-pressed=\{listening\}/.test(voiceSource) && /aria-controls=\{id\}/.test(voiceSource), 'microphone button exposes pressed state and its controlled field');
 check(/No speech was captured/.test(voiceSource), 'empty speech capture ends with an explanatory message rather than stale listening status');
-check((voiceSource.match(/recognitionRef\.current !== recognition/g) || []).length >= 3, 'stale speech-recognition events cannot overwrite the state of a newer voice capture');
+check((voiceSource.match(/recognitionRef\.current !== recognition/g) || []).length >= 4, 'stale speech-recognition events cannot overwrite the state of a newer voice capture');
 check(/const activeRecognition = recognitionRef\.current;[\s\S]*?recognitionRef\.current = null;[\s\S]*?activeRecognition\?\.stop\(\)/.test(voiceSource), 'unmount cleanup invalidates the speech recognizer before stopping it so late events cannot update an unmounted field');
 check(/valueRef\.current = next;\s*onChange\(next\);\s*setStatus\(''\)/.test(voiceSource), 'manual text edits clear outdated speech-recognition status messages');
 check(/speechSynthesis/.test(intake) && /currentOptions\.map/.test(intake), 'question text and answer options can be read aloud');

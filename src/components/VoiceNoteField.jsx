@@ -51,6 +51,7 @@ export default function VoiceNoteField({
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       recognition.onstart = () => {
+        if (recognitionRef.current !== recognition) return;
         setListening(true);
         setStatus(language === 'hi' ? 'सुन रहा है…' : 'Listening…');
       };
