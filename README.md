@@ -258,7 +258,7 @@ The latest exact-source verification completed on application-code commit 8f44a9
 | Static quality audit | **2,524 passed**, 0 failed |
 | Regression test suite | **967 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
 | Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
-| Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (106.00 kB gzip) |
+| Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (105.99 kB gzip) |
 | Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.94 kB (33.18 kB gzip) |
 | PWA service worker | 34 precache entries generated (980.47 KiB) |
 
@@ -266,7 +266,7 @@ These checks cover source structure, data validation, routing, persistence, patt
 
 
 
-The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. This application code is deployed in production: deployment dpl_4hPiACBGmQzwxDpji7azb2fnQHa2 (READY, commit 4d09c8be..., which includes app code 8f44a9cc...). Live direct requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200 with the new entry bundle. This confirms the live SPA shell and route rewrite, not full browser interaction or visual validation.
+The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. This application code is deployed in production: deployment dpl_BULeMmr3mi7Byqr39j2aezTwaiUn (READY, commit f4aa4ef6..., which includes app code 8f44a9cc...). Live direct requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200 with the new entry bundle. This confirms the live SPA shell and route rewrite, not full browser interaction or visual validation.
 
 Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.94 kB (33.18 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
