@@ -1,6 +1,7 @@
 import { formatVisionTimelineDate, normalizeVisionTimelineEntries } from './visionTimeline.js';
 import { analyzeSpatial, describeSpatial, getFlaggedCellCount, normalizeFlaggedCells } from '../engine/amslerSpatial.js';
 import { buildCompactExperienceSummary } from '../engine/visionExperienceProfile.js';
+import { normalizeDirectionAwarenessResult } from './visionActivity.js';
 
 function localized(value, language = 'en') {
   if (value && typeof value === 'object') return value[language] || value.en || '';
@@ -26,6 +27,7 @@ export function buildAppointmentPreparationPack({
   questionsToAsk = '',
   timelineEntries = [],
   amslerResults = null,
+  visionResults = null,
   experienceProfile = null,
   conversationReview = null,
   now = new Date(),
@@ -95,6 +97,17 @@ export function buildAppointmentPreparationPack({
       }
     : null;
 
+  const normalizedVisionResults = normalizeDirectionAwarenessResult(visionResults);
+  const safeVisionActivity = normalizedVisionResults?.completed
+    ? {
+        completed: true,
+        round1: normalizedVisionResults.data.left,
+        round2: normalizedVisionResults.data.right,
+      }
+    : normalizedVisionResults?.skipped
+      ? { skipped: true }
+      : null;
+
   const compactExperienceSummary = experienceProfile
     ? buildCompactExperienceSummary(experienceProfile, language, 260, 2)
     : '';
@@ -129,6 +142,7 @@ export function buildAppointmentPreparationPack({
     conversationReview: safeConversationReview,
     amsler: safeAmsler,
     amslerSpatial: amslerSpatialText,
+    visionActivity: safeVisionActivity,
     language: language === 'hi' ? 'hi' : 'en',
   };
 }
