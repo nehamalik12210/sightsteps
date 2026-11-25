@@ -1291,7 +1291,7 @@ const profileTimelineFixtures = [
     updatedAt: '2026-10-10T12:00:00.000Z',
   },
 ];
-const experienceProfile = buildVisionExperienceProfile(rameshPersona.answers, profileTimelineFixtures);
+const experienceProfile = buildVisionExperienceProfile(rameshAnswers, profileTimelineFixtures);
 assert(experienceProfile.mainExperience?.id === 'blurred_vision', 'profile uses the current main reported experience');
 assert(experienceProfile.mainExperience?.contexts.length === 2, 'profile retains both reported experience contexts');
 assert(experienceProfile.mainExperience?.sourceIds.includes('experience_onset'), 'main experience links to onset source answer');
