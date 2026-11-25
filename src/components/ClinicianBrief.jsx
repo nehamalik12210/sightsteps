@@ -58,10 +58,18 @@ export default function ClinicianBrief({ onClose }) {
     const previousFocus = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null;
+    // Make both the Report content around this overlay and the global app
+    // controls outside the route tree inert. The latter include the fixed
+    // accessibility skip link/settings button rendered as App siblings.
     const container = dialog.parentElement;
-    const background = container
+    const localBackground = container
       ? Array.from(container.children).filter((element) => element !== dialog)
       : [];
+    const appRoot = dialog.closest('.app');
+    const globalBackground = appRoot
+      ? Array.from(appRoot.children).filter((element) => !element.contains(dialog))
+      : [];
+    const background = [...new Set([...localBackground, ...globalBackground])];
     const previousBackgroundState = background.map((element) => ({
       element,
       inert: element.inert,

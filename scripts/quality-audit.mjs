@@ -191,6 +191,8 @@ check(/additional_experience_/.test(engineSource) && /makeQuestionSource\(experi
 check(/rpt--brief-print/.test(report) && /printBrief\('brief'\)/.test(report) && /printBrief\('detail'\)/.test(report), 'report offers separate concise and detailed print modes');
 const clinicianBriefCssSource = read('src/components/ClinicianBrief.css');
 check(/@page\s+clinicianBrief\s*\{/.test(clinicianBriefCssSource) && /page:\s*['"]clinicianBrief['"]/.test(clinicianBriefSource), 'Clinician Brief uses a named page rule so its A4 settings do not leak into other print views');
+check(/z-index:\s*2200/.test(clinicianBriefCssSource), 'Clinician Brief overlays global fixed accessibility controls and skip link');
+check(/dialog\.closest\('\.app'\)/.test(clinicianBriefSource) && /globalBackground/.test(clinicianBriefSource) && /element\.contains\(dialog\)/.test(clinicianBriefSource), 'Clinician Brief makes global app siblings inert as well as local Report siblings');
 check(!/@page\s*\{/.test(clinicianBriefCssSource), 'Clinician Brief stylesheet does not declare global print-page settings');
 check(/setDiscussionPriorities/.test(report) && /selectedIndex/.test(report) && /slice\(0, 2\)/.test(contextSource), 'participant-selected priorities are capped at two and influence report ordering');
 check(/questionsToAsk/.test(report) && /setQuestionsToAsk/.test(contextSource), 'participant questions are captured and persisted');
