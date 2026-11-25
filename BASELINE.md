@@ -24,7 +24,9 @@
 - `npm run build`: check + Vite production build.
 - `npm run export-review`: writes `exports/clinical-review-export.txt`.
 
-## Previously verified production build evidence (commit 5d964fc5...)
+## Historical route-splitting production build evidence (commit 5d964fc5...)
+
+The figures in this section are from the earlier route-splitting deployment. They are retained as a historical comparison; the latest verified application build and metrics are in the section below.
 
 Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e612a2ffe0c1db1bf65b131cf0` completed READY:
 - Quality audit: **2,522 passed, 0 failed**. The audit now resolves relative paths from both static imports and literal dynamic `import()` calls; explicit checks cover all nine lazy-loaded page routes and the loading/focus handoff.
