@@ -138,7 +138,7 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 | Command | What it does |
 |---|---|
 | `npm run audit` | 2,524 static project, data and feature checks |
-| `npm test` | 961 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
+| `npm test` | 967 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -256,17 +256,17 @@ The latest exact-source verification completed on main commit c1936631a3eb93e4b0
 | Check | Result |
 |---|---|
 | Static quality audit | **2,524 passed**, 0 failed |
-| Regression test suite | **961 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
+| Regression test suite | **967 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
 | Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
 | Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (106.00 kB gzip) |
-| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.87 kB (33.15 kB gzip) |
-| PWA service worker | 34 precache entries generated (980.40 KiB) |
+| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.94 kB (33.18 kB gzip) |
+| PWA service worker | 34 precache entries generated (980.47 KiB) |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device Amsler calibration, responsive visual/print testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
 
 
-The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
+The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
 
 Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.87 kB (33.15 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
