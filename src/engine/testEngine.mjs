@@ -961,6 +961,21 @@ const amslerPack = buildAppointmentPreparationPack({
 assert(amslerPack.amsler !== null, 'appointment pack includes Amsler results when completed');
 assert(amslerPack.amsler.right === 2, 'appointment pack Amsler right eye count matches');
 assert(amslerPack.amsler.left === 0, 'appointment pack Amsler left eye count matches');
+const malformedAmslerPack = buildAppointmentPreparationPack({
+  language: 'en',
+  amslerResults: {
+    completed: true,
+    calibrated: true,
+    data: {
+      right: { cellCount: 5, flaggedCells: [{ row: 4, col: 4 }, { row: 4, col: 4 }, null, { row: 20, col: 1 }] },
+      left: { cellCount: 3, flaggedCells: { invalid: true } },
+    },
+  },
+});
+assert(malformedAmslerPack.amsler.right === 1, 'appointment pack reports normalized unique right-eye flags');
+assert(malformedAmslerPack.amsler.left === 0, 'appointment pack ignores malformed left-eye cell collections');
+assert(malformedAmslerPack.amslerSpatial.right.some((line) => line.includes('1 region flagged')), 'appointment pack spatial summary matches the normalized flag count');
+assert(malformedAmslerPack.amslerSpatial.left.some((line) => line.includes('no regions flagged')), 'appointment pack spatial summary safely handles malformed left-eye data');
 assert(amslerPack.experienceProfile !== null, 'appointment pack includes a compact experience headline when supplied');
 assert(typeof amslerPack.experienceProfile.summary === 'string', 'appointment pack stores one compact profile summary');
 assert(amslerPack.experienceProfile.summary.includes('Blurred or unclear vision'), 'appointment pack summary retains the main reported experience');
@@ -985,7 +1000,7 @@ for (const pattern of rameshPatterns) {
 
 // === Amsler Spatial Analysis ===
 console.log('\n=== Amsler spatial analysis ===');
-import { analyzeEye, analyzeSpatial, describeSpatial } from './amslerSpatial.js';
+import { analyzeEye, analyzeSpatial, describeSpatial, getFlaggedCellCount, normalizeFlaggedCells } from './amslerSpatial.js';
 import { evaluateClusters } from '../data/patternClusters.js';
 import clusterDefinitions from '../data/patternClusters.js';
 
@@ -996,6 +1011,28 @@ assert(emptyAnalysis.spread === 'none', 'empty cells → spread "none"');
 assert(emptyAnalysis.hasQuadrantConcentration === false, 'empty cells → no quadrant concentration');
 assert(emptyAnalysis.centroid === null, 'empty cells → null centroid');
 assert(emptyAnalysis.dominantQuadrant === null, 'empty cells → no dominant quadrant');
+
+// Persisted cell data is validated before analysis and print summaries.
+assert(analyzeEye(null).count === 0, 'null cell collection safely produces an empty analysis');
+assert(analyzeEye({}).count === 0, 'non-array cell collection safely produces an empty analysis');
+assert(analyzeSpatial(null).right.count === 0 && analyzeSpatial(null).left.count === 0, 'missing spatial input safely produces two empty eye analyses');
+const malformedCells = [
+  { row: 1, col: 2 },
+  null,
+  { row: 1, col: 2 },
+  { row: -1, col: 2 },
+  { row: 20, col: 2 },
+  { row: 1.5, col: 2 },
+  { row: 2, col: Number.NaN },
+  { row: 19, col: 19 },
+];
+const normalizedCells = normalizeFlaggedCells(malformedCells);
+assert(normalizedCells.length === 2, 'cell normalization drops invalid coordinates and duplicate flags');
+assert(normalizedCells[0].row === 1 && normalizedCells[0].col === 2, 'cell normalization preserves valid first coordinates');
+assert(analyzeEye(malformedCells).count === 2, 'spatial analysis counts only unique valid cells');
+assert(getFlaggedCellCount({ flaggedCells: malformedCells, cellCount: 8 }) === 2, 'report count follows normalized cells, not stale stored cellCount');
+assert(getFlaggedCellCount({ cellCount: 4 }) === 4, 'count-only legacy result remains supported');
+assert(getFlaggedCellCount({ cellCount: -1 }) === 0, 'invalid legacy cellCount is ignored');
 
 // Single cell
 const singleAnalysis = analyzeEye([{ row: 2, col: 3 }]);
