@@ -1,4 +1,5 @@
 import VisionExperienceProfile from './VisionExperienceProfile.jsx';
+import VisionEvidencePathways from './VisionEvidencePathways.jsx';
 import './AppointmentPreparationPack.css';
 
 export default function AppointmentPreparationPack({ pack, language = 'en' }) {
@@ -70,6 +71,8 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
           language={language}
         />
       )}
+
+      <VisionEvidencePathways pathways={pack.evidencePathways} language={language} compact />
 
       {pack.conversationReview && (
         <section className="appointment-pack__section appointment-pack__participant-review" aria-labelledby="appointment-pack-review">
