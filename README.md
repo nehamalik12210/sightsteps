@@ -16,7 +16,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 
 ### Demonstration modes
 
-Landing offers two scripted Ramesh walkthroughs. The short walkthrough covers the seven guided intake questions and proceeds directly to the report. A second walkthrough continues into the optional Direction Awareness activity and Amsler flow so those features can be explored separately. Both are scripted demo sessions, are excluded from participant history, and do not represent real participant measurements or clinical validation.
+Landing presents one scripted Ramesh demo card. The seven-question report-first walkthrough is the default; an optional checkbox on the same card adds the Direction Awareness activity and Amsler flow. Both paths use the same scripted participant answers and are excluded from participant history. The demo does not represent real participant measurements or clinical validation.
 
 ### Saved session history
 

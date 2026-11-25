@@ -73,6 +73,7 @@ export default function Landing() {
 
   const lang = language || 'en';
   const [demoStartPending, setDemoStartPending] = useState(false);
+  const [includeVisionActivities, setIncludeVisionActivities] = useState(false);
   const [newJourneyPending, setNewJourneyPending] = useState(false);
   const [sessionActionError, setSessionActionError] = useState('');
   const hasSavedSession = Boolean(isHydrated && sessionId && consentGiven);
@@ -179,7 +180,7 @@ export default function Landing() {
     }
   };
 
-  const handleDemo = async (persona = rameshPersona) => {
+  const handleDemo = async () => {
     if (demoStartPending) return;
     setSessionActionError('');
     setDemoStartPending(true);
@@ -191,7 +192,7 @@ export default function Landing() {
         : 'The previous session could not be cleared. Please try again.');
       return;
     }
-    startDemo(persona);
+    startDemo(includeVisionActivities ? rameshActivityDemoPersona : rameshPersona);
   };
 
   return (
@@ -248,26 +249,33 @@ export default function Landing() {
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </button>
 
-            <button className="landing__demo-btn" type="button" onClick={() => handleDemo(rameshPersona)} disabled={!isHydrated || demoStartPending}>
-              <span className="landing__demo-avatar" aria-hidden="true">र</span>
-              <span className="landing__demo-text">
-                <span className="landing__demo-label">{t('landing.tryDemo', lang)}</span>
-                <span className="landing__demo-sub">
-                  {lang === 'hi' ? 'रमेश, 42, दर्ज़ी · 7 सवाल · लगभग 1 मिनट' : 'Ramesh, 42, Tailor · 7 guided questions · ~1 min'}
+            <section className="landing__demo-card" aria-labelledby="landing-demo-heading">
+              <button className="landing__demo-btn" type="button" onClick={handleDemo} disabled={!isHydrated || demoStartPending}>
+                <span className="landing__demo-avatar" aria-hidden="true">र</span>
+                <span className="landing__demo-text">
+                  <span className="landing__demo-label" id="landing-demo-heading">{t('landing.tryDemo', lang)}</span>
+                  <span className="landing__demo-sub">
+                    {includeVisionActivities
+                      ? t('landing.demo.fullSummary', lang)
+                      : t('landing.demo.shortSummary', lang)}
+                  </span>
                 </span>
-              </span>
-              <span className="material-symbols-outlined landing__demo-arrow" aria-hidden="true">arrow_forward</span>
-            </button>
-            <button className="landing__demo-btn landing__demo-btn--activities" type="button" onClick={() => handleDemo(rameshActivityDemoPersona)} disabled={!isHydrated || demoStartPending}>
-              <span className="landing__demo-avatar" aria-hidden="true">E</span>
-              <span className="landing__demo-text">
-                <span className="landing__demo-label">{lang === 'hi' ? 'वैकल्पिक दृष्टि गतिविधियाँ भी देखें' : 'Include optional vision activities'}</span>
-                <span className="landing__demo-sub">
-                  {lang === 'hi' ? 'रमेश · 7 सवाल · दिशा पहचान और एम्सलर ग्रिड' : 'Ramesh · 7 guided questions · Direction Awareness + Amsler'}
+                <span className="material-symbols-outlined landing__demo-arrow" aria-hidden="true">arrow_forward</span>
+              </button>
+              <label className="landing__demo-option" htmlFor="landing-demo-include-vision">
+                <input
+                  id="landing-demo-include-vision"
+                  type="checkbox"
+                  checked={includeVisionActivities}
+                  onChange={(event) => setIncludeVisionActivities(event.target.checked)}
+                  disabled={demoStartPending}
+                />
+                <span className="landing__demo-option-text">
+                  <strong>{t('landing.demo.includeVision', lang)}</strong>
+                  <small>{t('landing.demo.includeVisionHelp', lang)}</small>
                 </span>
-              </span>
-              <span className="material-symbols-outlined landing__demo-arrow" aria-hidden="true">arrow_forward</span>
-            </button>
+              </label>
+            </section>
             <button className="btn btn--outline btn--full" type="button" onClick={() => navigate('/kiosk')} disabled={!isHydrated}>
               <span className="material-symbols-outlined" aria-hidden="true">tablet_mac</span>
               {lang === 'hi' ? 'साझा टैबलेट / कियोस्क मोड' : 'Shared tablet / kiosk mode'}

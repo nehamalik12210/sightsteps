@@ -335,3 +335,11 @@ A passing build or automated test is not a substitute for the listed clinical, s
 - Final workflow run 45688025235 on commit 7e59c9c289150d3e1943c9836268f10ecaa44b56 completed SUCCESS: quality 2,634 passed / 0 failed; engine tests 1,068 passed / 0 failed; session-history policy 10 passed / 0 failed; IndexedDB 42 passed / 0 failed; demo walkthrough policy 9 passed / 0 failed; clinical-language audit 23 JSX files / 2,824 fragments, no violations; production build passed; PWA precache 34 entries (1,031.17 KiB); clinical review export 1,192 lines with 8 patterns, 5 Ramesh matches, 10 discussion prompts and 2 follow-up notes.
 - Production deployment dpl_HU1UcU3nvVpRr9jDMaRAGkATHwWu is READY for the exact source commit and aliased to https://sightsteps.vercel.app. Live root returned HTTP 200; the deployed main bundle includes the English and Hindi activity-inclusive demo labels.
 - Browser interaction testing of the new selection and completing E/Amsler remains pending. The desktop/browser environment could not be started because Vercel Sandbox returned HTTP 402 for the Hobby snapshot-storage quota, and the local container could not resolve github.com to clone the repository. Do not claim a manual UI walkthrough for the new path.
+
+
+## Landing demo-card consolidation — 26 November 2026
+
+- Follow-up to F-34: the two separate Ramesh demo buttons were visually repetitive because both entered the same seven-question scripted participant flow.
+- Consolidated them into one Ramesh demo card. The short report-first path remains the default; a checkbox inside the same card optionally enables the existing Direction Awareness and Amsler continuation.
+- The checkbox is separately labelled, keyboard operable and translated into English and Hindi. The card subtitle updates to reflect the selected path. No second demo entry card remains.
+- Updated the quality audit to require exactly one demo button and verify that the optional checkbox selects the correct scripted persona. The existing nine demo-policy tests continue to cover the two underlying walkthrough behaviours.

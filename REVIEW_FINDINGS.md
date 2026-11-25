@@ -113,3 +113,6 @@ The current production alias is READY and returns HTTP 200. Browser-level visual
 | ID | Finding | Verification | Status |
 |---|---|---|---|
 | F-34 | The short Ramesh demonstration intentionally skipped vision activities, so evaluators needed a separate route to demonstrate Direction Awareness and Amsler. | Confirmed by the Ramesh persona skipVision=true and the Intake end-of-flow route to Report. | Added a second controlled Ramesh variant with the same seven guided answers and skipVision=false. Landing exposes both demos; VisionActivity retains the E-to-Amsler continuation. Dedicated 9-check demo-flow test and quality-audit assertions pass in CI run 45688025235. Manual browser walkthrough remains pending. |
+
+
+| F-35 | Landing showed two separate Ramesh demo cards although both shared the same seven guided questions; only the post-intake destination differed. | Confirmed in Landing JSX: two adjacent demo buttons called the same handler with either the short or activity-inclusive persona. | Fixed by consolidating to one demo card with an optional, unchecked-by-default checkbox for Direction Awareness and Amsler. The subtitle reflects the selected mode. Quality audit now verifies one demo button and the optional selection wiring. |
