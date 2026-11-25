@@ -1,5 +1,5 @@
 import { formatVisionTimelineDate, normalizeVisionTimelineEntries } from './visionTimeline.js';
-import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
+import { analyzeSpatial, describeSpatial, getFlaggedCellCount, normalizeFlaggedCells } from '../engine/amslerSpatial.js';
 import { buildCompactExperienceSummary } from '../engine/visionExperienceProfile.js';
 
 function localized(value, language = 'en') {
@@ -81,10 +81,16 @@ export function buildAppointmentPreparationPack({
       note: compactText(entry.impact, 96),
     }));
 
-  const safeAmsler = amslerResults?.completed && amslerResults.data
+  const safeAmslerCells = amslerResults?.completed && amslerResults.data
     ? {
-        right: amslerResults.data.right?.cellCount ?? amslerResults.data.right?.flaggedCells?.length ?? 0,
-        left: amslerResults.data.left?.cellCount ?? amslerResults.data.left?.flaggedCells?.length ?? 0,
+        right: normalizeFlaggedCells(amslerResults.data.right?.flaggedCells),
+        left: normalizeFlaggedCells(amslerResults.data.left?.flaggedCells),
+      }
+    : null;
+  const safeAmsler = safeAmslerCells
+    ? {
+        right: getFlaggedCellCount(amslerResults.data.right),
+        left: getFlaggedCellCount(amslerResults.data.left),
         calibrated: amslerResults.calibrated ?? false,
       }
     : null;
@@ -105,13 +111,9 @@ export function buildAppointmentPreparationPack({
 
   // Spatial analysis for the prep pack
   let amslerSpatialText = null;
-  if (safeAmsler && amslerResults.data) {
-    const flagged = {
-      right: amslerResults.data.right?.flaggedCells || [],
-      left: amslerResults.data.left?.flaggedCells || [],
-    };
-    if (flagged.right.length > 0 || flagged.left.length > 0) {
-      const spatial = analyzeSpatial(flagged);
+  if (safeAmsler && safeAmslerCells) {
+    if (safeAmslerCells.right.length > 0 || safeAmslerCells.left.length > 0) {
+      const spatial = analyzeSpatial(safeAmslerCells);
       amslerSpatialText = describeSpatial(spatial, language);
     }
   }
