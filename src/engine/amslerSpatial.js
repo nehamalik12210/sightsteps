@@ -12,6 +12,45 @@ const GRID_SIZE = 20;
 const MIDDLE_GRID_ZONE = { min: 7, max: 12 }; // middle 6×6 grid area; not an anatomical region
 
 /**
+ * Keep only unique, in-range grid coordinates from persisted or caller-provided data.
+ * The interactive grid itself already produces this shape; this boundary protects
+ * reports and print generation from stale or malformed saved sessions.
+ */
+export function normalizeFlaggedCells(cells) {
+  if (!Array.isArray(cells)) return [];
+  const seen = new Set();
+  const normalized = [];
+
+  for (const cell of cells) {
+    const row = cell?.row;
+    const col = cell?.col;
+    if (!Number.isInteger(row) || !Number.isInteger(col)
+      || row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) continue;
+
+    const key = row * GRID_SIZE + col;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push({ row, col });
+  }
+
+  return normalized;
+}
+
+/**
+ * Read the count shown in reports using the same coordinate validation as spatial analysis.
+ * Preserve count-only records from older saved sessions when no cell array exists.
+ */
+export function getFlaggedCellCount(eyeData) {
+  if (eyeData && Object.prototype.hasOwnProperty.call(eyeData, 'flaggedCells')) {
+    return normalizeFlaggedCells(eyeData.flaggedCells).length;
+  }
+  const count = eyeData?.cellCount;
+  return Number.isInteger(count) && count >= 0 && count <= GRID_SIZE * GRID_SIZE
+    ? count
+    : 0;
+}
+
+/**
  * Determine which quadrant a cell falls in.
  * UL = upper-left, UR = upper-right, LL = lower-left, LR = lower-right
  */
@@ -39,7 +78,8 @@ function isCentral(row, col) {
  * @returns {object} spatial analysis result
  */
 export function analyzeEye(cells) {
-  if (!cells || cells.length === 0) {
+  const validCells = normalizeFlaggedCells(cells);
+  if (validCells.length === 0) {
     return {
       count: 0,
       quadrants: { UL: 0, UR: 0, LL: 0, LR: 0 },
@@ -59,7 +99,7 @@ export function analyzeEye(cells) {
   let sumRow = 0;
   let sumCol = 0;
 
-  for (const { row, col } of cells) {
+  for (const { row, col } of validCells) {
     quadrants[getQuadrant(row, col)] += 1;
     if (isCentral(row, col)) {
       centralCount += 1;
@@ -72,21 +112,21 @@ export function analyzeEye(cells) {
 
   // Centroid
   const centroid = {
-    row: sumRow / cells.length,
-    col: sumCol / cells.length,
+    row: sumRow / validCells.length,
+    col: sumCol / validCells.length,
   };
 
   // Dominant quadrant (the one with the most flags, if it has >50% of all flags)
   const sortedQuadrants = Object.entries(quadrants).sort((a, b) => b[1] - a[1]);
-  const dominantQuadrant = sortedQuadrants[0][1] > cells.length * 0.5
+  const dominantQuadrant = sortedQuadrants[0][1] > validCells.length * 0.5
     ? sortedQuadrants[0][0]
     : null;
 
   // Describe quadrant concentration only; cells in one quadrant are not
   // necessarily physically adjacent, so this is not a spatial-cluster test.
-  const maxQuadrantRatio = sortedQuadrants[0][1] / cells.length;
+  const maxQuadrantRatio = sortedQuadrants[0][1] / validCells.length;
   let spread;
-  if (cells.length === 1) {
+  if (validCells.length === 1) {
     spread = 'single';
   } else if (maxQuadrantRatio >= 0.6) {
     spread = 'quadrant-concentrated';
@@ -95,10 +135,10 @@ export function analyzeEye(cells) {
   }
 
   // At least three flags, with 60% or more in a single quadrant.
-  const hasQuadrantConcentration = cells.length >= 3 && maxQuadrantRatio >= 0.6;
+  const hasQuadrantConcentration = validCells.length >= 3 && maxQuadrantRatio >= 0.6;
 
   return {
-    count: cells.length,
+    count: validCells.length,
     quadrants,
     centroid,
     centralCount,
@@ -116,8 +156,9 @@ export function analyzeEye(cells) {
  * @returns {object}
  */
 export function analyzeSpatial(flaggedCells) {
-  const right = analyzeEye(flaggedCells?.right || []);
-  const left = analyzeEye(flaggedCells?.left || []);
+  const safeCells = flaggedCells && typeof flaggedCells === 'object' ? flaggedCells : {};
+  const right = analyzeEye(safeCells.right);
+  const left = analyzeEye(safeCells.left);
 
   const totalRight = right.count;
   const totalLeft = left.count;
