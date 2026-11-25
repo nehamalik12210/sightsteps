@@ -249,7 +249,7 @@ export default function ClinicianBrief({ onClose }) {
               </div>
             )}
             <div className="clinician-brief__patterns">
-              {matchedPatterns.map((pattern) => (
+              {matchedPatterns.slice(0, 2).map((pattern) => (
                 <div key={pattern.id} className="clinician-brief__pattern-card">
                   <div className="clinician-brief__pattern-head">
                     <span className="material-symbols-outlined" aria-hidden="true">{pattern.icon}</span>
@@ -266,6 +266,13 @@ export default function ClinicianBrief({ onClose }) {
                 </div>
               ))}
             </div>
+            {matchedPatterns.length > 2 && (
+              <p className="clinician-brief__more-patterns">
+                {lang === 'hi'
+                  ? `पूरी रिपोर्ट में ${matchedPatterns.length - 2} अन्य पैटर्न दिए गए हैं।`
+                  : `${matchedPatterns.length - 2} additional patterns are available in the detailed report.`}
+              </p>
+            )}
           </section>
         )}
 
@@ -363,7 +370,7 @@ export default function ClinicianBrief({ onClose }) {
               {lang === 'hi' ? 'चर्चा के सुझाए गए विषय' : 'Suggested Discussion Topics'}
             </h2>
             <div className="clinician-brief__discuss-list">
-              {report.discussionPoints.slice(0, 5).map((point) => (
+              {report.discussionPoints.slice(0, 2).map((point) => (
                 <div key={point.id} className="clinician-brief__discuss-item">
                   <strong>{localized(point.title, lang)}</strong>
                   <p>{localized(point.context, lang)}</p>
