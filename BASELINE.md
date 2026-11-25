@@ -147,3 +147,16 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Verification for this exact deployment: quality audit **2,565 passed, 0 failed**; regression tests **1,055 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments, no violations**; Vite **104 modules transformed**; PWA **34 precache entries (1,014.77 KiB)**.
 - Live root returned **HTTP 200** and the production CSS asset was fetched and verified to contain `.amsler__topbar-counter`.
 - Browser/device verification of the calibration recovery and header overlap remains pending because the Vercel Sandbox Snapshot Storage limit prevented creating another browser sandbox. Do not treat the automated build as a visual or physical-device test.
+
+
+## Phase 4 kiosk cleanup failure hardening — 25 November 2026
+
+- Finding F-25: when `reset()` failed in kiosk timeout, kiosk setup, Landing's end-session control, or Report's finish action, several handlers only displayed a warning and left the previous participant in memory. A user could potentially return to Landing or a protected participant route and continue the old session even though deletion had failed.
+- Added `markKioskCleanupFailed()` in `AppContext`, reusing the existing `KIOSK_CLEANUP_FAILED` reducer action to reset all in-memory participant state and set a blocking cleanup flag.
+- Applied the failure action to all kiosk cleanup exit paths: `KioskGuard`, `KioskSetup`, Landing's `handleEndKiosk`, and Report's reset-and-navigate helper whenever `kioskMode` is active.
+- Hardened `getProtectedRouteRedirect`: a cleanup-failed session is redirected to `/kiosk?clearError=1` before the normal session/profile/intake/vision route checks. NewSessionGuard already blocked onboarding; this extends the block to every protected participant route.
+- Added a regression test using a complete/consented session with saved answers and vision results, proving it still redirects to the kiosk retry screen when `kioskCleanupFailed` is true. Added two quality-audit assertions covering all reset exit callers and protected-route enforcement.
+- Commit: `86ab9d8d45e5731d8a6d03b5fd4f2f96021417d3`.
+- Production deployment: `dpl_Bj3i3UT1agdAdsgqieM9EhxBDJ4b` — READY, aliased to `https://sightsteps.vercel.app`.
+- Exact deployment verification: quality audit **2,568 passed, 0 failed**; engine regression tests **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**; PWA **34 precache entries (1,015.05 KiB)**. Production root HTTP **200 OK** and served `index-DBJQfr6s.js`.
+- Direct browser interaction verification of a simulated IndexedDB deletion failure remains pending because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox. The new failure route is covered by the automated routing regression and source audit; deployment READY is not presented as manual visual validation.
