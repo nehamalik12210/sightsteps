@@ -898,6 +898,11 @@ assert(mockAmslerResult.data.right.flaggedCells[0].row === 5 && mockAmslerResult
 assert(typeof mockAmslerResult.timestamp === 'string', 'result has ISO timestamp');
 assert(mockAmslerResult.calibrated === true, 'result reports calibration status');
 
+assert(
+  canCalibrateAmsler(600, 450, 150) && !canCalibrateAmsler(600, 450, 300),
+  'a small calibrated reference can fit in a short viewport even when the initial slider width does not'
+);
+
 // Skip result shape
 const mockSkipResult = { completed: false, skipped: true, data: null };
 assert(mockSkipResult.skipped === true, 'skipped result has skipped flag');

@@ -11,6 +11,7 @@ import {
   canCalibrateAmsler,
   doesCalibratedGridFit,
   getMaxCalibrationSliderWidth,
+  MIN_CALIBRATION_SLIDER_PX,
 } from '../engine/amslerCalibration.js';
 import './AmslerGrid.css';
 
@@ -57,6 +58,7 @@ function AmslerGrid() {
   }, []);
 
   const maxSliderWidthPx = getMaxCalibrationSliderWidth(viewportWidthPx);
+  const canAdjustCalibration = canCalibrateAmsler(viewportWidthPx, viewportHeightPx, MIN_CALIBRATION_SLIDER_PX);
   const canCalibrate = canCalibrateAmsler(viewportWidthPx, viewportHeightPx, sliderWidthPx);
 
   useEffect(() => {
@@ -254,7 +256,7 @@ function AmslerGrid() {
                 min="150"
                 max={maxSliderWidthPx}
                 value={sliderWidthPx}
-                disabled={!canCalibrate}
+                disabled={!canAdjustCalibration}
                 onChange={(e) => setSliderWidthPx(Number(e.target.value))}
                 aria-label={lang === 'hi' ? 'कैलिब्रेशन स्लाइडर' : 'Calibration slider'}
               />
