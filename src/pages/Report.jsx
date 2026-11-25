@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { evaluatePatterns } from '../engine/patternEngine.js';
+import { getFlaggedCellCount } from '../engine/amslerSpatial.js';
 import { evaluateClusters } from '../data/patternClusters.js';
 import patternDefinitions from '../data/patterns.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
@@ -364,7 +365,7 @@ export default function Report() {
             <div className="rpt__amsler-grid">
               {['right', 'left'].map((eye) => {
                 const eyeData = amslerResults.data[eye];
-                const count = eyeData?.cellCount || (eyeData?.flaggedCells?.length ?? 0);
+                const count = getFlaggedCellCount(eyeData);
                 return (
                   <div key={eye} className="rpt__amsler-eye-card">
                     <span className="rpt__amsler-eye-label">{eye === 'right' ? (lang === 'hi' ? 'दाईं आँख' : 'Right Eye') : (lang === 'hi' ? 'बाईं आँख' : 'Left Eye')}</span>
