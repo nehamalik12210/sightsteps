@@ -1332,6 +1332,8 @@ assert(rameshPathways.relationships.some((item) => item.type === 'timeline-onset
 assert(rameshPathways.limitations.activityImpactsLinkedToSpecificExperiences === false, 'pathways do not invent an experience-to-activity-impact link absent from the questionnaire');
 const activityImpactPathway = rameshPathways.relationships.find((item) => item.type === 'activity-impact');
 assert(Boolean(activityImpactPathway), 'pathways represent participant-selected activity-impact evidence');
+assert(activityImpactPathway?.id === 'activity-impact:fine_detail', 'activity-impact pathway uses the profile activity identifier');
+assert(Boolean(activityImpactPathway?.id && !activityImpactPathway.id.endsWith('undefined')), 'activity-impact pathway has a stable non-empty ID');
 assert(activityImpactPathway?.sourceAnswerIds.includes('affected_activities') && activityImpactPathway?.sourceAnswerIds.includes('activity_impact_fine_detail'), 'activity-impact pathway cites the selected activity and its own impact answer');
 assert(activityImpactPathway?.sourceAnswerIds.includes('experience_context'), 'activity-impact pathway cites the main experience context as separate evidence');
 assert(activityImpactPathway?.statement.en.includes('does not assign a one-to-one link'), 'activity-impact pathway does not imply an unsupported link to one specific experience or situation');
