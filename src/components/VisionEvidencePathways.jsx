@@ -47,9 +47,11 @@ export default function VisionEvidencePathways({ pathways, language = 'en', comp
                 <span className={`vision-evidence__type vision-evidence__type--${item.type}`}>
                   {item.type === 'shared-context'
                     ? (hi ? 'साझा संदर्भ' : 'SHARED CONTEXT')
-                    : item.type === 'timeline-experience'
-                      ? (hi ? 'टाइमलाइन' : 'TIMELINE LINK')
-                      : (hi ? 'अनुभव और संदर्भ' : 'EXPERIENCE · CONTEXT')}
+                    : item.type === 'activity-impact'
+                      ? (hi ? 'गतिविधि पर प्रभाव' : 'ACTIVITY IMPACT')
+                      : item.type === 'timeline-onset'
+                        ? (hi ? 'टाइमलाइन और शुरुआत' : 'TIMELINE · ONSET')
+                        : (hi ? 'अनुभव और संदर्भ' : 'EXPERIENCE · CONTEXT')}
                 </span>
                 <h3>{localized(item.title, language)}</h3>
               </div>
