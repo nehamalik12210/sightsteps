@@ -176,3 +176,9 @@
 - Verification on local sandbox checkout of main `ab9734412c2b85ea8c2d84906f1619f6176df34d` plus uncommitted correction: `npm run audit` 2,558 passed; `npm test` 1,044 passed; `npm run clinical-lint` 23 JSX files / 2,771 fragments passed; `npm run build` 103 modules passed; `npm run export-review` 1,187 lines passed; `git diff --check` passed.
 - Dependency installation: `npm ci` passed (349 packages added / 350 audited); four moderate dependency advisories remain in the PWA toolchain.
 - Initial upload commit: `983520c6ee403e981a451da0953791784cd4ed04` was superseded after its remote review-file blob was corrupted. Corrective commit: `3983af07d0a6a1bb5796b2146b4702b66adce108` restores complete source and documentation.
+
+
+### Phase 4 initial fix — close accessibility panel on navigation
+- Source inspection confirmed the global accessibility `<details>` panel persisted across route changes because it is mounted outside the route tree and only closed on Escape or outside pointer input.
+- Added a React Router location-key effect that closes the panel after navigation, preventing it from covering a newly opened page.
+- Added a static quality-audit regression assertion. A direct browser interaction test for this specific change is pending because the Vercel sandbox quota prevented creating another sandbox; production build logs will be checked.

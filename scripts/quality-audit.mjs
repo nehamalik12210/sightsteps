@@ -351,6 +351,7 @@ check(/navigate\(getAmslerReturnPath\(visionResults\)/.test(amslerGridSource) &&
 check(/savedDirectionResults/.test(vision) && /useState\(\(\) => \(savedDirectionResults \? 'results' : 'intro'\)\)/.test(vision), 'reopening the E activity restores its saved results instead of its intro screen');
 check(/id="main-content"/.test(amslerGridSource), 'Amsler grid page has a skip-navigation main landmark');
 check(accessibilityControlsSource.includes("addEventListener('pointerdown', handleOutsidePointer)") && accessibilityControlsSource.includes("detailsRef.current.contains(event.target)"), 'accessibility settings close when a user taps outside the panel');
+check(/useLocation/.test(accessibilityControlsSource) && /detailsRef\.current\.open = false/.test(accessibilityControlsSource) && /\[location\.key\]/.test(accessibilityControlsSource), 'accessibility settings close on route navigation so the panel does not cover the destination screen');
 check(accessibilityControlsCssSource.includes('data-a11y-contrast') && accessibilityControlsCssSource.includes('data-a11y-targets') && accessibilityControlsCssSource.includes('data-a11y-motion'), 'display settings provide contrast, larger targets and reduced-motion modes');
 check(baseCss.includes('var(--a11y-scale') && accessCss.includes('data-a11y-scale'), 'global typography can scale while preserving responsive rem sizing');
 check(appSource.includes('RouteFocusManager') && appSource.includes("getElementById('main-content')?.focus"), 'route changes move keyboard focus to the new page main landmark');

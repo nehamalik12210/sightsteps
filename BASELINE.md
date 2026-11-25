@@ -110,3 +110,10 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Browser verification (Chromium headless): Landing loaded without console/page errors; Ramesh demo advanced through seven guided answers to Report; Clinician Brief opened and focus moved to Close; print body class was set; PDF generation produced one A4 page; Escape closed modal and restored the body class. This is a scripted browser check, not cross-browser, assistive-technology, physical-device, or printer validation.
 - Confirmed and fixed F-19: unscoped `@page` in the Clinician Brief CSS affected all print paths. The A4 page rule is now named and applied only to the brief container.
 - Corrective commit `3983af07d0a6a1bb5796b2146b4702b66adce108` restores complete files after a remote upload truncation was detected. Deployment/live-commit verification is pending.
+
+
+## Phase 4 — initial navigation UX fix (25 November 2026)
+
+- Confirmed source issue F-20: global accessibility settings could remain open over a destination page after route navigation.
+- Fixed with `useLocation` + location-key effect in `AccessibilityControls`; added a quality-audit assertion.
+- Source diff review and automated deployment verification pending.

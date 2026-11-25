@@ -57,3 +57,6 @@
 - Clinician Brief modal browser check: opened, moved focus to Close, set the print body class, generated a one-page A4 PDF, and closed on Escape while restoring the body class. No console or page errors were observed.
 - Automated checks passed after the F-19 fix: quality audit 2,558; regression tests 1,044; clinical audit 23 JSX files / 2,771 fragments; production build 103 modules; review export 1,187 lines.
 - Browser print preview was simulated with Chromium headless; a real printer/device and cross-browser print-preview inspection remain pending.
+
+
+| F-20 | Global accessibility settings panel remained open when navigating to another route, potentially overlaying the new page. | Confirmed from component placement: the controls are mounted globally outside the route tree and had no location-change close handler. | Fixed: the panel now closes on React Router location-key changes. Added a quality-audit regression assertion. Scripted browser verification of this exact new interaction is unavailable in the current sandbox because Vercel Snapshot Storage limits were reached; production build/automated checks will be verified through the Vercel deployment. |
