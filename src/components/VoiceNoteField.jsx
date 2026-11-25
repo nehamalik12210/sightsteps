@@ -51,6 +51,7 @@ export default function VoiceNoteField({
         setStatus(language === 'hi' ? 'सुन रहा है…' : 'Listening…');
       };
       recognition.onresult = (event) => {
+        if (recognitionRef.current !== recognition) return;
         const transcript = Array.from(event.results || [])
           .map((result) => result?.[0]?.transcript || '')
           .join(' ')
@@ -66,6 +67,7 @@ export default function VoiceNoteField({
         }
       };
       recognition.onerror = (event) => {
+        if (recognitionRef.current !== recognition) return;
         recognitionError = true;
         const message = event?.error === 'not-allowed'
           ? (language === 'hi' ? 'माइक्रोफ़ोन अनुमति नहीं मिली।' : 'Microphone permission was not granted.')
@@ -74,6 +76,7 @@ export default function VoiceNoteField({
         setListening(false);
       };
       recognition.onend = () => {
+        if (recognitionRef.current !== recognition) return;
         setListening(false);
         recognitionRef.current = null;
         if (!receivedResult && !recognitionError) {
@@ -85,6 +88,7 @@ export default function VoiceNoteField({
       recognitionRef.current = recognition;
       recognition.start();
     } catch {
+      if (recognitionRef.current === recognition) recognitionRef.current = null;
       setListening(false);
       setStatus(language === 'hi' ? 'आवाज़ पहचान शुरू नहीं हो सकी।' : 'Could not start voice recognition.');
     }
@@ -106,6 +110,7 @@ export default function VoiceNoteField({
           const next = event.target.value.slice(0, maxLength);
           valueRef.current = next;
           onChange(next);
+          setStatus('');
         }}
         placeholder={placeholder}
         rows={rows}

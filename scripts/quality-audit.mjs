@@ -208,6 +208,8 @@ check(appSource.includes('<OfflineStatus />') && offlineStatusSource.includes("a
 check(/aria-describedby=\{\[countId, privacyId, status \? statusId : null\]/.test(voiceSource), 'voice fields describe the character count, privacy note and recognition status');
 check(/aria-pressed=\{listening\}/.test(voiceSource) && /aria-controls=\{id\}/.test(voiceSource), 'microphone button exposes pressed state and its controlled field');
 check(/No speech was captured/.test(voiceSource), 'empty speech capture ends with an explanatory message rather than stale listening status');
+check((voiceSource.match(/recognitionRef\.current !== recognition/g) || []).length >= 3, 'stale speech-recognition events cannot overwrite the state of a newer voice capture');
+check(/valueRef\.current = next;\s*onChange\(next\);\s*setStatus\(''\)/.test(voiceSource), 'manual text edits clear outdated speech-recognition status messages');
 check(/speechSynthesis/.test(intake) && /currentOptions\.map/.test(intake), 'question text and answer options can be read aloud');
 check(/getQuestionCompletionProgress/.test(intake), 'questionnaire progress is calculated from completed visible answers');
 check(/aria-valuenow=\{progress\.percent\}/.test(intake) && /width: `\$\{progress\.percent\}%`/.test(intake) && /\{progress\.percent\}%/.test(intake), 'progress-bar fill, accessible value and percentage label use the same rounded percentage');
