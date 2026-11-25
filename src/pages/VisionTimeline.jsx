@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { getReportedExperienceOptions } from '../data/questions.js';
@@ -77,6 +77,13 @@ export default function VisionTimeline() {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
+  const editorHeadingRef = useRef(null);
+
+  useEffect(() => {
+    if (!editingId) return;
+    editorHeadingRef.current?.focus();
+  }, [editingId]);
+
   const updateDraft = (field, value) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setError('');
@@ -86,7 +93,9 @@ export default function VisionTimeline() {
   const resetDraft = () => {
     setDraft(createEmptyDraft(concerns[0] && concerns[0].value));
     setEditingId(null);
+    setDeleteConfirmId(null);
     setError('');
+    setStatus('');
   };
 
   const handleEdit = (entry) => {
@@ -194,7 +203,7 @@ export default function VisionTimeline() {
           <div className="vti__editor-head">
             <div>
               <p className="vti__kicker">{editingId ? (lang === 'hi' ? 'एंट्री संपादित करें' : 'EDIT ENTRY') : (lang === 'hi' ? 'नई एंट्री' : 'NEW ENTRY')}</p>
-              <h3 id="vti-editor-heading">{editingId ? (lang === 'hi' ? 'अपना रिकॉर्ड अपडेट करें' : 'Update your record') : (lang === 'hi' ? 'एक अनुभव दर्ज करें' : 'Record an experience')}</h3>
+              <h3 id="vti-editor-heading" ref={editorHeadingRef} tabIndex="-1">{editingId ? (lang === 'hi' ? 'अपना रिकॉर्ड अपडेट करें' : 'Update your record') : (lang === 'hi' ? 'एक अनुभव दर्ज करें' : 'Record an experience')}</h3>
             </div>
             <span className="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
           </div>

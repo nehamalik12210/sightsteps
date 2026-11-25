@@ -284,6 +284,8 @@ check(timelineUtilitySource.includes('normalizeVisionTimelineEntries') && timeli
 check(/const seenIds = new Set\(\)/.test(timelineUtilitySource) && /normalizeVisionTimelineEntries\(timelineEntries\)/.test(appointmentPackSource), 'timeline IDs are deduplicated before they enter the report or appointment pack');
 check(timelineUtilitySource.includes('validateVisionTimelineDraft') && timelineUtilitySource.includes('futureDate'), 'timeline validation rejects invalid and future dates');
 check(timelinePageSource.includes('handleEdit') && timelinePageSource.includes('confirmDelete') && timelinePageSource.includes('setVisionTimelineEntries'), 'timeline supports editing and confirmed deletion');
+check(/editorHeadingRef\.current\?\.focus\(\)/.test(timelinePageSource) && /ref={editorHeadingRef} tabIndex={-1}/.test(timelinePageSource), 'editing a timeline entry moves keyboard focus to the editor heading');
+check(/setDeleteConfirmId\(null\)[\s\S]*?setStatus\(''\)/.test(timelinePageSource), 'starting or cancelling a timeline draft clears stale save and delete status');
 check(timelinePageSource.includes('Participant-reported') && timelinePageSource.includes('not a test or clinical assessment'), 'timeline notes are explicitly participant-reported and non-clinical');
 check(report.includes('My Vision Timeline') && report.includes('rpt__timeline-list'), 'detailed report includes participant-recorded timeline');
 const reportStaticIds = [...report.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
