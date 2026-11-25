@@ -125,13 +125,15 @@ export default function Onboarding() {
             <legend>{lang === 'hi' ? 'सेशन इतिहास (वैकल्पिक)' : 'Saved session history (optional)'}</legend>
             <label className="onboarding__history-consent-option">
               <input
+                id="history-consent-checkbox"
                 type="checkbox"
                 checked={historyConsentSelected}
                 onChange={(event) => setHistoryConsentSelected(event.target.checked)}
+                aria-describedby="history-consent-note"
               />
               <span>{t('onboarding.historyConsent.label', lang)}</span>
             </label>
-            <p>{t('onboarding.historyConsent.note', lang)}</p>
+            <p id="history-consent-note">{t('onboarding.historyConsent.note', lang)}</p>
           </fieldset>
         )}
         {kioskMode && <p className="onboarding__kiosk-note">{lang === 'hi' ? 'साझा-डिवाइस मोड सक्रिय है: पाँच मिनट की निष्क्रियता के बाद डेटा साफ़ होगा।' : 'Shared-device mode is active: session data clears after five minutes of inactivity.'}</p>}
