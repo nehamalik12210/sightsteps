@@ -278,7 +278,7 @@ check(/getSavedSessions/.test(storageSource) && /loadSessionById/.test(storageSo
 check(/preserveHistory \? await archiveLatestSession\(\) : await clearAllSessions\(\)/.test(contextSource), 'ordinary participant reset can archive while kiosk cleanup clears all data');
 check(/saved-session-heading/.test(landingSource) && /handleResumeSaved/.test(landingSource) && /handleDeleteSaved/.test(landingSource), 'saved session history exposes resume and delete controls');
 const consentSource = read('src/data/i18n.js');
-check(/up to 10 session records/.test(consentSource) && /डेटा एन्क्रिप्ट नहीं है/.test(consentSource), 'bilingual consent discloses local retention and lack of encryption');
+check(/up to 10 completed session records/.test(consentSource) && /डेटा एन्क्रिप्ट नहीं है/.test(consentSource), 'bilingual consent discloses optional completed-session retention and lack of encryption');
 check(/historyConsentGiven/.test(contextSource) && /historyConsentGiven/.test(storageSource) && /historyConsentGiven/.test(read('src/utils/sessionHistory.js')), 'multi-session retention requires explicit updated history consent');
 check(/consentGiven: Boolean\(record\.consentGiven\),\s*historyConsentGiven: Boolean\(record\.historyConsentGiven\),/.test(contextSource), 'session hydration restores the saved participant history-consent decision after reload');
 check(/state\.consentGiven, state\.historyConsentGiven, state\.isDemo/.test(contextSource), 'autosave observes history-consent changes so the saved consent decision is not dropped');
