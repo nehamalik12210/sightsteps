@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getNextGridCell } from '../utils/gridNavigation.js';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
 import { getAmslerReturnPath } from '../utils/sessionRouting.js';
@@ -36,7 +37,9 @@ function AmslerGrid() {
   const [reportPending, setReportPending] = useState(false);
   const [kbRow, setKbRow] = useState('');
   const [kbCol, setKbCol] = useState('');
+  const [focusedCell, setFocusedCell] = useState({ row: 0, col: 0 });
   const sliderRef = useRef(null);
+  const gridCellRefs = useRef({});
 
   const [sliderWidthPx, setSliderWidthPx] = useState(300);
   const [viewportMetrics, setViewportMetrics] = useState(getViewportMetrics);
@@ -79,6 +82,7 @@ function AmslerGrid() {
 
   const startTest = () => {
     setCurrentEye('right');
+    setFocusedCell({ row: 0, col: 0 });
     setFlaggedCells({ right: [], left: [] });
     setPhase('testing');
   };
@@ -86,6 +90,25 @@ function AmslerGrid() {
   const gridSizePx = calibrationPxPerMm ? calibrationPxPerMm * GRID_PHYSICAL_MM : 300;
   const cellSizePx = gridSizePx / GRID_SIZE;
   const gridFitsCurrentViewport = doesCalibratedGridFit(viewportWidthPx, viewportHeightPx, gridSizePx);
+
+  const handleGridCellKeyDown = useCallback((event, row, col) => {
+    const nextCell = getNextGridCell(row, col, event.key, GRID_SIZE);
+    if (!nextCell) return;
+    event.preventDefault();
+    setFocusedCell(nextCell);
+    gridCellRefs.current[`${nextCell.row}-${nextCell.col}`]?.focus({ preventScroll: true });
+  }, []);
+
+  // The grid replaces the instruction screen. Move focus into its single
+  // roving tab stop when testing starts and when the participant changes eyes.
+  useEffect(() => {
+    if (phase !== 'testing' || !gridFitsCurrentViewport) return undefined;
+    const key = `${focusedCell.row}-${focusedCell.col}`;
+    const frame = window.requestAnimationFrame(() => {
+      gridCellRefs.current[key]?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [phase, currentEye, gridFitsCurrentViewport]);
 
   const handleCellClick = useCallback((row, col) => {
     if (!gridFitsCurrentViewport) return;
@@ -149,7 +172,13 @@ function AmslerGrid() {
         cells.push(
           <button
             key={`${r}-${c}`}
+            ref={(node) => {
+              const key = `${r}-${c}`;
+              if (node) gridCellRefs.current[key] = node;
+              else delete gridCellRefs.current[key];
+            }}
             type="button"
+            tabIndex={focusedCell.row === r && focusedCell.col === c ? 0 : -1}
             className={`amsler__cell${isFlagged ? ' amsler__cell--flagged' : ''}`}
             style={{
               width: `${cellSizePx}px`,
@@ -158,6 +187,8 @@ function AmslerGrid() {
               top: `${r * cellSizePx}px`,
             }}
             onClick={() => handleCellClick(r, c)}
+            onFocus={() => setFocusedCell({ row: r, col: c })}
+            onKeyDown={(event) => handleGridCellKeyDown(event, r, c)}
             aria-label={`${lang === 'hi' ? 'ग्रिड सेल' : 'Grid cell'} ${r + 1},${c + 1}${isFlagged ? (lang === 'hi' ? ' — चिह्नित' : ' — flagged') : ''}`}
             aria-pressed={isFlagged}
           >
@@ -317,7 +348,15 @@ function AmslerGrid() {
           <p className="amsler__test-prompt">
             {lang === 'hi' ? 'केंद्र के बिंदु पर ध्यान केंद्रित करें। लहरदार, धुंधली या गायब रेखाओं वाले क्षेत्रों पर टैप करें।' : 'Focus on the center dot. Tap any areas where lines appear wavy, blurred or missing.'}
           </p>
-          <div className="amsler__grid-container" style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }} hidden={!gridFitsCurrentViewport}>
+          <div
+            className="amsler__grid-container"
+            role="group"
+            aria-label={lang === 'hi'
+              ? '20 पंक्ति और 20 स्तंभ वाला ग्रिड। शुरू करने के लिए Tab दबाएँ और जाने के लिए तीर कुंजियों का उपयोग करें।'
+              : '20 by 20 selection grid. Tab to enter, use arrow keys to move, and press Space to flag or unflag a cell.'}
+            style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }}
+            hidden={!gridFitsCurrentViewport}
+          >
             <div className="amsler__grid-lines" style={{ width: `${gridSizePx}px`, height: `${gridSizePx}px` }}>
               {/* Horizontal lines */}
               {Array.from({ length: GRID_SIZE + 1 }, (_, i) => (

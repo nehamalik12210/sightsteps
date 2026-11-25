@@ -5,6 +5,7 @@
  */
 
 import { evaluateAnswers } from './ruleEngine.js';
+import { getNextGridCell } from '../utils/gridNavigation.js';
 import { getBackNavigationAnswerIds, getAmslerReturnPath, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
 import questionBank, { getActivityDependentAnswerIds, getActivityLabel, getSelectedAdditionalExperienceIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
@@ -949,6 +950,36 @@ assert(
   !doesCalibratedGridFit(Number.NaN, 800, 300),
   'invalid viewport measurements fail closed'
 );
+
+// Roving keyboard navigation for the 20x20 Amsler selection grid.
+assert(
+  JSON.stringify(getNextGridCell(5, 5, 'ArrowUp')) === JSON.stringify({ row: 4, col: 5 }),
+  'Amsler grid ArrowUp moves one row without changing columns'
+);
+assert(
+  JSON.stringify(getNextGridCell(5, 5, 'ArrowDown')) === JSON.stringify({ row: 6, col: 5 }),
+  'Amsler grid ArrowDown moves one row without changing columns'
+);
+assert(
+  JSON.stringify(getNextGridCell(5, 5, 'ArrowLeft')) === JSON.stringify({ row: 5, col: 4 }),
+  'Amsler grid ArrowLeft moves one column'
+);
+assert(
+  JSON.stringify(getNextGridCell(5, 5, 'ArrowRight')) === JSON.stringify({ row: 5, col: 6 }),
+  'Amsler grid ArrowRight moves one column'
+);
+assert(getNextGridCell(0, 0, 'ArrowUp') === null, 'Amsler grid focus stays within the top edge');
+assert(getNextGridCell(19, 19, 'ArrowRight') === null, 'Amsler grid focus stays within the right edge');
+assert(
+  JSON.stringify(getNextGridCell(7, 12, 'Home')) === JSON.stringify({ row: 7, col: 0 }),
+  'Amsler grid Home moves to the first cell in the current row'
+);
+assert(
+  JSON.stringify(getNextGridCell(7, 12, 'End')) === JSON.stringify({ row: 7, col: 19 }),
+  'Amsler grid End moves to the last cell in the current row'
+);
+assert(getNextGridCell(0, 0, 'PageDown') === null, 'Amsler grid ignores unrelated keys');
+assert(getNextGridCell(20, 0, 'ArrowDown') === null, 'Amsler grid rejects invalid row coordinates');
 
 // === Appointment Pack — Amsler Integration ===
 console.log('\n=== Appointment pack Amsler integration ===');
