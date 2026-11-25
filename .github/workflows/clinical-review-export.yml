@@ -5,15 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "scripts/export-prompts.mjs"
-      - "src/data/patterns.js"
-      - "src/data/patternClusters.js"
-      - "src/data/i18n.js"
-      - "src/data/questions.js"
-      - "src/data/demoPersona.js"
-      - "src/engine/**"
+      - "src/**"
+      - "scripts/**"
       - "package.json"
       - "package-lock.json"
+      - "vite.config.*"
+      - "index.html"
       - ".github/workflows/clinical-review-export.yml"
   workflow_dispatch:
 
