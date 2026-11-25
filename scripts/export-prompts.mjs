@@ -20,6 +20,7 @@ import clusters from '../src/data/patternClusters.js';
 import strings from '../src/data/i18n.js';
 import rameshPersona from '../src/data/demoPersona.js';
 import { getVisibleQuestions } from '../src/data/questions.js';
+import { buildVisionEvidencePathways } from '../src/engine/visionEvidencePathways.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const exportDir = join(root, 'exports');
@@ -100,8 +101,54 @@ if (rameshPatterns.length === 0) {
   }
 }
 
-// ─── 4. Rules Engine Discussion Prompts (Demo Persona) ────────
-section('4. DISCUSSION PROMPTS FROM RULES ENGINE (Ramesh)');
+// ─── 4. Vision Evidence Pathways (Demo Persona) ────────────────
+section('4. VISION EVIDENCE PATHWAYS (SCRIPTED RAMESH DEMO)');
+
+const rameshEvidencePathways = buildVisionEvidencePathways(
+  rameshPersona.answers,
+  rameshPersona.timelineEntries,
+);
+lines.push('  This section shows deterministic relationships across the scripted demo answers.');
+lines.push('  Shared-context links require the same specific context to be selected for separate reported experiences.');
+lines.push('  Information gaps identify unanswered fields that the questionnaire asks; they are not clinical conclusions.');
+lines.push('  Activity impacts are not attributed to a specific experience because the stored answers do not make that link.');
+lines.push('');
+
+for (const relationship of rameshEvidencePathways.relationships) {
+  sub(`Relationship: ${relationship.type} — ${relationship.id}`);
+  row('Title', loc(relationship.title, 'en'), loc(relationship.title, 'hi'));
+  row('Explanation', loc(relationship.statement, 'en'), loc(relationship.statement, 'hi'));
+  lines.push('  Source answer IDs: ' + (relationship.sourceAnswerIds.join(', ') || 'None'));
+  for (const source of relationship.sourceAnswers) {
+    lines.push(`    - [EN] ${loc(source.label, 'en')}: ${loc(source.value, 'en')} [${source.id}]`);
+    lines.push(`      [HI] ${loc(source.label, 'hi')}: ${loc(source.value, 'hi')} [${source.id}]`);
+  }
+  if (relationship.sourceTimeline?.length) {
+    lines.push('  Source timeline IDs: ' + relationship.sourceTimelineIds.join(', '));
+    for (const source of relationship.sourceTimeline) {
+      lines.push(`    - [EN] ${source.date || 'Date not recorded'}: ${loc(source.detail, 'en')} [${source.id}]`);
+      lines.push(`      [HI] ${source.date || 'तारीख दर्ज नहीं'}: ${loc(source.detail, 'hi')} [${source.id}]`);
+    }
+  }
+}
+
+sub('Information gaps (not recorded details)');
+for (const gap of rameshEvidencePathways.informationGaps) {
+  row('Information gap', loc(gap.title, 'en'), loc(gap.title, 'hi'));
+  row('Explanation', loc(gap.statement, 'en'), loc(gap.statement, 'hi'));
+  lines.push('  Missing fields: ' + gap.missingFields.map((field) => loc(field.label, 'en')).join(', '));
+  lines.push('  Source answer IDs: ' + (gap.sourceAnswerIds.join(', ') || 'None'));
+  for (const source of gap.sourceAnswers) {
+    lines.push(`    - [EN] ${loc(source.label, 'en')}: ${loc(source.value, 'en')} [${source.id}]`);
+    lines.push(`      [HI] ${loc(source.label, 'hi')}: ${loc(source.value, 'hi')} [${source.id}]`);
+  }
+}
+lines.push('  Limitations: no clinical scoring, diagnosis, causal inference or experience-to-activity-impact attribution.');
+lines.push('  Shared-context relationship count: ' + rameshEvidencePathways.relationships.filter((item) => item.type === 'shared-context').length);
+lines.push('  Information-gap count: ' + rameshEvidencePathways.informationGaps.length);
+
+// ─── 5. Rules Engine Discussion Prompts (Demo Persona) ────────
+section('5. DISCUSSION PROMPTS FROM RULES ENGINE (Ramesh)');
 
 const rameshReport = evaluateAnswers(rameshPersona.answers, {
   activities: rameshPersona.activities,
@@ -123,8 +170,8 @@ for (const point of rameshReport.discussionPoints) {
   lines.push('');
 }
 
-// ─── 5. Custom "Other" Activity Provenance Example ────────────
-section('5. CUSTOM "OTHER" ACTIVITY PROVENANCE (SYNTHETIC TEST DATA)');
+// ─── 6. Custom "Other" Activity Provenance Example ────────────
+section('6. CUSTOM "OTHER" ACTIVITY PROVENANCE (SYNTHETIC TEST DATA)');
 
 const customOtherAnswers = {
   custom_activity_name: {
@@ -159,8 +206,8 @@ for (const point of customOtherReport.discussionPoints.filter((item) => (
   lines.push('');
 }
 
-// ─── 6. Follow-Up Notes ──────────────────────────────────────
-section('6. FOLLOW-UP NOTES (Ramesh)');
+// ─── 7. Follow-Up Notes ──────────────────────────────────────
+section('7. FOLLOW-UP NOTES (Ramesh)');
 
 for (const note of rameshReport.followUpNotes) {
   sub(`Note: ${note.id}`);
@@ -169,8 +216,8 @@ for (const note of rameshReport.followUpNotes) {
   lines.push('');
 }
 
-// ─── 7. Amsler Grid Wording ──────────────────────────────────
-section('7. AMSLER GRID WORDING');
+// ─── 8. Amsler Grid Wording ──────────────────────────────────
+section('8. AMSLER GRID WORDING');
 
 const amslerStrings = {
   'Intro notice': {
@@ -200,8 +247,8 @@ for (const [label, text] of Object.entries(amslerStrings)) {
   row(label, text.en, text.hi);
 }
 
-// ─── 8. Clinician Brief Wording ──────────────────────────────
-section('8. CLINICIAN BRIEF WORDING');
+// ─── 9. Clinician Brief Wording ──────────────────────────────
+section('9. CLINICIAN BRIEF WORDING');
 
 const briefStrings = {
   'Main disclaimer': {
@@ -219,8 +266,8 @@ for (const [label, text] of Object.entries(briefStrings)) {
 }
 
 
-// ─── 9. Adaptive Additional-Experience Questions ─────────────
-section('9. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
+// ─── 10. Adaptive Additional-Experience Questions ─────────────
+section('10. ADAPTIVE ADDITIONAL-EXPERIENCE QUESTIONS');
 
 // Illustrative answer fixture: these are question templates, not a clinical case.
 const secondaryQuestionFixture = {
@@ -252,8 +299,8 @@ for (const question of secondaryQuestions) {
   lines.push('');
 }
 
-// ─── 10. Custom Activity and Participant Review ───────────────
-section('10. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
+// ─── 11. Custom Activity and Participant Review ───────────────
+section('11. CUSTOM ACTIVITY AND PARTICIPANT REVIEW');
 row(
   'Custom activity prompt',
   'What is your other everyday activity? Example participant entry: jewellery making.',
@@ -285,8 +332,8 @@ row(
   'यह समीक्षा केवल बातचीत का संदर्भ है। इससे मूल जवाब या चिकित्सकीय व्याख्या नहीं बदलती।',
 );
 
-// ─── 11. Source Provenance Labels ─────────────────────────────
-section('11. SOURCE PROVENANCE LABELS');
+// ─── 12. Source Provenance Labels ─────────────────────────────
+section('12. SOURCE PROVENANCE LABELS');
 row(
   'Report discussion topic',
   'Your responses linked to this topic:',
@@ -303,8 +350,8 @@ row(
   'इस विषय से जुड़े आपके जवाब:',
 );
 
-// ─── 12. Report Notice Strings ───────────────────────────────
-section('12. KEY i18n STRINGS');
+// ─── 13. Report Notice Strings ───────────────────────────────
+section('13. KEY i18n STRINGS');
 const keyI18nKeys = [
   'disclaimer.full',
   'patterns.title',
