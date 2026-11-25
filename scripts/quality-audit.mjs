@@ -169,6 +169,8 @@ const conversationReviewSource = read('src/components/ConversationReview.jsx');
 const conversationReviewCssSource = read('src/components/ConversationReview.css');
 const appointmentPackBuilderSource = read('src/utils/appointmentPack.js');
 const appointmentPackComponentSource = read('src/components/AppointmentPreparationPack.jsx');
+const activityProfileSource = read('src/pages/ActivityProfile.jsx');
+check(/getAffectedActivityLabels\(affected, customLabel\)/.test(activityProfileSource), 'changing a participant-entered Other activity refreshes the affected-activities label with the custom wording');
 const clinicianBriefSource = read('src/components/ClinicianBrief.jsx');
 const sessionTestSource = read('src/engine/testEngine.mjs');
 

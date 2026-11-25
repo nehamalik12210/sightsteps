@@ -7,7 +7,7 @@
 import { evaluateAnswers } from './ruleEngine.js';
 import { getNextGridCell } from '../utils/gridNavigation.js';
 import { getBackNavigationAnswerIds, getAmslerReturnPath, getNewSessionRedirect, getPendingSessionQuestion, getProtectedRouteRedirect, getResumePath } from '../utils/sessionRouting.js';
-import questionBank, { getActivityDependentAnswerIds, getActivityLabel, getSelectedAdditionalExperienceIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
+import questionBank, { getActivityDependentAnswerIds, getActivityLabel, getAffectedActivityLabels, getSelectedAdditionalExperienceIds, getNextQuestion, getQuestionForActivities, getProgress, getQuestionCompletionProgress, getVisibleQuestions, isAnswerComplete } from '../data/questions.js';
 import strings from '../data/i18n.js';
 import { createSessionRecord } from '../utils/storage.js';
 import { hasKioskSessionExpired, shouldDiscardKioskSessionOnRestore, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolicy.js';
@@ -349,6 +349,10 @@ const customActivityOptions = getQuestionForActivities(otherActivityQuestion, ['
 assert(customActivityOptions.find((option) => option.value === 'other')?.label.en === 'Jewellery making', 'affected-activity choice uses the participant-defined Other activity label');
 assert(getActivityLabel('other', customActivityAnswers)?.en === 'Jewellery making', 'custom activity helper resolves participant wording');
 assert(getActivityLabel('other', customActivityAnswers)?.hi === 'Jewellery making', 'custom activity helper preserves participant-entered wording verbatim across locale fields');
+const renamedAffectedLabels = getAffectedActivityLabels(['reading', 'other', 'none'], 'Repairing watches');
+assert(renamedAffectedLabels.en === 'Reading & study, Repairing watches', 'renaming a custom activity updates the affected-activities answer label in English');
+assert(renamedAffectedLabels.hi === 'पढ़ाई और अध्ययन, Repairing watches', 'renaming a custom activity updates the affected-activities answer label in Hindi without losing the custom wording');
+
 
 const customActivityContextAnswers = {
   ...customActivityAnswers,

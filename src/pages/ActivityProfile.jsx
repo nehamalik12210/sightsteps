@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
-import { getActivityDependentAnswerIds } from '../data/questions.js';
+import { getActivityDependentAnswerIds, getAffectedActivityLabels } from '../data/questions.js';
 import LocalSaveStatus from '../components/LocalSaveStatus.jsx';
 import './ActivityProfile.css';
 
@@ -116,19 +116,7 @@ export default function ActivityProfile() {
       if (previousCustomLabel && previousCustomLabel !== customLabel) {
         const affected = Array.isArray(answers?.affected_activities?.value) ? answers.affected_activities.value : [];
         if (affected.includes('other')) {
-          const labels = affected
-            .filter((id) => id !== 'none' && id !== 'unsure')
-            .map((id) => {
-              const activity = ACTIVITY_OPTIONS.find((item) => item.id === id);
-              return activity?.label?.en || id;
-            });
-          const labelsHi = affected
-            .filter((id) => id !== 'none' && id !== 'unsure')
-            .map((id) => {
-              const activity = ACTIVITY_OPTIONS.find((item) => item.id === id);
-              return activity?.label?.hi || id;
-            });
-          setAnswer('affected_activities', affected, { en: labels.join(', '), hi: labelsHi.join(', ') });
+          setAnswer('affected_activities', affected, getAffectedActivityLabels(affected, customLabel));
         }
         clearAnswers(['activity_impact_other', 'activity_impact_frequency_other']);
       }

@@ -336,6 +336,22 @@ export function getActivityLabel(activityId, answers = {}) {
   return ACTIVITY_LABELS[activityId] || null;
 }
 
+/** Build the localized answer label for the participant's affected activities. */
+export function getAffectedActivityLabels(activityIds = [], customActivityName = '') {
+  const custom = typeof customActivityName === 'string' ? customActivityName.trim() : '';
+  const ids = (Array.isArray(activityIds) ? activityIds : [])
+    .filter((id) => id !== 'none' && id !== 'unsure');
+  const labels = ids.map((id) => (
+    id === 'other' && custom
+      ? { en: custom, hi: custom }
+      : ACTIVITY_LABELS[id] || { en: id, hi: id }
+  ));
+  return {
+    en: labels.map((label) => label.en).join(', '),
+    hi: labels.map((label) => label.hi).join(', '),
+  };
+}
+
 function buildAdditionalExperienceQuestions(answers = {}) {
   const reported = new Map(getReportedExperienceOptions(answers).map((item) => [item.value, item.label]));
   const onsetOptions = questions.find((question) => question.id === 'experience_onset')?.options || [];
