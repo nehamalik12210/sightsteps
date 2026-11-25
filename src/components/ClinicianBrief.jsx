@@ -244,6 +244,34 @@ export default function ClinicianBrief({ onClose }) {
           );
         })()}
 
+        {safeVisionResults && (
+          <section className="clinician-brief__section">
+            <h2>
+              <span className="material-symbols-outlined" aria-hidden="true">explore</span>
+              {lang === 'hi' ? 'दिशा पहचान गतिविधि के जवाब' : 'Direction Awareness Activity Responses'}
+            </h2>
+            {safeVisionResults.skipped ? (
+              <p>{lang === 'hi' ? 'प्रतिभागी ने यह वैकल्पिक गतिविधि छोड़ दी।' : 'The participant skipped this optional activity.'}</p>
+            ) : (
+              <div className="clinician-brief__amsler">
+                <div className="clinician-brief__amsler-eye">
+                  <strong>{lang === 'hi' ? 'राउंड 1' : 'Round 1'}</strong>
+                  <span>{safeVisionResults.data.left.correct}/{safeVisionResults.data.left.total}</span>
+                </div>
+                <div className="clinician-brief__amsler-eye">
+                  <strong>{lang === 'hi' ? 'राउंड 2' : 'Round 2'}</strong>
+                  <span>{safeVisionResults.data.right.correct}/{safeVisionResults.data.right.total}</span>
+                </div>
+              </div>
+            )}
+            <p className="clinician-brief__amsler-note">
+              {lang === 'hi'
+                ? 'ये केवल गतिविधि के जवाबों की गिनती हैं; यह दृष्टि की तीक्ष्णता या दोनों आँखों के बीच अंतर का आकलन नहीं है।'
+                : 'These are counts of responses in the activity only; they do not assess visual acuity or differences between your eyes.'}
+            </p>
+          </section>
+        )}
+
         {report.discussionPoints.length > 0 && (
           <section className="clinician-brief__section">
             <h2>
