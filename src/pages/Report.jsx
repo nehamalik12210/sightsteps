@@ -5,6 +5,7 @@ import { t } from '../data/i18n.js';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { evaluatePatterns } from '../engine/patternEngine.js';
 import { getFlaggedCellCount } from '../engine/amslerSpatial.js';
+import { normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { evaluateClusters } from '../data/patternClusters.js';
 import patternDefinitions from '../data/patterns.js';
 import { getReportedExperienceOptions } from '../data/questions.js';
@@ -128,6 +129,7 @@ export default function Report() {
         questionsToAsk,
         timelineEntries: sortedTimelineEntries,
         amslerResults,
+        visionResults,
         experienceProfile,
         conversationReview,
         now: new Date(),
@@ -157,9 +159,8 @@ export default function Report() {
   }
   if (Object.keys(answers).length === 0) return null;
 
-  const hasVisionData = visionResults?.completed === true
-    && Boolean(visionResults?.data?.left)
-    && Boolean(visionResults?.data?.right);
+  const safeVisionResults = normalizeDirectionAwarenessResult(visionResults);
+  const hasVisionData = safeVisionResults?.completed === true;
   const hasFollowUp = report.followUpNotes.length > 0;
   const reportedConcerns = getReportedExperienceOptions(answers);
   const selectedPriorities = normalizeDiscussionPriorities(
@@ -692,7 +693,7 @@ export default function Report() {
             </div>
             <div className="rpt__eye-grid">
               {['left', 'right'].map((eye) => {
-                const result = visionResults.data[eye];
+                const result = safeVisionResults.data[eye];
                 const correct = Number.isFinite(result?.correct) ? result.correct : 0;
                 const total = Number.isFinite(result?.total) ? result.total : 0;
                 return (
@@ -713,7 +714,7 @@ export default function Report() {
           </section>
         )}
 
-        {visionResults?.skipped && (
+        {safeVisionResults?.skipped && (
           <div className="rpt__skipped">
             <span className="material-symbols-outlined" aria-hidden="true">visibility_off</span>
             <p>{lang === 'hi' ? 'आपने वैकल्पिक दिशा पहचान गतिविधि छोड़ दी।' : 'You skipped the optional direction awareness activity.'}</p>
