@@ -1364,6 +1364,28 @@ assert(!mainHeadachePathways.informationGaps.some((item) => item.missingFields.s
 assert(buildVisionEvidencePathways(null, null).relationships.length === 0, 'pathway engine safely handles malformed empty input');
 const pathwaysPack = buildAppointmentPreparationPack({ language: 'en', evidencePathways: rameshPathways });
 assert(pathwaysPack.evidencePathways === rameshPathways, 'appointment pack preserves the same computed evidence pathways');
+assert(!rameshPathways.informationGaps.some((item) => item.experienceId === 'headaches'), 'unselected reported experiences are not given discussion information gaps');
+const demoNightVisionPattern = evaluatePatterns(rameshPersona.answers).find((item) => item.id === 'night-vision');
+assert(Boolean(demoNightVisionPattern), 'Ramesh demo night-vision pattern matches the reported night-driving context');
+assert(demoNightVisionPattern?.sources.some((source) => source.id === 'additional_experience_night_vision_context'), 'Ramesh night-vision pattern cites its own secondary context answer');
+assert(!demoNightVisionPattern?.sources.some((source) => source.id === 'experience_context'), 'Ramesh night-vision pattern does not borrow the primary experience context');
+const rameshSecondaryFollowUpIds = getVisibleQuestions(rameshPersona.answers, rameshPersona.activities)
+  .filter((question) => question.id.startsWith('additional_experience_night_vision_'))
+  .map((question) => question.id);
+assert(['onset', 'frequency', 'context', 'eye'].every((field) => rameshSecondaryFollowUpIds.includes(`additional_experience_night_vision_${field}`)), 'Ramesh pathway information gaps correspond to real visible secondary questions');
+const variesPathways = buildVisionEvidencePathways({
+  ...rameshPersona.answers,
+  experience_context: { value: ['varies'], label: { en: 'It varies or has no clear pattern', hi: 'यह अलग-अलग होता है या कोई स्पष्ट पैटर्न नहीं है' } },
+  additional_experience_night_vision_context: { value: ['varies'], label: { en: 'It varies or has no clear pattern', hi: 'यह अलग-अलग होता है या कोई स्पष्ट पैटर्न नहीं है' } },
+}, []);
+assert(!variesPathways.relationships.some((item) => item.type === 'shared-context'), 'non-specific varies selections do not create shared-context inference');
+assert(!variesPathways.relationships.some((item) => item.type === 'experience-context'), 'non-specific varies selections do not create experience-context pathways');
+const mainInformationGap = buildVisionEvidencePathways({
+  blurred_vision: { value: 'yes', label: { en: 'Yes', hi: 'हाँ' } },
+  primary_concern: { value: 'blurred_vision', label: { en: 'Blurred or unclear vision', hi: 'धुंधला या अस्पष्ट दिखाई देना' } },
+}, []).informationGaps.find((item) => item.experienceId === 'blurred_vision');
+assert(['onset', 'change', 'context', 'frequency', 'eye'].every((field) => mainInformationGap?.missingFields.some((item) => item.id === field)), 'main experience gaps cover the corresponding unanswered questionnaire fields');
+
 
 const compactHindiSummary = buildCompactExperienceSummary(experienceProfile, 'hi', 360, 3);
 assert(compactHindiSummary.includes('मुख्य बताया गया अनुभव'), 'compact summary has a Hindi version');
