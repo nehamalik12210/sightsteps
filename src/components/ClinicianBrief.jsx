@@ -6,7 +6,7 @@
  * discussion prompts — all with source links and non-diagnostic framing.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { evaluatePatterns } from '../engine/patternEngine.js';
@@ -46,6 +46,75 @@ export default function ClinicianBrief({ onClose }) {
   } = useApp();
 
   const lang = language || 'en';
+  const dialogRef = useRef(null);
+  const closeHandlerRef = useRef(onClose);
+  closeHandlerRef.current = onClose;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+
+    document.body.classList.add('has-clinician-brief');
+    const previousFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const container = dialog.parentElement;
+    const background = container
+      ? Array.from(container.children).filter((element) => element !== dialog)
+      : [];
+    const previousBackgroundState = background.map((element) => ({
+      element,
+      inert: element.inert,
+      ariaHidden: element.getAttribute('aria-hidden'),
+    }));
+
+    previousBackgroundState.forEach(({ element }) => {
+      element.inert = true;
+      element.setAttribute('aria-hidden', 'true');
+    });
+
+    dialog.querySelector('.clinician-brief__close')?.focus();
+
+    const handleDialogKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeHandlerRef.current?.();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = Array.from(dialog.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )).filter((element) => element.getClientRects().length > 0);
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDialogKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleDialogKeyDown);
+      document.body.classList.remove('has-clinician-brief');
+      previousBackgroundState.forEach(({ element, inert, ariaHidden }) => {
+        element.inert = inert;
+        if (ariaHidden === null) element.removeAttribute('aria-hidden');
+        else element.setAttribute('aria-hidden', ariaHidden);
+      });
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, []);
 
   const report = useMemo(() => evaluateAnswers(answers, {
     activities,
@@ -84,19 +153,26 @@ export default function ClinicianBrief({ onClose }) {
   };
 
   return (
-    <div className="clinician-brief">
+    <div
+      className="clinician-brief"
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="clinician-brief-screen-title"
+      tabIndex="-1"
+    >
       <div className="clinician-brief__screen-header">
         <button type="button" className="clinician-brief__close" onClick={onClose} aria-label={lang === 'hi' ? 'बंद करें' : 'Close'}>
           <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
-        <h2>{lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h2>
+        <h2 id="clinician-brief-screen-title">{lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h2>
         <button type="button" className="btn btn--primary btn--sm" onClick={handlePrint}>
           <span className="material-symbols-outlined" aria-hidden="true">print</span>
           {lang === 'hi' ? 'प्रिंट करें' : 'Print'}
         </button>
       </div>
 
-      <div className="clinician-brief__page" id="clinician-brief-print">
+      <main className="clinician-brief__page" id="clinician-brief-print">
         <header className="clinician-brief__header">
           <div>
             <h1>SightSteps — {lang === 'hi' ? 'क्लिनिशियन सारांश' : 'Clinician Brief'}</h1>
@@ -312,7 +388,6 @@ export default function ClinicianBrief({ onClose }) {
           </section>
         )}
 
-      </div>
+      </main>
     </div>
   );
-}
