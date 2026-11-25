@@ -246,7 +246,7 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
       const frequencyEn = activity.frequency?.en ? ` You notice this ${activity.frequency.en.toLowerCase()}.` : '';
       const frequencyHi = activity.frequency?.hi ? ` आपने यह ${activity.frequency.hi} महसूस होने की बात बताई।` : '';
       relationships.push({
-        id: `activity-impact:${activity.id}`,
+        id: `activity-impact:${activity.activityId}`,
         type: 'activity-impact',
         title: {
           en: 'Context and activity-impact evidence',
