@@ -43,6 +43,7 @@ check(summaries.at(-1).sessionId === 'participant-2', 'oldest two saved sessions
 check(await loadSessionById('participant-0') === null, 'pruned session is no longer loadable');
 check((await loadSessionById('participant-2'))?.sessionId === 'participant-2', 'retained session can be loaded by ID');
 check((await loadLatestSession())?.sessionId === 'participant-11', 'latest-session pointer targets the most recent save');
+check((await loadSessionById('participant-11'))?.historyConsentGiven === true, 'history consent survives an IndexedDB save and reload round trip');
 check(await archiveLatestSession() === true, 'archiving clears the auto-resume pointer');
 check(await loadLatestSession() === null, 'archived session is not restored automatically');
 check((await loadSessionById('participant-11'))?.sessionId === 'participant-11', 'archiving preserves the underlying participant record');

@@ -277,6 +277,8 @@ check(/saved-session-heading/.test(landingSource) && /handleResumeSaved/.test(la
 const consentSource = read('src/data/i18n.js');
 check(/up to 10 session records/.test(consentSource) && /डेटा एन्क्रिप्ट नहीं है/.test(consentSource), 'bilingual consent discloses local retention and lack of encryption');
 check(/historyConsentGiven/.test(contextSource) && /historyConsentGiven/.test(storageSource) && /historyConsentGiven/.test(read('src/utils/sessionHistory.js')), 'multi-session retention requires explicit updated history consent');
+check(/consentGiven: Boolean\(record\.consentGiven\),\s*historyConsentGiven: Boolean\(record\.historyConsentGiven\),/.test(contextSource), 'session hydration restores the saved participant history-consent decision after reload');
+check(/state\.consentGiven, state\.historyConsentGiven, state\.isDemo/.test(contextSource), 'autosave observes history-consent changes so the saved consent decision is not dropped');
 check(/shared or public device/.test(consentSource) && /साझा या सार्वजनिक डिवाइस/.test(consentSource), 'bilingual consent warns against saving sensitive sessions on shared or public devices');
 
 // Participant timeline and appointment preparation output.

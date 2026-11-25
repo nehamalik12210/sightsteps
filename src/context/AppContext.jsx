@@ -226,6 +226,7 @@ export function AppProvider({ children }) {
             payload: {
               language: record.language || 'en',
               consentGiven: Boolean(record.consentGiven),
+              historyConsentGiven: Boolean(record.historyConsentGiven),
               isDemo: Boolean(record.isDemo),
               demoPersona: record.demoPersona || null,
               demoStepIndex: Number(record.demoStepIndex || 0),
@@ -271,7 +272,7 @@ export function AppProvider({ children }) {
     return () => { active = false; };
   }, [
     state.isHydrated, state.sessionId, state.startedAt, state.language,
-    state.consentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
+    state.consentGiven, state.historyConsentGiven, state.isDemo, state.demoPersona, state.demoStepIndex,
     state.activities, state.primaryActivity, state.participantNote, state.answers,
     state.visionResults, state.amslerResults, state.report, state.appointmentFollowUp, state.visionTimelineEntries,
     state.discussionPriorities, state.questionsToAsk, state.conversationReview, state.assistedCompletion, state.kioskMode,
