@@ -9,6 +9,7 @@ import {
 import { clearAllSessions, loadLatestSession, saveSession } from '../utils/storage.js';
 import { shouldDiscardKioskSessionOnRestore } from '../utils/kioskPolicy.js';
 import { normalizeVisionTimelineEntries } from '../utils/visionTimeline.js';
+import { normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
 
 const AppContext = createContext(null);
 
@@ -152,7 +153,7 @@ function appReducer(state, action) {
       return { ...state, participantNote: action.payload || '' };
 
     case 'SET_VISION_RESULTS':
-      return { ...state, visionResults: action.payload };
+      return { ...state, visionResults: normalizeDirectionAwarenessResult(action.payload) };
 
     case 'SET_AMSLER_RESULTS':
       return { ...state, amslerResults: action.payload };
@@ -230,9 +231,7 @@ export function AppProvider({ children }) {
               primaryActivity: record.primaryActivity || record.demoPersona?.primaryActivity || null,
               participantNote: record.participantNote || '',
               answers: record.answers || {},
-              visionResults: (record.visionResults?.skipped || record.visionResults?.data?.activityType === 'direction-awareness')
-                ? record.visionResults
-                : null,
+              visionResults: normalizeDirectionAwarenessResult(record.visionResults),
               amslerResults: record.amslerResults || null,
               // Rebuild report content from current rules instead of trusting saved output.
               report: null,
