@@ -100,6 +100,249 @@
   overflow-wrap: anywhere;
 }
 
+/* Keep the screen brief detailed, but make its printed version a true one-page handout. */
+.clinician-brief__more-patterns {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 6mm;
+}
+
+@media print {
+  .clinician-brief__page {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #17212b;
+    font-size: 8pt;
+  }
+
+  .clinician-brief__header {
+    margin-bottom: 5px;
+    padding-bottom: 4px;
+  }
+
+  .clinician-brief__header h1 {
+    font-size: 13pt;
+  }
+
+  .clinician-brief__date {
+    margin-top: 1px;
+    font-size: 7pt;
+  }
+
+  .clinician-brief__disclaimer {
+    gap: 5px;
+    padding: 5px 7px;
+    margin-bottom: 6px;
+  }
+
+  .clinician-brief__disclaimer p,
+  .clinician-brief__section,
+  .clinician-brief__pattern-card > p,
+  .clinician-brief__discuss-item p {
+    font-size: 7.2pt;
+    line-height: 1.2;
+  }
+
+  .clinician-brief__section {
+    margin-bottom: 6px;
+  }
+
+  .clinician-brief__section > h2 {
+    gap: 4px;
+    font-size: 8pt;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+  }
+
+  .clinician-brief__section > h2 > .material-symbols-outlined {
+    font-size: 10pt;
+  }
+
+  .clinician-brief__clusters,
+  .clinician-brief__prompt-box,
+  .clinician-brief__pattern-card > .clinician-brief__sources,
+  .clinician-brief__discuss-item .clinician-brief__sources {
+    display: none !important;
+  }
+
+  .clinician-brief__pattern-card:nth-child(n + 3) {
+    display: none !important;
+  }
+
+  .clinician-brief__patterns {
+    gap: 4px;
+  }
+
+  .clinician-brief__pattern-card {
+    padding: 5px 7px;
+    border-left-width: 2px;
+  }
+
+  .clinician-brief__pattern-head {
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+
+  .clinician-brief__pattern-head .material-symbols-outlined {
+    font-size: 10pt;
+  }
+
+  .clinician-brief__pattern-head strong {
+    font-size: 8pt;
+  }
+
+  .clinician-brief__pattern-card > p {
+    margin-bottom: 0;
+  }
+
+  .clinician-brief__group {
+    margin-bottom: 3px;
+  }
+
+  .clinician-brief__group h3 {
+    font-size: 7.5pt;
+    margin-bottom: 2px;
+  }
+
+  .clinician-brief__table {
+    font-size: 7pt;
+  }
+
+  .clinician-brief__table td {
+    padding: 2px 4px;
+  }
+
+  .clinician-brief__amsler {
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+
+  .clinician-brief__amsler-eye {
+    padding: 4px;
+  }
+
+  .clinician-brief__amsler-eye strong,
+  .clinician-brief__amsler-eye span {
+    font-size: 7pt;
+  }
+
+  .clinician-brief__amsler-note,
+  .clinician-brief__footer p {
+    font-size: 6.8pt;
+  }
+
+  .clinician-brief__discuss-list {
+    gap: 3px;
+  }
+
+  .clinician-brief__discuss-item {
+    padding: 4px 6px;
+    border-left-width: 2px;
+  }
+
+  .clinician-brief__discuss-item strong {
+    font-size: 7.5pt;
+  }
+
+  .clinician-brief__discuss-item p {
+    margin-top: 1px;
+  }
+
+  .clinician-brief__timeline ol {
+    gap: 2px;
+  }
+
+  .clinician-brief__timeline li {
+    grid-template-columns: 70px minmax(0, 1fr);
+    font-size: 6.8pt;
+  }
+
+  .vision-evidence {
+    margin: 4px 0;
+    padding: 5px 7px;
+    gap: 4px;
+    border-radius: 5px;
+  }
+
+  .vision-evidence__header h2 {
+    font-size: 9pt;
+  }
+
+  .vision-evidence__eyebrow,
+  .vision-evidence__type {
+    font-size: 6pt;
+  }
+
+  .vision-evidence__intro,
+  .vision-evidence__disclaimer,
+  .vision-evidence__gaps > p,
+  .vision-evidence__omitted {
+    font-size: 6.7pt;
+    line-height: 1.15;
+  }
+
+  .vision-evidence__list {
+    gap: 3px;
+  }
+
+  .vision-evidence__card,
+  .vision-evidence__gap {
+    padding: 4px 6px;
+  }
+
+  .vision-evidence__card h3,
+  .vision-evidence__gaps h3 {
+    font-size: 7.5pt;
+  }
+
+  .vision-evidence__card > p,
+  .vision-evidence__gap > strong,
+  .vision-evidence__gap ul {
+    font-size: 6.7pt;
+    line-height: 1.15;
+  }
+
+  .vision-evidence__sources,
+  .vision-evidence__gap-sources {
+    gap: 2px;
+    margin-top: 3px;
+    padding-top: 2px;
+  }
+
+  .vision-evidence__sources > strong,
+  .vision-evidence__sources li,
+  .vision-evidence__gap-sources {
+    font-size: 6.2pt;
+    line-height: 1.1;
+  }
+
+  .vision-evidence__sources code,
+  .vision-evidence__gap-sources code {
+    font-size: 5.7pt;
+  }
+
+  .vision-evidence__disclaimer {
+    padding-top: 3px;
+  }
+
+  .clinician-brief__section,
+  .clinician-brief__pattern-card,
+  .clinician-brief__discuss-item,
+  .clinician-brief__group,
+  .clinician-brief__cluster-card,
+  .clinician-brief__spatial,
+  .vision-evidence__card,
+  .vision-evidence__gap {
+    break-inside: avoid;
+  }
+}
+
 /* Isolate the modal from the full Report when its print action is used. */
 @media print {
   body.has-clinician-brief .rpt > :not(.clinician-brief) {
