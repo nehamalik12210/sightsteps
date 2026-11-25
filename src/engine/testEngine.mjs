@@ -1328,8 +1328,18 @@ for (const relationship of rameshPathways.relationships) {
   assert(relationship.sourceAnswerIds.every((id) => Boolean(rameshPersona.answers[id])), `evidence relationship ${relationship.id} cites only existing source answer IDs`);
   assert(relationship.sourceAnswers.every((source) => relationship.sourceAnswerIds.includes(source.id)), `evidence relationship ${relationship.id} source records match its source IDs`);
 }
-assert(rameshPathways.relationships.some((item) => item.type === 'timeline-experience' && item.sourceTimelineIds.includes('profile-main-entry')), 'timeline pathway links the participant-authored entry to its reported experience');
+assert(rameshPathways.relationships.some((item) => item.type === 'timeline-onset' && item.sourceTimelineIds.includes('profile-main-entry')), 'timeline pathway links the participant-authored entry to its reported experience');
 assert(rameshPathways.limitations.activityImpactsLinkedToSpecificExperiences === false, 'pathways do not invent an experience-to-activity-impact link absent from the questionnaire');
+const activityImpactPathway = rameshPathways.relationships.find((item) => item.type === 'activity-impact');
+assert(Boolean(activityImpactPathway), 'pathways represent participant-selected activity-impact evidence');
+assert(activityImpactPathway?.sourceAnswerIds.includes('affected_activities') && activityImpactPathway?.sourceAnswerIds.includes('activity_impact_fine_detail'), 'activity-impact pathway cites the selected activity and its own impact answer');
+assert(activityImpactPathway?.sourceAnswerIds.includes('experience_context'), 'activity-impact pathway cites the main experience context as separate evidence');
+assert(activityImpactPathway?.statement.en.includes('does not assign a one-to-one link'), 'activity-impact pathway does not imply an unsupported link to one specific experience or situation');
+const temporalPathway = rameshPathways.relationships.find((item) => item.type === 'timeline-onset' && item.sourceTimelineIds.includes('profile-main-entry'));
+assert(Boolean(temporalPathway), 'timeline pathway joins a dated participant entry with the reported onset answer');
+assert(temporalPathway?.sourceAnswerIds.includes('experience_onset'), 'timeline-onset pathway cites the corresponding onset answer');
+assert(temporalPathway?.statement.en.includes('entry date, not a medically determined onset date'), 'timeline-onset pathway distinguishes the participant entry date from clinical onset');
+
 const nightVisionGap = rameshPathways.informationGaps.find((item) => item.experienceId === 'night_vision');
 assert(Boolean(nightVisionGap), 'selected secondary experience with unanswered details produces an information-gap pathway');
 assert(nightVisionGap?.missingFields.some((item) => item.id === 'onset'), 'information gap identifies missing secondary onset');
