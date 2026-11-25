@@ -291,3 +291,37 @@
 - Phase 7: BOUNDED LOCAL SESSION HISTORY IMPLEMENTED AND FAKE-INDEXEDDB TRANSACTION-TESTED; identity-linked profiles, cloud sync, and cross-device history remain OUT OF SCOPE.
 
 A passing build or automated test is not a substitute for the listed clinical, screen-reader, printer, or physical-kiosk exercises.
+
+## Ordered continuation and Phase 7 privacy close-out — 26 November 2026
+
+### Confirmed Phase 7 regression: history-consent hydration
+
+- Source review found that HYDRATE restored consentGiven but omitted historyConsentGiven. The subsequent autosave could therefore overwrite an explicit saved-history choice as false; ending the session could then delete an otherwise consented history record.
+- Fixed in commit a458ca128bee5ad41daef0b75eb0295bd0aab6ed: restore historyConsentGiven from IndexedDB and include it in autosave dependencies.
+- Added a persisted-record regression assertion and two quality-audit assertions.
+- CI run 45686246249 completed SUCCESS on that exact commit: quality audit 2,609; engine tests 1,064; session-history policy 10; IndexedDB 42; clinical-language audit 23 JSX / 2,807 copy fragments; Vite production build 105 modules; PWA precache 34 entries.
+
+### Explicit opt-in for completed-session retention
+
+- The previous onboarding accepted the main consent action while automatically enabling history retention. Updated onboarding to present a separate, optional, unchecked-by-default history checkbox in English and Hindi.
+- Active-session saving for resume remains disclosed. Only completed-session retention requires the explicit history opt-in. If declined, the active record is removed when the participant starts a new journey. Kiosk mode does not display the history option and continues to clear the complete store.
+- The app state now defaults new sessions to historyConsentGiven: false; onboarding passes the participant's explicit choice, and storage/history filters retain the existing 10-record limit.
+- Added a storage assertion for a session that opts out: it can be resumed while active, is not exposed in saved history, cannot be selected from the saved-history list, and is deleted when ended.
+- Updated consent copy, accessible description, onboarding styles and README.
+- Commits: 22e494c1ba5592f6d08e1ac769f223c5d76b0a43, 44aafd041bca7adef3fcf32e3a3197ab7f454b9b, 634d5d1a72abe2584162e000effacd713f541971, and documentation update 58abb9c68d77294c7f88966b908130bb19b195c5.
+- The first two CI attempts exposed issues in the new audit assertion itself (declaration order, then stale copy expectation). Both were corrected; the final workflow run 45686841938 completed SUCCESS on 634d5d1a72abe2584162e000effacd713f541971.
+- Final successful CI result: quality audit 2,631 passed / 0 failed; engine regression suite 1,068 passed / 0 failed; session-history policy 10 passed / 0 failed; IndexedDB 42 checks passed / 0 failed; clinical-language audit 23 JSX files / 2,816 fragments, no violations; Vite production build 105 modules; PWA precache 34 entries (1,030.31 KiB); bilingual clinical-review export 1,192 lines, with 8 pattern definitions, 5 Ramesh matches, 10 discussion prompts and 2 follow-up notes.
+
+### Deployment and remaining release gates
+
+- Latest production deployment: dpl_2J13SKRPTqy5FGHfR7tytcizWSt3, READY, associated with current main commit 58abb9c68d77294c7f88966b908130bb19b195c5; production alias https://sightsteps.vercel.app.
+- Live root request returned HTTP 200 and served the updated Vite asset bundle. This validates the deployed SPA shell, not browser-level interaction of the new consent checkbox.
+- Browser desktop verification could not be performed because Vercel Sandbox creation returned HTTP 402: Hobby plan snapshot-storage quota exceeded. No browser/visual test is claimed for the newly added consent checkbox.
+- Still open: real-device Amsler physical scale/viewing-distance/tap validation; full screen-reader/assistive-technology review; real printer/page-count check; a real five-minute kiosk idle exercise; browser-level IndexedDB deletion-failure injection; separate E Direction and Amsler walkthrough evidence; and first formal optometrist/ophthalmologist review.
+- Phase 7 remains deliberately bounded to consent-based, local, 10-record session history. Identity-linked profiles, cross-device accounts, cloud sync and a clinician document repository were not added because the handoff requires an explicit data model and participant/kiosk separation before such an expansion.
+
+### Dependency-audit limitation
+
+- The CI artifact reports four moderate findings in the development/build-time PWA toolchain: glob@11.1.0, minimatch@10.2.6, workbox-build@7.4.1, and vite-plugin-pwa@2.0.0. No high or critical findings were reported.
+- The advisories currently identify fixes at glob@14.0.2 and minimatch@11.0.1; current Workbox build dependency ranges still resolve the older major lines. A forced transitive override or PWA-plugin downgrade was not applied because compatibility was not proven. References: https://github.com/advisories/GHSA-3g3m-2fjr-6pw4 and https://github.com/advisories/GHSA-g3hv-75wg-m249.
+- Treat this as a pending build-toolchain dependency update, not as a verified production-runtime exploit. Reassess when compatible Workbox/PWA releases are available.

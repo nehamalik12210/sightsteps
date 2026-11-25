@@ -98,3 +98,12 @@
 8. F-08 — Clinician Brief provenance: FIXED. Report discussion topics distinguish the participant responses linked to a topic; Clinician Brief labels “Your responses contributing to this pattern”; Evidence Pathways expose original answer IDs and distinguish participant-reported answers from generated relationships.
 
 External release gate: First formal expert review by a licensed optometrist or ophthalmologist remains pending. SightSteps is not clinically validated or clinician-approved.
+
+## Follow-up findings from 26 November 2026
+
+| ID | Finding | Verification | Status |
+|---|---|---|---|
+| F-32 | A saved participant's explicit historyConsentGiven flag was not restored by the HYDRATE action after reload. Autosave could overwrite the flag as false, and later archive could remove the history record. | Confirmed in src/context/AppContext.jsx by comparing the persisted session shape with the hydration payload and autosave dependency list. | Fixed in a458ca128bee5ad41daef0b75eb0295bd0aab6ed. Hydration restores the flag, autosave tracks it, and quality/storage regressions pass. CI run 45686246249 SUCCESS. |
+| F-33 | Completed-session retention was enabled implicitly by the single onboarding consent action rather than a separate, explicit history choice. | Confirmed in Onboarding.jsx and the START_SESSION reducer: every new participant session previously set historyConsentGiven: true. | Fixed: separate English/Hindi checkbox is optional and unchecked by default; new sessions default to false; kiosk mode suppresses the option; opt-out active sessions can be resumed but are not exposed in history and are deleted on archive. CI run 45686841938 SUCCESS (2,631 quality checks, 1,068 engine tests, 10 history-policy tests, 42 IndexedDB checks). |
+
+The current production alias is READY and returns HTTP 200. Browser-level visual verification of F-33 remains pending because Vercel Sandbox creation was blocked by the Hobby snapshot-storage quota. Do not claim the new checkbox has been manually tested in a browser.
