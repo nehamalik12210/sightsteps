@@ -91,11 +91,18 @@ function missingFieldsForExperience(experience, isMain, answers) {
   const onsetKey = isMain ? 'experience_onset' : `additional_experience_${experience.id}_onset`;
   const contextKey = isMain ? 'experience_context' : `additional_experience_${experience.id}_context`;
   const frequencyKey = isMain ? 'experience_frequency' : `additional_experience_${experience.id}_frequency`;
+  const eyeKey = isMain ? 'which_eye' : `additional_experience_${experience.id}_eye`;
 
   if (!hasAnswer(answers, onsetKey)) {
     missing.push({
       id: 'onset',
       label: { en: 'When you first noticed it', hi: 'यह पहली बार कब महसूस हुआ' },
+    });
+  }
+  if (isMain && !hasAnswer(answers, 'experience_change')) {
+    missing.push({
+      id: 'change',
+      label: { en: 'How it has changed over time', hi: 'समय के साथ इसमें क्या बदलाव आया' },
     });
   }
   if (!Array.isArray(experience.contexts) || experience.contexts.length === 0) {
@@ -110,8 +117,14 @@ function missingFieldsForExperience(experience, isMain, answers) {
       label: { en: 'How often you notice it', hi: 'यह कितनी बार महसूस होता है' },
     });
   }
-  // The questionnaire reuses the original headache response as frequency, so
-  // no separate frequency gap is reported for headaches.
+  if (experience.id !== 'headaches' && !hasAnswer(answers, eyeKey)) {
+    missing.push({
+      id: 'eye',
+      label: { en: 'Which eye or eyes are involved', hi: 'किस आँख या आँखों में यह महसूस होता है' },
+    });
+  }
+  // Headache frequency is reused from the original headaches response; the
+  // questionnaire does not ask which eye is involved for headaches.
   return { missing, onsetKey, contextKey };
 }
 
