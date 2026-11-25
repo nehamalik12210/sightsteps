@@ -14,7 +14,9 @@ import { evaluateClusters } from '../data/patternClusters.js';
 import { analyzeSpatial, describeSpatial, getFlaggedCellCount } from '../engine/amslerSpatial.js';
 import { normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
+import { buildVisionEvidencePathways } from '../engine/visionEvidencePathways.js';
 import VisionExperienceProfile from './VisionExperienceProfile.jsx';
+import VisionEvidencePathways from './VisionEvidencePathways.jsx';
 import { formatVisionTimelineDate } from '../utils/visionTimeline.js';
 import './ClinicianBrief.css';
 
@@ -56,6 +58,10 @@ export default function ClinicianBrief({ onClose }) {
 
   const experienceProfile = useMemo(
     () => buildVisionExperienceProfile(answers, visionTimelineEntries || []),
+    [answers, visionTimelineEntries],
+  );
+  const evidencePathways = useMemo(
+    () => buildVisionEvidencePathways(answers, visionTimelineEntries || []),
     [answers, visionTimelineEntries],
   );
 
@@ -110,6 +116,8 @@ export default function ClinicianBrief({ onClose }) {
             language={lang}
           />
         )}
+
+        <VisionEvidencePathways pathways={evidencePathways} language={lang} compact />
 
         {(conversationReview?.confirmed || conversationReview?.correction) && (
           <section className="clinician-brief__section clinician-brief__participant-review">
