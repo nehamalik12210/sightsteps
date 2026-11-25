@@ -160,3 +160,14 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Production deployment: `dpl_Bj3i3UT1agdAdsgqieM9EhxBDJ4b` — READY, aliased to `https://sightsteps.vercel.app`.
 - Exact deployment verification: quality audit **2,568 passed, 0 failed**; engine regression tests **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**; PWA **34 precache entries (1,015.05 KiB)**. Production root HTTP **200 OK** and served `index-DBJQfr6s.js`.
 - Direct browser interaction verification of a simulated IndexedDB deletion failure remains pending because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox. The new failure route is covered by the automated routing regression and source audit; deployment READY is not presented as manual visual validation.
+
+
+## Phase 4 voice-note lifecycle hardening — 25 November 2026
+
+- Finding F-26: `VoiceNoteField` used asynchronous browser speech-recognition callbacks. A recognizer that had already been stopped could deliver a late `onstart`, `onresult`, `onerror` or `onend` event and overwrite the state of a newer capture. Manual edits also left an outdated voice-status message visible. Navigating away while recognition was running could allow the old `onend` handler to update an unmounted component.
+- Fixed by checking the callback's `recognition` instance against `recognitionRef.current` before handling start/result/error/end events; clearing voice status when the participant manually edits the text; and invalidating the active recognizer reference before calling `stop()` during component unmount so its eventual events are ignored.
+- Added three source-audit assertions covering stale callback guards, manual-edit status clearing, and unmount invalidation.
+- Final implementation commit: `fc2408ad1cacb2959f12520c50dc2654738e3500` (the voice callback/status fix was introduced in `985b8ad36ece222339fbd4dbe67d243a741896f1`, followed by unmount invalidation in `7d78cdfe6858598ef036208912249ea84385b638`, then an additional `onstart` guard and stricter audit threshold in the final commit).
+- Production deployment: `dpl_4yACz5HTwWWnkE2qF5imqteVRM4K` — READY, aliased to `https://sightsteps.vercel.app`.
+- Verification for the exact final commit: quality audit **2,571 passed, 0 failed**; engine regression tests **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**; PWA **34 precache entries (1,015.19 KiB)**. Production root returned **HTTP 200** and serves `index-BhcLV8q3.js`.
+- No live microphone/permission/device browser test was possible because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox. Automated static checks and production build passed; real browser microphone behavior remains a device-level validation item.

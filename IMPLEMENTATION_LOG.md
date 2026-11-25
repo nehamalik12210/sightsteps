@@ -217,3 +217,12 @@
 - F-25 commit: `86ab9d8d45e5731d8a6d03b5fd4f2f96021417d3`.
 - Production deployment `dpl_Bj3i3UT1agdAdsgqieM9EhxBDJ4b` reached READY and is aliased to `https://sightsteps.vercel.app`. Exact checks: quality **2,568 passed**; regression tests **1,056 passed**; clinical-language scan **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules**; PWA **34 precache entries (1,015.05 KiB)**. Production root returned **HTTP 200** and serves `index-DBJQfr6s.js`.
 - Browser failure-injection test for an IndexedDB deletion failure remains pending due Vercel Sandbox Snapshot Storage quota. Automated routing regression, static audit and production build passed; no manual browser/assistive-technology claim is made.
+
+
+### Phase 4 — F-26 voice-note asynchronous lifecycle hardening
+- Guarded all four browser speech-recognition lifecycle callbacks (`onstart`, `onresult`, `onerror`, `onend`) against stale recognizer instances, preventing an older capture from overwriting the current one after a rapid stop/restart.
+- Manual text edits now clear stale voice status. On unmount, the component first invalidates the current recognition reference and then stops it, ensuring the browser's delayed `onend` cannot update an unmounted component.
+- Added three source-audit assertions for stale-callback checks, manual-edit status reset, and unmount invalidation.
+- Final application commit: `fc2408ad1cacb2959f12520c50dc2654738e3500`.
+- Vercel production deployment `dpl_4yACz5HTwWWnkE2qF5imqteVRM4K` reached READY and is aliased to `sightsteps.vercel.app`. Exact checks: quality **2,571 passed**; regression **1,056 passed**; clinical language **23 JSX / 2,774 fragments** passed; Vite **104 modules**; PWA **34 precache entries (1,015.19 KiB)**. Live root HTTP **200** and served `index-BhcLV8q3.js`.
+- Direct microphone permission/device testing remains pending due Vercel Sandbox Snapshot Storage quota. No browser-level voice test is claimed for F-26.
