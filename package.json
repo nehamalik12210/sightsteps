@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run check && vite build",
     "preview": "vite preview",
-    "test": "node src/engine/testEngine.mjs",
+    "test": "node src/engine/testEngine.mjs && node scripts/session-history-test.mjs && node scripts/storage-test.mjs",
     "audit": "node scripts/quality-audit.mjs",
     "clinical-lint": "node scripts/clinical-language-audit.mjs",
     "export-review": "node scripts/export-prompts.mjs",
@@ -19,9 +19,10 @@
     "react-router-dom": "^7.6.0"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.14",
     "@vitejs/plugin-react": "^4.5.2",
+    "fake-indexeddb": "^6.2.8",
     "vite": "^6.3.5",
-    "vite-plugin-pwa": "^2.0.0",
-    "@babel/parser": "7.29.14"
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

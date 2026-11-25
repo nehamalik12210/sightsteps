@@ -6,7 +6,7 @@ import {
   useReducer,
   useRef,
 } from 'react';
-import { clearAllSessions, loadLatestSession, saveSession } from '../utils/storage.js';
+import { archiveLatestSession, clearAllSessions, deleteSavedSession, loadLatestSession, loadSessionById, saveSession, setLatestSessionId } from '../utils/storage.js';
 import { shouldDiscardKioskSessionOnRestore } from '../utils/kioskPolicy.js';
 import { normalizeVisionTimelineEntries } from '../utils/visionTimeline.js';
 import { normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
@@ -19,6 +19,7 @@ const initialState = {
   saveStatus: 'idle',
   language: null,
   consentGiven: false,
+  historyConsentGiven: false,
   isDemo: false,
   demoPersona: null,
   demoStepIndex: 0,
@@ -89,7 +90,7 @@ function appReducer(state, action) {
       return { ...state, language: action.payload };
 
     case 'GIVE_CONSENT':
-      return { ...state, consentGiven: true };
+      return { ...state, consentGiven: true, historyConsentGiven: true };
 
     case 'START_SESSION':
       return {
@@ -97,6 +98,7 @@ function appReducer(state, action) {
         isHydrated: true,
         language: action.payload?.language || state.language || 'en',
         consentGiven: true,
+        historyConsentGiven: true,
         kioskMode: Boolean(state.kioskMode),
         assistedCompletion: Boolean(state.assistedCompletion),
         sessionId: createSessionId(),
@@ -308,19 +310,54 @@ export function AppProvider({ children }) {
   const setAppointmentFollowUp = useCallback((updates) => dispatch({ type: 'SET_APPOINTMENT_FOLLOW_UP', payload: updates }), []);
   const setVisionTimelineEntries = useCallback((entries) => dispatch({ type: 'SET_VISION_TIMELINE_ENTRIES', payload: entries }), []);
 
-  const reset = useCallback(() => {
-    // Concurrent callers share one deletion operation rather than reporting a
-    // false failure when two controls are activated close together.
+  const resumeSavedSession = useCallback(async (savedSessionId) => {
+    if (resettingRef.current) return null;
+    const record = await loadSessionById(savedSessionId);
+    if (!record || !record.consentGiven || !record.historyConsentGiven || record.isDemo || record.kioskMode) return null;
+    const selected = await setLatestSessionId(savedSessionId);
+    if (!selected) return null;
+    dispatch({
+      type: 'HYDRATE',
+      payload: {
+        ...record,
+        // Saved report snapshots are rebuilt by the current report rules.
+        report: null,
+        isHydrated: true,
+        storageAvailable: true,
+        saveStatus: 'saved',
+        kioskCleanupFailed: false,
+      },
+    });
+    return record;
+  }, []);
+
+  const removeSavedSession = useCallback(async (savedSessionId) => {
+    if (resettingRef.current) return false;
+    const removesActiveSession = state.sessionId === savedSessionId;
+    if (removesActiveSession) resettingRef.current = true;
+    try {
+      const deleted = await deleteSavedSession(savedSessionId);
+      if (deleted && removesActiveSession) dispatch({ type: 'RESET' });
+      return deleted;
+    } finally {
+      if (removesActiveSession) resettingRef.current = false;
+    }
+  }, [state.sessionId]);
+
+  const reset = useCallback((options = {}) => {
+    // Ordinary participants can archive a session; shared-device kiosk flows
+    // must erase every record. Callers can make this boundary explicit.
+    const preserveHistory = typeof options.preserveHistory === 'boolean'
+      ? options.preserveHistory
+      : !state.kioskMode;
+
     if (resetPromiseRef.current) return resetPromiseRef.current;
 
     resettingRef.current = true;
     resetPromiseRef.current = (async () => {
       try {
-        // Existing writes finish before clearAllSessions because storage
-        // serializes all IndexedDB writes through one queue.
-        const cleared = await clearAllSessions();
+        const cleared = preserveHistory ? await archiveLatestSession() : await clearAllSessions();
         if (!cleared) return false;
-
         dispatch({ type: 'RESET' });
         return true;
       } finally {
@@ -330,7 +367,7 @@ export function AppProvider({ children }) {
     })();
 
     return resetPromiseRef.current;
-  }, []);
+  }, [state.kioskMode]);
 
   const value = {
     ...state,
@@ -357,6 +394,8 @@ export function AppProvider({ children }) {
     setAppointmentFollowUp,
     setVisionTimelineEntries,
     reset,
+    resumeSavedSession,
+    removeSavedSession,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

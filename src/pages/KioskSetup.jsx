@@ -27,7 +27,7 @@ export default function KioskSetup() {
     if (startPending) return;
     setClearError(false);
     setStartPending(true);
-    const cleared = await reset();
+    const cleared = await reset({ preserveHistory: false });
     if (!cleared) {
       setStartPending(false);
       setClearError(true);

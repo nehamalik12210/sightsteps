@@ -5,6 +5,7 @@
  */
 
 import { normalizeVisionTimelineEntries } from './visionTimeline.js';
+import { limitSavedSessionRecords, toSavedSessionSummaries } from './sessionHistory.js';
 
 const DB_NAME = 'SightSteps';
 const DB_VERSION = 1;
@@ -83,6 +84,7 @@ export function createSessionRecord(state) {
     updatedAt: new Date().toISOString(),
     language: state.language || 'en',
     consentGiven: Boolean(state.consentGiven),
+    historyConsentGiven: Boolean(state.historyConsentGiven),
     isDemo: Boolean(state.isDemo),
     demoPersona: state.demoPersona || null,
     demoStepIndex: Number(state.demoStepIndex || 0),
@@ -128,19 +130,41 @@ export function saveSession(state) {
       const record = createSessionRecord(state);
 
       const sessionsStore = transaction.objectStore(STORE_SESSIONS);
-      // This prototype resumes one latest session, not a history of participants.
-      // Remove superseded session records so abandoned sessions are not retained.
-      const existingKeysRequest = sessionsStore.getAllKeys();
-      existingKeysRequest.onsuccess = () => {
-        for (const key of existingKeysRequest.result || []) {
-          if (key !== record.sessionId) sessionsStore.delete(key);
+      sessionsStore.put(record);
+      // Keep the newest ten records; prune in the same transaction as the save.
+      const existingRecordsRequest = sessionsStore.getAll();
+      existingRecordsRequest.onsuccess = () => {
+        const records = existingRecordsRequest.result || [];
+        const newestRecord = (predicate) => records
+          .filter(predicate)
+          .sort((a, b) => Date.parse(b.updatedAt || b.startedAt || '') - Date.parse(a.updatedAt || a.startedAt || ''))[0];
+        const retainedIds = new Set(
+          limitSavedSessionRecords(records.filter((item) => !item.isDemo && !item.kioskMode))
+            .map((item) => item.sessionId),
+        );
+        // Keep at most one demo and one active kiosk record separately, so
+        // repeated demos can never evict a participant's saved history.
+        const latestDemo = newestRecord((item) => item.isDemo);
+        const latestKiosk = newestRecord((item) => item.kioskMode);
+        if (latestDemo) retainedIds.add(latestDemo.sessionId);
+        if (latestKiosk) retainedIds.add(latestKiosk.sessionId);
+        // Preserve a legacy single-session record only while it remains active.
+        // archiveLatestSession removes it when the participant starts a new journey.
+        if (state.consentGiven && !state.historyConsentGiven && !state.isDemo && !state.kioskMode) {
+          retainedIds.add(record.sessionId);
+        }
+        for (const item of records) {
+          if (!retainedIds.has(item.sessionId)) sessionsStore.delete(item.sessionId);
         }
       };
-      sessionsStore.put(record);
-      transaction.objectStore(STORE_META).put({
-        key: 'latestSessionId',
-        value: state.sessionId,
-      });
+      // Demo progress is not a participant session and must never take over
+      // the participant's resume pointer.
+      if (!state.isDemo) {
+        transaction.objectStore(STORE_META).put({
+          key: 'latestSessionId',
+          value: state.sessionId,
+        });
+      }
 
       await transactionDone(transaction);
       return true;
@@ -186,6 +210,98 @@ export async function loadLatestSession() {
  * Remove every SightSteps session and the latest-session pointer.
  * This matches the product's explicit "Clear my data" action.
  */
+export async function loadSessionById(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId.trim()) return null;
+  try {
+    await writeQueue;
+    const db = await openDB();
+    const transaction = db.transaction([STORE_SESSIONS], 'readonly');
+    const request = transaction.objectStore(STORE_SESSIONS).get(sessionId);
+    return await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('Could not read saved session.'));
+    });
+  } catch (error) {
+    console.warn('[SightSteps] Could not load saved session:', error?.message || error);
+    return null;
+  }
+}
+
+export async function getSavedSessions() {
+  try {
+    await writeQueue;
+    const db = await openDB();
+    const transaction = db.transaction([STORE_SESSIONS], 'readonly');
+    const request = transaction.objectStore(STORE_SESSIONS).getAll();
+    const records = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error('Could not list saved sessions.'));
+    });
+    return toSavedSessionSummaries(records);
+  } catch (error) {
+    console.warn('[SightSteps] Could not list saved sessions:', error?.message || error);
+    return [];
+  }
+}
+
+export function archiveLatestSession() {
+  return enqueueWrite(async () => {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([STORE_META, STORE_SESSIONS], 'readwrite');
+      const metaStore = transaction.objectStore(STORE_META);
+      const sessionsStore = transaction.objectStore(STORE_SESSIONS);
+      const done = transactionDone(transaction);
+      const pointerRequest = metaStore.get('latestSessionId');
+      pointerRequest.onsuccess = () => {
+        const latestId = pointerRequest.result?.value || null;
+        metaStore.delete('latestSessionId');
+        if (!latestId) return;
+        const recordRequest = sessionsStore.get(latestId);
+        recordRequest.onsuccess = () => {
+          // A record created under the older single-session consent must not
+          // silently become part of the new multi-session history.
+          if (!recordRequest.result?.historyConsentGiven) sessionsStore.delete(latestId);
+        };
+      };
+      await done;
+      return true;
+    } catch (error) {
+      console.warn('[SightSteps] Could not archive latest session:', error?.message || error);
+      return false;
+    }
+  });
+}
+
+export function setLatestSessionId(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId.trim()) return Promise.resolve(false);
+  return enqueueWrite(async () => {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([STORE_META, STORE_SESSIONS], 'readwrite');
+      const done = transactionDone(transaction);
+      const request = transaction.objectStore(STORE_SESSIONS).get(sessionId);
+      let selected = false;
+      request.onsuccess = () => {
+        const record = request.result;
+        if (record && record.consentGiven && record.historyConsentGiven && !record.isDemo && !record.kioskMode) {
+          transaction.objectStore(STORE_META).put({ key: 'latestSessionId', value: sessionId });
+          selected = true;
+        }
+      };
+      await done;
+      return selected;
+    } catch (error) {
+      console.warn('[SightSteps] Could not select saved session:', error?.message || error);
+      return false;
+    }
+  });
+}
+
+export function deleteSavedSession(sessionId) {
+  return clearLatestSession(sessionId);
+}
+
 export function clearAllSessions() {
   return enqueueWrite(async () => {
     try {

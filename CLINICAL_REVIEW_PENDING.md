@@ -164,3 +164,8 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 
 ## Reviewer Feedback
 _To be completed after formal clinical review._
+
+
+## Additional review item — local session history (25 November 2026)
+
+The prototype now retains up to 10 consented participant session records in the current browser's IndexedDB. Records are not encrypted, do not sync to accounts or other devices, and are individually deletable from the Landing page. Demo/kiosk sessions are excluded from the participant history list; kiosk cleanup clears the complete local session store. Please review whether this retention period/count and the consent wording are appropriate before any real-world participant use. This implementation is not an identity-linked clinical record system.

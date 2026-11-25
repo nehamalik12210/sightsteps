@@ -20,8 +20,8 @@ const strings = {
   'onboarding.chooseLanguage': { en: 'Choose your language', hi: 'अपनी भाषा चुनें' },
   'onboarding.consent.title': { en: 'Before we begin', hi: 'शुरू करने से पहले' },
   'onboarding.consent.text': {
-    en: 'SightSteps organises the experiences and habits you report into discussion points. It does not diagnose eye conditions, determine a prescription or replace a professional eye examination. Session data is saved in this device’s browser when browser storage is available.',
-    hi: 'SightSteps आपके बताए अनुभवों और आदतों को चर्चा के विषयों में व्यवस्थित करता है। यह आँखों की बीमारी का निदान, चश्मे का नंबर निर्धारित या पेशेवर जाँच का विकल्प नहीं है। ब्राउज़र स्टोरेज उपलब्ध होने पर सेशन डेटा इसी डिवाइस में सहेजा जाता है।',
+    en: 'SightSteps organises the experiences and habits you report into discussion points. It does not diagnose eye conditions, determine a prescription or replace a professional eye examination. With your consent, up to 10 session records can be saved in this browser on this device so you can resume or delete them later. Data is not encrypted or synced to an account or another device. Anyone with access to this browser may be able to open saved sessions, so do not use a shared or public device. You can delete saved sessions from the home screen or clear all browser data.',
+    hi: 'SightSteps आपके बताए अनुभवों और आदतों को चर्चा के विषयों में व्यवस्थित करता है। यह आँखों की बीमारी का निदान, चश्मे का नंबर निर्धारित या पेशेवर जाँच का विकल्प नहीं है। आपकी सहमति से, इस डिवाइस के इसी ब्राउज़र में अधिकतम 10 सेशन सहेजे जा सकते हैं, जिन्हें आप बाद में फिर खोल या हटा सकते हैं। डेटा एन्क्रिप्ट नहीं है और किसी खाते या दूसरे डिवाइस से सिंक नहीं होता। इस ब्राउज़र तक पहुँच रखने वाला कोई भी व्यक्ति सहेजे गए सेशन खोल सकता है, इसलिए साझा या सार्वजनिक डिवाइस का उपयोग न करें। आप होम स्क्रीन से सहेजे गए सेशन हटा सकते हैं या ब्राउज़र का पूरा डेटा साफ़ कर सकते हैं।',
   },
   'onboarding.consent.agree': { en: 'I understand, continue', hi: 'मैं समझता/समझती हूँ, आगे बढ़ें' },
 

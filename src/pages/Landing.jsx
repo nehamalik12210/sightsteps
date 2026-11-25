@@ -5,6 +5,7 @@ import { t } from '../data/i18n.js';
 import rameshPersona from '../data/demoPersona.js';
 import { getResumePath } from '../utils/sessionRouting.js';
 import { initVoices } from '../utils/tts.js';
+import { getSavedSessions } from '../utils/storage.js';
 import './Landing.css';
 
 /** Optical-lens-inspired SVG illustration. Kept intentionally consistent with the current design. */
@@ -66,6 +67,8 @@ export default function Landing() {
     demoPersona,
     startDemo,
     reset,
+    resumeSavedSession,
+    removeSavedSession,
   } = useApp();
 
   const lang = language || 'en';
@@ -95,11 +98,24 @@ export default function Landing() {
     }
   }, [newJourneyPending, isHydrated, sessionId, consentGiven, isDemo, navigate]);
 
+  const [savedSessions, setSavedSessions] = useState([]);
+  const [historyBusyId, setHistoryBusyId] = useState(null);
+  const [historyError, setHistoryError] = useState('');
+
+  useEffect(() => {
+    if (!isHydrated) return undefined;
+    let active = true;
+    getSavedSessions().then((records) => {
+      if (active) setSavedSessions(records.filter((record) => record.sessionId !== sessionId));
+    });
+    return () => { active = false; };
+  }, [isHydrated, sessionId]);
+
   const handleStart = async () => {
     if (newJourneyPending) return;
     setSessionActionError('');
     setNewJourneyPending(true);
-    const cleared = await reset();
+    const cleared = await reset({ preserveHistory: !kioskMode });
     if (!cleared) {
       setNewJourneyPending(false);
       setSessionActionError(lang === 'hi'
@@ -119,9 +135,41 @@ export default function Landing() {
     }));
   };
 
+  const handleResumeSaved = async (savedSessionId) => {
+    setHistoryBusyId(savedSessionId);
+    setHistoryError('');
+    try {
+      const record = await resumeSavedSession(savedSessionId);
+      if (!record) {
+        setHistoryError(lang === 'hi'
+          ? 'यह सेशन उपलब्ध नहीं है। सूची को रीफ़्रेश करें।'
+          : 'This saved session is unavailable. Refresh the list and try again.');
+        return;
+      }
+      navigate(getResumePath(record), { replace: true });
+    } finally {
+      setHistoryBusyId(null);
+    }
+  };
+
+  const handleDeleteSaved = async (savedSessionId) => {
+    const confirmed = window.confirm(lang === 'hi'
+      ? 'क्या इस सहेजे गए सेशन को इस डिवाइस से हटाना है?'
+      : 'Delete this saved session from this device?');
+    if (!confirmed) return;
+    setHistoryBusyId(savedSessionId);
+    setHistoryError('');
+    const deleted = await removeSavedSession(savedSessionId);
+    if (deleted) setSavedSessions((items) => items.filter((item) => item.sessionId !== savedSessionId));
+    else setHistoryError(lang === 'hi'
+      ? 'सेशन हटाया नहीं जा सका। कृपया दोबारा प्रयास करें।'
+      : 'The saved session could not be deleted. Please try again.');
+    setHistoryBusyId(null);
+  };
+
   const handleEndKiosk = async () => {
     setSessionActionError('');
-    const cleared = await reset();
+    const cleared = await reset({ preserveHistory: false });
     if (cleared) navigate('/kiosk', { replace: true });
     else {
       markKioskCleanupFailed();
@@ -135,7 +183,7 @@ export default function Landing() {
     if (demoStartPending) return;
     setSessionActionError('');
     setDemoStartPending(true);
-    const cleared = await reset();
+    const cleared = await reset({ preserveHistory: true });
     if (!cleared) {
       setDemoStartPending(false);
       setSessionActionError(lang === 'hi'
@@ -240,6 +288,43 @@ export default function Landing() {
           ZEISS Beyond Code 2026
         </span>
       </div>
-    </main>
+          {!kioskMode && savedSessions.length > 0 && (
+        <section className="saved-session-history" aria-labelledby="saved-session-heading">
+          <div className="saved-session-history__heading">
+            <div>
+              <p className="saved-session-history__eyebrow">{lang === 'hi' ? 'इस डिवाइस पर' : 'ON THIS DEVICE'}</p>
+              <h2 id="saved-session-heading">{lang === 'hi' ? 'सहेजे गए सेशन' : 'Saved sessions'}</h2>
+              <p>{lang === 'hi' ? 'आप पिछले सेशन को फिर से खोल सकते हैं या हटा सकते हैं। डेटा केवल इसी डिवाइस पर रहता है।' : 'Resume a previous session or remove it. These records stay only on this device.'}</p>
+            </div>
+            <span className="saved-session-history__count">{savedSessions.length}/10</span>
+          </div>
+          <div className="saved-session-history__list">
+            {savedSessions.map((record) => {
+              const dateValue = record.updatedAt || record.startedAt;
+              const dateLabel = dateValue && Number.isFinite(Date.parse(dateValue))
+                ? new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(dateValue))
+                : (lang === 'hi' ? 'तारीख उपलब्ध नहीं' : 'Date unavailable');
+              return (
+                <article className="saved-session-history__item" key={record.sessionId}>
+                  <div className="saved-session-history__meta">
+                    <strong>{lang === 'hi' ? 'दृष्टि अनुभव सेशन' : 'Vision experience session'}</strong>
+                    <span>{dateLabel}</span>
+                  </div>
+                  <div className="saved-session-history__actions">
+                    <button type="button" className="btn btn--secondary" onClick={() => handleResumeSaved(record.sessionId)} disabled={historyBusyId !== null}>
+                      {historyBusyId === record.sessionId ? (lang === 'hi' ? 'खोल रहे हैं…' : 'Opening…') : (lang === 'hi' ? 'फिर खोलें' : 'Resume')}
+                    </button>
+                    <button type="button" className="saved-session-history__delete" onClick={() => handleDeleteSaved(record.sessionId)} disabled={historyBusyId !== null}>
+                      {lang === 'hi' ? 'हटाएँ' : 'Delete'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          {historyError && <p className="saved-session-history__error" role="alert">{historyError}</p>}
+        </section>
+      )}
+</main>
   );
 }

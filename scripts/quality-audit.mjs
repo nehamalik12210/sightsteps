@@ -255,7 +255,7 @@ check(/document\.documentElement\.lang = state\.language === 'hi' \? 'hi' : 'en'
 check(/enqueueWrite/.test(storageSource) && /writeQueue/.test(storageSource), 'local writes are serialized so an in-flight save cannot recreate participant data after reset');
 check(/Each kiosk participant chooses their own language/.test(read('src/pages/KioskSetup.jsx')), 'kiosk setup does not inherit the previous participant language');
 check(/disabled=\{!isHydrated \|\| startPending\}/.test(read('src/pages/KioskSetup.jsx')), 'kiosk setup cannot start a participant before session hydration completes');
-check(/await reset\(\)/.test(read('src/pages/KioskSetup.jsx')) && /clears any current saved SightSteps session/.test(read('src/pages/KioskSetup.jsx')), 'starting a kiosk session explicitly clears any previous local participant session');
+check(/await reset\(\{ preserveHistory: false \}\)/.test(read('src/pages/KioskSetup.jsx')) && /clears any current saved SightSteps session/.test(read('src/pages/KioskSetup.jsx')), 'starting a kiosk session explicitly clears all previous local participant history');
 check(/KIOSK_IDLE_LIMIT_MS/.test(kioskGuardSource) && /hasKioskSessionExpired/.test(kioskGuardSource), 'kiosk sessions clear after configured inactivity');
 check(/Returning to a still-valid visible session counts as activity/.test(kioskGuardSource), 'returning to an unexpired kiosk tab restarts its inactivity window');
 check(/shouldDiscardKioskSessionOnRestore/.test(contextSource) && /clearAllSessions\(\)/.test(contextSource), 'kiosk sessions are cleared rather than restored after a reload');
@@ -269,7 +269,15 @@ check(/kioskCleanupFailed/.test(landingSource) && /\/kiosk\?clearError=1/.test(l
 check(/kioskCleanupFailed/.test(kioskSetupSource) && /setClearError\(true\)/.test(kioskSetupSource), 'kiosk retry screen explains a failed cleanup even when opened directly');
 check(/markKioskCleanupFailed/.test(contextSource) && /markKioskCleanupFailed/.test(kioskGuardSource) && /markKioskCleanupFailed/.test(kioskSetupSource) && /markKioskCleanupFailed/.test(report), 'failed kiosk cleanup clears in-memory participant state from every kiosk exit path');
 check(/session\.kioskCleanupFailed/.test(read('src/utils/sessionRouting.js')) && /kiosk\?clearError=1/.test(read('src/utils/sessionRouting.js')), 'failed kiosk cleanup blocks every protected participant route until retry succeeds');
-check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('await reset();', landingSource.indexOf('const handleDemo')) < landingSource.indexOf('startDemo(rameshPersona)', landingSource.indexOf('const handleDemo')), 'demo start clears the previous local session before replacing it');
+check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('await reset({ preserveHistory: true });', landingSource.indexOf('const handleDemo')) < landingSource.indexOf('startDemo(rameshPersona)', landingSource.indexOf('const handleDemo')), 'demo start preserves prior participant history');
+check(/MAX_SAVED_SESSIONS = 10/.test(read('src/utils/sessionHistory.js')) && /limitSavedSessionRecords/.test(storageSource), 'local participant history is bounded to ten records');
+check(/getSavedSessions/.test(storageSource) && /loadSessionById/.test(storageSource) && /setLatestSessionId/.test(storageSource) && /archiveLatestSession/.test(storageSource), 'local session storage supports list, archive, selection and resume');
+check(/preserveHistory \? await archiveLatestSession\(\) : await clearAllSessions\(\)/.test(contextSource), 'ordinary participant reset can archive while kiosk cleanup clears all data');
+check(/saved-session-heading/.test(landingSource) && /handleResumeSaved/.test(landingSource) && /handleDeleteSaved/.test(landingSource), 'saved session history exposes resume and delete controls');
+const consentSource = read('src/data/i18n.js');
+check(/up to 10 session records/.test(consentSource) && /डेटा एन्क्रिप्ट नहीं है/.test(consentSource), 'bilingual consent discloses local retention and lack of encryption');
+check(/historyConsentGiven/.test(contextSource) && /historyConsentGiven/.test(storageSource) && /historyConsentGiven/.test(read('src/utils/sessionHistory.js')), 'multi-session retention requires explicit updated history consent');
+check(/shared or public device/.test(consentSource) && /साझा या सार्वजनिक डिवाइस/.test(consentSource), 'bilingual consent warns against saving sensitive sessions on shared or public devices');
 
 // Participant timeline and appointment preparation output.
 const timelinePageSource = read('src/pages/VisionTimeline.jsx');

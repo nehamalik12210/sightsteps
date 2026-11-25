@@ -262,6 +262,32 @@
 - Phase 4 — Application flow/design/accessibility: AUTOMATED + HEADLESS SMOKE VERIFIED; FULL ACCESSIBILITY VALIDATION OPEN. Headless Chromium checked Landing, the seven-question Ramesh flow, Report, source-linked pathway, Clinician Brief dialog semantics/focus/inert background and no horizontal overflow at 390 px. Appointment Pack print mode and window.print invocation were intercepted. Actual printer output, page count and screen-reader testing remain open.
 - Phase 5 — Kiosk/data safety: IMPLEMENTATION + REGRESSION VERIFIED; REAL IDLE-TIME EXERCISE OPEN. Five-minute timeout, reload cleanup and cleanup-failure blocking paths remain covered by code and regression tests. This session did not wait five real minutes or inject IndexedDB deletion failure in a physical browser.
 - Phase 6 — Demo/submission evidence: PARTIALLY VERIFIED. Ramesh’s guided flow successfully reached Report through all seven answers. Review export contains five Ramesh pattern matches, ten discussion prompts and two follow-up notes. Ramesh skips optional vision activities, so E Direction Awareness and Amsler must be demonstrated separately.
-- Phase 7 — Participant continuity expansion: DEFERRED BY DESIGN. Existing local storage retains one latest session and one appointment follow-up object. Multi-profile/multi-session migration was not attempted during the theme-critical submission window because it requires a separate schema, migration strategy and explicit kiosk/profile deletion boundary. Existing timeline and single appointment follow-up remain; expanded profile/history/appointments/documents are not claimed.
+- Phase 7 — Participant continuity expansion: initially deferred during the first baseline pass; the bounded local session-history slice was subsequently implemented on 25 November 2026. See the Phase 7 implementation section below. Identity-linked profiles, cloud sync, cross-device history and clinician document storage remain out of scope.
 - Final exact-source checks: quality 2,588, regression 1,064, clinical-language audit 23 JSX / 2,777 fragments, Vite 104 modules, PWA 34 entries / 1,016.82 KiB, review export 1,192 lines. Full npm run build passed.
 - Remaining release gates: first formal expert review; real-device Amsler scale/viewing validation; assistive-technology testing; actual print preview/page count; real five-minute kiosk idle and IndexedDB failure injection. None is represented as completed.
+
+
+## Phase 7 — Bounded local participant session continuity (25 November 2026)
+
+- Reused the existing IndexedDB `sessions` store and `sessionId` key path; no database-version migration was required.
+- `saveSession` now retains the newest 10 records rather than deleting every superseded session. History summaries include only consented, non-demo, non-kiosk participant records.
+- Landing now lists saved sessions, supports resuming a selected record and deleting an individual record, and states clearly that the history is local to the current browser/device.
+- Ordinary session reset archives the latest-session pointer while retaining the record. Selecting a history record restores the pointer. Individual deletion removes only the selected record. Kiosk setup, kiosk exit and kiosk cleanup failure paths explicitly clear all session records and metadata.
+- Updated the bilingual consent text to disclose the 10-record local retention behavior, lack of encryption/account sync, and how records can be deleted.
+- Added bounded-history policy tests and `fake-indexeddb` transaction tests for 12-record retention, pruning, load by ID, latest-pointer behavior, archive, resume selection, demo exclusion, individual deletion, and write-queue/full-wipe ordering.
+- Automated implementation and code gates pass; browser interaction testing could not run in this environment because the installed `chromium-browser` command is only a Snap launcher and the Snap browser is absent.
+- Scope remains local session continuity, not identity-linked multi-person profiles, cloud sync, clinician document storage, or cross-device accounts.
+
+
+## Current phase disposition — 25 November 2026
+
+- Phase 0: COMPLETE.
+- Phase 1: IMPLEMENTATION COMPLETE; external clinical review and real-device/clinical sign-off remain OPEN.
+- Phase 2: COMPLETE FOR AUTOMATED SOURCE VALIDATION.
+- Phase 3: IMPLEMENTED; source-linked evidence pathways and exports remain non-diagnostic by design.
+- Phase 4: IMPLEMENTED AND AUTOMATED-VERIFIED; full screen-reader/assistive-technology and physical print checks remain OPEN.
+- Phase 5: IMPLEMENTED AND REGRESSION-VERIFIED; an actual five-minute physical-device idle exercise and injected real-browser IndexedDB deletion failure remain OPEN.
+- Phase 6: RAMESH GUIDED DEMO AND REVIEW EXPORT VERIFIED; separately demonstrating E Direction Awareness and Amsler in the live UI remains to be recorded.
+- Phase 7: BOUNDED LOCAL SESSION HISTORY IMPLEMENTED AND FAKE-INDEXEDDB TRANSACTION-TESTED; identity-linked profiles, cloud sync, and cross-device history remain OUT OF SCOPE.
+
+A passing build or automated test is not a substitute for the listed clinical, screen-reader, printer, or physical-kiosk exercises.
