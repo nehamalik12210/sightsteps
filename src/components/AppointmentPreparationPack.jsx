@@ -42,6 +42,27 @@ export default function AppointmentPreparationPack({ pack, language = 'en' }) {
         </section>
       </div>
 
+      {pack.visionActivity && (
+        <section className="appointment-pack__section" aria-labelledby="appointment-pack-direction">
+          <h2 id="appointment-pack-direction">{hi ? 'दिशा पहचान गतिविधि' : 'Direction Awareness Activity'}</h2>
+          {pack.visionActivity.skipped ? (
+            <p className="appointment-pack__empty">
+              {hi ? 'प्रतिभागी ने यह वैकल्पिक गतिविधि छोड़ दी।' : 'The participant skipped this optional activity.'}
+            </p>
+          ) : (
+            <div className="appointment-pack__amsler-grid">
+              <p><strong>{hi ? 'राउंड 1:' : 'Round 1:'}</strong> {pack.visionActivity.round1.correct}/{pack.visionActivity.round1.total}</p>
+              <p><strong>{hi ? 'राउंड 2:' : 'Round 2:'}</strong> {pack.visionActivity.round2.correct}/{pack.visionActivity.round2.total}</p>
+            </div>
+          )}
+          <p className="appointment-pack__context">
+            {hi
+              ? 'ये केवल इस गतिविधि में चुनी गई दिशाओं की गिनती हैं। ये दृष्टि की तीक्ष्णता या आँखों के बीच अंतर नहीं बताते।'
+              : 'These are counts of direction selections in this interaction only. They do not describe visual acuity or differences between your eyes.'}
+          </p>
+        </section>
+      )}
+
       {pack.experienceProfile?.summary && (
         <VisionExperienceProfile
           verbosity="pack"
