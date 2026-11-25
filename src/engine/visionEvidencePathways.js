@@ -195,6 +195,75 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
     }
   }
 
+  // Relationship B — show context and activity evidence together, but do not
+  // assign a specific activity impact to one experience or context: the
+  // questionnaire records these separately and has no per-experience mapping.
+  if (profile.mainExperience && profile.activityImpacts?.length) {
+    for (const activity of profile.activityImpacts) {
+      const contextSourceIds = profile.mainExperience.contexts?.length && hasAnswer(safeAnswers, 'experience_context')
+        ? ['experience_context']
+        : [];
+      const sourceIds = unique([
+        profile.mainExperience.id,
+        ...contextSourceIds,
+        ...(activity.sourceIds || []),
+      ]);
+      const sourceAnswers = sourceIds.map((id) => {
+        const label = id === profile.mainExperience.id
+          ? { en: 'Reported experience response', hi: 'बताए गए अनुभव का जवाब' }
+          : id === 'experience_context'
+            ? { en: 'Situations selected', hi: 'चुनी गई परिस्थितियाँ' }
+            : id === 'affected_activities'
+              ? { en: 'Everyday activity selected', hi: 'चुनी गई दैनिक गतिविधि' }
+              : id === 'custom_activity_name'
+                ? { en: 'Participant-entered activity name', hi: 'प्रतिभागी द्वारा लिखा गया गतिविधि का नाम' }
+                : id.startsWith('activity_impact_frequency_')
+                  ? { en: 'How often this activity is affected', hi: 'यह गतिविधि कितनी बार प्रभावित होती है' }
+                  : { en: 'Impact described for this activity', hi: 'इस गतिविधि के लिए बताया गया प्रभाव' };
+        return sourceRecord(id, label, safeAnswers, activity.label?.en || '');
+      }).filter(Boolean);
+
+      const contextsEn = (profile.mainExperience.contexts || [])
+        .map((item) => localized(item.label).en)
+        .join(', ');
+      const contextsHi = (profile.mainExperience.contexts || [])
+        .map((item) => localized(item.label).hi)
+        .join(', ');
+      const impactEn = activity.impactStatus === 'reported'
+        ? activity.impacts.map((item) => localized(item.label).en).join(', ')
+        : activity.impactStatus === 'no_impact_reported'
+          ? 'you selected that no specific impact was reported'
+          : activity.impactStatus === 'unsure'
+            ? 'you selected that you were unsure how it was affected'
+            : 'no further impact detail was recorded';
+      const impactHi = activity.impactStatus === 'reported'
+        ? activity.impacts.map((item) => localized(item.label).hi).join(', ')
+        : activity.impactStatus === 'no_impact_reported'
+          ? 'आपने चुना कि कोई विशेष प्रभाव नहीं बताया गया'
+          : activity.impactStatus === 'unsure'
+            ? 'आपने चुना कि प्रभाव के बारे में निश्चित नहीं हैं'
+            : 'प्रभाव के बारे में अतिरिक्त विवरण दर्ज नहीं हुआ';
+      const frequencyEn = activity.frequency?.en ? ` You notice this ${activity.frequency.en.toLowerCase()}.` : '';
+      const frequencyHi = activity.frequency?.hi ? ` आपने यह ${activity.frequency.hi} महसूस होने की बात बताई।` : '';
+      relationships.push({
+        id: `activity-impact:${activity.id}`,
+        type: 'activity-impact',
+        title: {
+          en: 'Context and activity-impact evidence',
+          hi: 'संदर्भ और दैनिक गतिविधि पर प्रभाव का विवरण',
+        },
+        statement: {
+          en: `For ${localized(profile.mainExperience.label).en.toLowerCase()}, you selected ${contextsEn || 'no specific situation'} as situations where you notice it. You also selected ${activity.label.en} as an everyday activity to discuss and recorded: ${impactEn}.${frequencyEn} The questionnaire does not identify which specific experience or situation this activity detail belongs to, so SightSteps does not assign a one-to-one link.`,
+          hi: `${localized(profile.mainExperience.label).hi} के लिए आपने ${contextsHi || 'कोई विशेष परिस्थिति नहीं'} को ऐसी परिस्थितियों के रूप में चुना जहाँ यह महसूस होता है। आपने ${activity.label.hi} को चर्चा के लिए दैनिक गतिविधि के रूप में भी चुना और यह दर्ज किया: ${impactHi}।${frequencyHi} प्रश्नावली यह नहीं बताती कि गतिविधि का यह विवरण किस विशेष अनुभव या परिस्थिति से जुड़ा है, इसलिए SightSteps कोई एक-से-एक संबंध नहीं बनाता।`,
+        },
+        sourceAnswerIds: sourceIds,
+        sourceAnswers,
+        sourceTimelineIds: [],
+        sourceTimeline: [],
+      });
+    }
+  }
+
   for (const [contextId, linked] of contextMap.entries()) {
     const distinct = [...new Map(linked.map((item) => [item.experience.id, item])).values()];
     if (contextId === 'varies' || distinct.length < 2) continue;
@@ -229,22 +298,32 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
     const label = localized(experience.label);
     const date = typeof entry.date === 'string' ? entry.date : '';
     const detail = [entry.context, entry.impact, entry.note].filter((value) => typeof value === 'string' && value.trim()).join(' · ');
-    const sources = sourceRecord(
+    const isMainExperience = experience.id === profile.mainExperience?.id;
+    const onsetKey = isMainExperience ? 'experience_onset' : `additional_experience_${experience.id}_onset`;
+    const responseSource = sourceRecord(
       experience.id,
       { en: `${label.en} response`, hi: `${label.hi} का जवाब` },
       safeAnswers,
       label.en,
     );
+    const onsetSource = sourceRecord(
+      onsetKey,
+      { en: 'When you first noticed it', hi: 'यह पहली बार कब महसूस हुआ' },
+      safeAnswers,
+    );
+    const sourceAnswers = [responseSource, onsetSource].filter(Boolean);
+    const onsetEn = onsetSource ? ` Your questionnaire response says you first noticed it: ${onsetSource.value.en}.` : ' No separate onset response was recorded.';
+    const onsetHi = onsetSource ? ` प्रश्नावली में आपने बताया कि यह पहली बार कब महसूस हुआ: ${onsetSource.value.hi}।` : ' पहली बार महसूस होने के बारे में अलग जवाब दर्ज नहीं हुआ।';
     relationships.push({
-      id: `timeline-experience:${entry.id}`,
-      type: 'timeline-experience',
-      title: { en: 'Participant timeline entry', hi: 'प्रतिभागी की टाइमलाइन प्रविष्टि' },
+      id: `timeline-onset:${entry.id}`,
+      type: 'timeline-onset',
+      title: { en: 'Timeline and onset details', hi: 'टाइमलाइन और शुरुआत का विवरण' },
       statement: {
-        en: `You recorded an entry for ${label.en} on ${date || 'an undated entry'}.${detail ? ` Your note: ${detail}` : ''}`,
-        hi: `आपने ${label.hi} के लिए ${date || 'बिना तारीख की प्रविष्टि'} दर्ज की।${detail ? ` आपका नोट: ${detail}` : ''}`,
+        en: `You entered a timeline record for ${label.en} on ${date || 'an undated entry'}.${detail ? ` Your note: ${detail}.` : ''}${onsetEn} The timeline date is your entry date, not a medically determined onset date.`,
+        hi: `आपने ${label.hi} के लिए ${date || 'बिना तारीख की प्रविष्टि'} दर्ज की।${detail ? ` आपका नोट: ${detail}।` : ''}${onsetHi} टाइमलाइन की तारीख आपकी प्रविष्टि की तारीख है, चिकित्सकीय रूप से निर्धारित शुरुआत की तारीख नहीं।`,
       },
-      sourceAnswerIds: sources ? [sources.id] : [],
-      sourceAnswers: sources ? [sources] : [],
+      sourceAnswerIds: unique(sourceAnswers.map((source) => source.id)),
+      sourceAnswers,
       sourceTimelineIds: [entry.id],
       sourceTimeline: [{
         id: entry.id,
@@ -312,7 +391,8 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
   const orderedRelationships = [
     ...relationships.filter((item) => item.type === 'shared-context'),
     ...relationships.filter((item) => item.type === 'experience-context'),
-    ...relationships.filter((item) => item.type === 'timeline-experience'),
+    ...relationships.filter((item) => item.type === 'activity-impact'),
+    ...relationships.filter((item) => item.type === 'timeline-onset'),
   ];
 
   return {
