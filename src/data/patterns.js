@@ -250,7 +250,12 @@ const patterns = [
       const experienceCount = [hasBlur, hasSquinting, hasNight, hasHeadaches].filter(Boolean).length;
       return noRecentExam && experienceCount >= 2;
     },
-    sourceKeys: ['eye_exam', 'blurred_vision', 'squinting', 'night_vision', 'headaches'],
+    sourceKeys: (answers) => [
+      'eye_exam',
+      ...Object.entries(EXPERIENCE_ANSWER_VALUES)
+        .filter(([experienceId, allowedValues]) => allowedValues.includes(answers?.[experienceId]?.value))
+        .map(([experienceId]) => experienceId),
+    ],
   },
 ];
 
