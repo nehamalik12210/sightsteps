@@ -61,6 +61,7 @@ export default function Landing() {
     visionResults,
     kioskMode,
     kioskCleanupFailed,
+    markKioskCleanupFailed,
     isDemo,
     demoPersona,
     startDemo,
@@ -122,9 +123,12 @@ export default function Landing() {
     setSessionActionError('');
     const cleared = await reset();
     if (cleared) navigate('/kiosk', { replace: true });
-    else setSessionActionError(lang === 'hi'
-      ? 'सेशन डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
-      : 'Session data could not be cleared. Please try again.');
+    else {
+      markKioskCleanupFailed();
+      setSessionActionError(lang === 'hi'
+        ? 'सेशन डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
+        : 'Session data could not be cleared. Please try again.');
+    }
   };
 
   const handleDemo = async () => {

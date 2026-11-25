@@ -50,6 +50,7 @@ export default function Report() {
     setConversationReview,
     assistedCompletion,
     kioskMode,
+    markKioskCleanupFailed,
     amslerResults,
     setDiscussionPriorities,
     setQuestionsToAsk,
@@ -101,6 +102,7 @@ export default function Report() {
     setSessionActionError('');
     const cleared = await reset();
     if (cleared) navigate(path, { replace: true });
+    else if (kioskMode) markKioskCleanupFailed();
     else setSessionActionError(lang === 'hi'
       ? 'स्थानीय डेटा साफ़ नहीं हो सका। कृपया फिर से प्रयास करें।'
       : 'Local session data could not be cleared. Please try again.');

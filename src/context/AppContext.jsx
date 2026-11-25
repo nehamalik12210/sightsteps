@@ -300,6 +300,7 @@ export function AppProvider({ children }) {
   const skipVision = useCallback(() => dispatch({ type: 'SKIP_VISION' }), []);
   const setReport = useCallback((report) => dispatch({ type: 'SET_REPORT', payload: report }), []);
   const setKioskMode = useCallback((enabled) => dispatch({ type: 'SET_KIOSK_MODE', payload: enabled }), []);
+  const markKioskCleanupFailed = useCallback(() => dispatch({ type: 'KIOSK_CLEANUP_FAILED' }), []);
   const setAssistedCompletion = useCallback((enabled) => dispatch({ type: 'SET_ASSISTED_COMPLETION', payload: enabled }), []);
   const setDiscussionPriorities = useCallback((priorities) => dispatch({ type: 'SET_DISCUSSION_PRIORITIES', payload: priorities }), []);
   const setQuestionsToAsk = useCallback((questions) => dispatch({ type: 'SET_QUESTIONS_TO_ASK', payload: questions }), []);
@@ -348,6 +349,7 @@ export function AppProvider({ children }) {
     skipVision,
     setReport,
     setKioskMode,
+    markKioskCleanupFailed,
     setAssistedCompletion,
     setDiscussionPriorities,
     setQuestionsToAsk,

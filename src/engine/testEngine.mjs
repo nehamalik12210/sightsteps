@@ -389,6 +389,7 @@ assert(getResumePath({ activities: ['fine_detail'], primaryActivity: 'fine_detai
 assert(getResumePath({ activities: ['fine_detail'], primaryActivity: 'fine_detail', answers: {}, visionResults: { skipped: true } }) === '/report', 'completed or skipped direction activity resumes at report');
 assert(getResumePath({ isDemo: true, demoPersona: rameshPersona, answers: {}, activities: rameshPersona.activities, primaryActivity: rameshPersona.primaryActivity }) === '/intake', 'demo resume returns to scripted intake flow');
 assert(getProtectedRouteRedirect({}) === '/', 'protected pages send a cleared or unconsented session to Landing');
+assert(getProtectedRouteRedirect({ sessionId: 'old-kiosk-session', consentGiven: true, kioskCleanupFailed: true, activities: ['reading'], primaryActivity: 'reading', answers: completedNormalAnswers, visionResults: { skipped: true } }, { requireProfile: true, requireIntake: true, requireVision: true }) === '/kiosk?clearError=1', 'failed kiosk cleanup blocks even an otherwise complete participant session from reopening Report');
 assert(getNewSessionRedirect({ sessionId: 'active' }) === '/', 'an active session cannot be overwritten by opening onboarding directly');
 assert(getNewSessionRedirect({ sessionId: null }) === null, 'a new session can enter onboarding when no participant session is active');
 assert(getNewSessionRedirect({ sessionId: 'new-session' }, true) === null, 'a newly-started journey explicitly marked by Landing is allowed through onboarding');

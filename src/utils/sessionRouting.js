@@ -103,6 +103,9 @@ export function getBackNavigationAnswerIds(visibleQuestions = [], currentQuestio
 
 /** Route guard policy for directly opened or refreshed application URLs. */
 export function getProtectedRouteRedirect(session = {}, requirements = {}) {
+  // A failed shared-device deletion blocks every participant route until the
+  // cleanup can be retried successfully from KioskSetup.
+  if (session.kioskCleanupFailed) return '/kiosk?clearError=1';
   if (!session.sessionId || !session.consentGiven) return '/';
 
   const activities = Array.isArray(session.activities) ? session.activities : [];

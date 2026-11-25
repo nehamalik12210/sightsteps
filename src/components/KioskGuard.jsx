@@ -6,7 +6,7 @@ import { hasKioskSessionExpired, KIOSK_IDLE_LIMIT_MS } from '../utils/kioskPolic
 /** Clears shared-device sessions after inactivity and never writes data to a server. */
 export default function KioskGuard() {
   const navigate = useNavigate();
-  const { kioskMode, sessionId, reset } = useApp();
+  const { kioskMode, sessionId, reset, markKioskCleanupFailed } = useApp();
 
   useEffect(() => {
     if (!kioskMode || !sessionId) return undefined;
@@ -23,6 +23,7 @@ export default function KioskGuard() {
       if (clearing) return;
       clearing = true;
       const cleared = await reset();
+      if (!cleared) markKioskCleanupFailed();
       navigate(cleared ? '/kiosk?timeout=1' : '/kiosk?timeout=1&clearError=1', { replace: true });
     };
 
@@ -64,7 +65,7 @@ export default function KioskGuard() {
       });
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [kioskMode, sessionId, reset, navigate]);
+  }, [kioskMode, sessionId, reset, markKioskCleanupFailed, navigate]);
 
   return null;
 }

@@ -6,7 +6,7 @@ import './KioskSetup.css';
 export default function KioskSetup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { setKioskMode, language, isHydrated, sessionId, kioskMode, kioskCleanupFailed, reset } = useApp();
+  const { setKioskMode, language, isHydrated, sessionId, kioskMode, kioskCleanupFailed, reset, markKioskCleanupFailed } = useApp();
   const [startPending, setStartPending] = useState(false);
   const [clearError, setClearError] = useState(searchParams.get('clearError') === '1' || kioskCleanupFailed);
   const lang = language || 'en';
@@ -31,6 +31,7 @@ export default function KioskSetup() {
     if (!cleared) {
       setStartPending(false);
       setClearError(true);
+      markKioskCleanupFailed();
       return;
     }
     // Each kiosk participant chooses their own language; never inherit the

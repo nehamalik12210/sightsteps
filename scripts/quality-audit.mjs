@@ -260,6 +260,8 @@ check(/case 'KIOSK_CLEANUP_FAILED'/.test(contextSource) && /kioskCleanupFailed: 
 check(/kioskCleanupFailed/.test(appSource) && /\/kiosk\?clearError=1/.test(appSource), 'direct onboarding cannot bypass a failed kiosk cleanup');
 check(/kioskCleanupFailed/.test(landingSource) && /\/kiosk\?clearError=1/.test(landingSource), 'Landing routes failed shared-device cleanup into the retry screen');
 check(/kioskCleanupFailed/.test(kioskSetupSource) && /setClearError\(true\)/.test(kioskSetupSource), 'kiosk retry screen explains a failed cleanup even when opened directly');
+check(/markKioskCleanupFailed/.test(contextSource) && /markKioskCleanupFailed/.test(kioskGuardSource) && /markKioskCleanupFailed/.test(kioskSetupSource) && /markKioskCleanupFailed/.test(report), 'failed kiosk cleanup clears in-memory participant state from every kiosk exit path');
+check(/session\.kioskCleanupFailed/.test(read('src/utils/sessionRouting.js')) && /kiosk\?clearError=1/.test(read('src/utils/sessionRouting.js')), 'failed kiosk cleanup blocks every protected participant route until retry succeeds');
 check(/const handleDemo = async/.test(landingSource) && landingSource.indexOf('await reset();', landingSource.indexOf('const handleDemo')) < landingSource.indexOf('startDemo(rameshPersona)', landingSource.indexOf('const handleDemo')), 'demo start clears the previous local session before replacing it');
 
 // Participant timeline and appointment preparation output.
