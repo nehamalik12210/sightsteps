@@ -60,3 +60,6 @@
 
 
 | F-20 | Global accessibility settings panel remained open when navigating to another route, potentially overlaying the new page. | Confirmed from component placement: the controls are mounted globally outside the route tree and had no location-change close handler. | Fixed: the panel now closes on React Router location-key changes. Added a quality-audit regression assertion. Production build and automated verification passed on commit `d61758b944ff36c5fba3b7f3577f368449f7b1fa`; direct browser interaction verification for this exact change remains unavailable because Vercel Sandbox Snapshot Storage limits were reached. |
+
+
+| F-21 | Amsler's 20 × 20 cell selector exposed 400 individual tab stops, making keyboard navigation impractical and the row/column fallback difficult to reach. | Confirmed in `src/pages/AmslerGrid.jsx`: each of 400 cell buttons was naturally tabbable, with no roving focus. | Fixed in commit `06a7fa0ae3419c3a8565f83fae35f44632198855`: single roving tab stop; arrow-key navigation; Home/End row navigation; focus restoration on test entry and eye change; labelled selection group; existing row/column fallback retained. Added 10 unit assertions and three quality-audit checks. Production build READY; direct browser/assistive-technology test pending due sandbox quota. |

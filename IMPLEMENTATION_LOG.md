@@ -189,3 +189,13 @@
 - Build checks: quality audit **2,559 passed**; regression tests **1,044 passed**; clinical-language audit passed (**23 JSX files / 2,771 fragments**); Vite **103 modules transformed**; PWA **34 precache entries (1,013.43 KiB)**.
 - The live production URL returned HTTP 200 after deployment. This validates deployment and the SPA shell, not the route-panel interaction itself.
 - Direct browser test of F-20 remains pending due sandbox snapshot-storage limit; no claim of visual or interaction validation is made for that change.
+
+
+### Phase 4 — F-21 Amsler grid keyboard navigation
+- Confirmed that the 20 × 20 Amsler region selection exposed 400 tab stops; this made keyboard traversal unnecessarily long and made the dedicated row/column fallback difficult to reach.
+- Added roving focus to keep exactly one grid cell in the tab sequence. Arrow keys move between adjacent cells without wrapping; Home and End move to the first and last cell of the current row. The active cell retains native button behavior for Space/Enter and its pressed state.
+- The grid now announces its 20 × 20 structure and movement keys, restores focus on test entry and eye change, and retains the existing row/column input method.
+- Added pure navigation helper `src/utils/gridNavigation.js`, ten regression assertions, and three quality-audit checks.
+- Commit: `06a7fa0ae3419c3a8565f83fae35f44632198855`.
+- Vercel verification: quality audit **2,563 passed**; regression suite **1,054 passed**; clinical-language scan **23 JSX files / 2,774 fragments** with no violations; production build **104 modules**; PWA **34 precache entries (1,014.73 KiB)**. Production deployment `dpl_HVN2rqsztHG8JoGCBeVE7ZhYLvTD` reached READY and `https://sightsteps.vercel.app` returned HTTP 200 with the new asset.
+- Limit: the sandbox snapshot quota prevented direct browser/assistive-technology verification of arrow-key navigation. This remains a device-level validation item; automated helper tests and production build passed.

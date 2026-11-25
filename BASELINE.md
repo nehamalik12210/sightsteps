@@ -127,3 +127,13 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Automated verification: quality audit **2,559 passed**; engine tests **1,044 passed**; clinical-language audit **23 JSX files / 2,771 fragments passed**; Vite **103 modules**; PWA **34 precache entries (1,013.43 KiB)**.
 - Production root HTTP check: **200 OK**.
 - Limit: direct browser interaction test for this new panel-close behavior remains pending because Vercel Sandbox Snapshot Storage is over the Hobby plan limit.
+
+
+## Phase 4 — Amsler keyboard navigation fix (25 November 2026)
+
+- Finding F-21: the 20 × 20 selection grid exposed 400 separate tab stops, forcing keyboard users to traverse each cell sequentially.
+- Fix committed as `06a7fa0ae3419c3a8565f83fae35f44632198855`: roving `tabIndex` keeps one cell in the tab order; arrow keys move cell focus; Home/End move to the first/last cell in the current row; focus is placed in the grid when testing starts and when switching eyes. The existing row/column keyboard fallback and Space/Enter activation remain available.
+- Added bounded-navigation unit tests and source-level quality-audit assertions.
+- Vercel production deployment `dpl_HVN2rqsztHG8JoGCBeVE7ZhYLvTD` reached READY and is aliased to `sightsteps.vercel.app`.
+- Deployment checks: quality audit **2,563 passed, 0 failed**; regression tests **1,054 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments, no violations**; Vite **104 modules transformed**; PWA **34 precache entries (1,014.73 KiB)**.
+- Live production root returned **HTTP 200** with the new JS asset. Automated and build validation passed. Direct browser interaction testing for arrow-key behavior remains pending because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox.
