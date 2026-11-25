@@ -16,7 +16,7 @@ SightSteps helps people organise visual experiences they have noticed, understan
 
 ### Saved session history
 
-For a regular consented participant session, SightSteps keeps up to **10** session records in the current browser's IndexedDB. The Landing page lists saved sessions so a participant can resume or delete an individual record. History is local to that browser/device; there are no accounts, cloud sync, identity matching, or cross-device profiles. Demo and kiosk sessions are excluded from the history list. Kiosk exit, inactivity cleanup, and kiosk setup clear the complete local session store rather than retaining another participant's data.
+The active participant session is stored in the current browser's IndexedDB while it is in progress so it can be resumed. During onboarding, participants can separately and optionally opt in to retain up to **10 completed session records** on that device; the choice is off by default. Without that opt-in, the active session is removed when a new journey begins. The Landing page lists opted-in saved sessions so a participant can resume or delete an individual record. History is local to that browser/device; records are not encrypted and there are no accounts, cloud sync, identity matching, or cross-device profiles. Demo and kiosk sessions are excluded from participant history. Kiosk exit, inactivity cleanup, and kiosk setup clear the complete local session store rather than retaining another participant's data.
 
 
 ## Theme Alignment
