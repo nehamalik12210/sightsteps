@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import './VisionEvidencePathways.css';
 
 function localized(value, language) {
@@ -8,22 +9,27 @@ function localized(value, language) {
 }
 
 export default function VisionEvidencePathways({ pathways, language = 'en', compact = false }) {
+  const titleId = useId();
+  const gapsId = `${titleId}-gaps`;
   if (!pathways || (!pathways.relationships?.length && !pathways.informationGaps?.length)) {
     return null;
   }
 
   const hi = language === 'hi';
-  const relationships = compact ? pathways.relationships.slice(0, 3) : pathways.relationships;
+  const sharedRelationships = pathways.relationships.filter((item) => item.type === 'shared-context');
+  const relationships = compact
+    ? (sharedRelationships.length ? sharedRelationships.slice(0, 1) : pathways.relationships.slice(0, 2))
+    : pathways.relationships;
   const gaps = compact ? pathways.informationGaps.slice(0, 2) : pathways.informationGaps;
   const remainingRelationships = Math.max(0, pathways.relationships.length - relationships.length);
   const remainingGaps = Math.max(0, pathways.informationGaps.length - gaps.length);
 
   return (
-    <section className={`vision-evidence${compact ? ' vision-evidence--compact' : ''}`} aria-labelledby="vision-evidence-title">
+    <section className={`vision-evidence${compact ? ' vision-evidence--compact' : ''}`} aria-labelledby={titleId}>
       <header className="vision-evidence__header">
         <div>
           <p className="vision-evidence__eyebrow">{hi ? 'जवाबों के बीच संबंध' : 'HOW YOUR RESPONSES CONNECT'}</p>
-          <h2 id="vision-evidence-title">{hi ? 'विज़न एविडेंस पाथवे' : 'Vision Evidence Pathways'}</h2>
+          <h2 id={titleId}>{hi ? 'विज़न एविडेंस पाथवे' : 'Vision Evidence Pathways'}</h2>
         </div>
         <span className="material-symbols-outlined" aria-hidden="true">account_tree</span>
       </header>
@@ -89,8 +95,8 @@ export default function VisionEvidencePathways({ pathways, language = 'en', comp
       )}
 
       {gaps.length > 0 && (
-        <section className="vision-evidence__gaps" aria-labelledby="vision-evidence-gaps">
-          <h3 id="vision-evidence-gaps">{hi ? 'जानकारी जो दर्ज नहीं हुई' : 'Information not recorded'}</h3>
+        <section className="vision-evidence__gaps" aria-labelledby={gapsId}>
+          <h3 id={gapsId}>{hi ? 'जानकारी जो दर्ज नहीं हुई' : 'Information not recorded'}</h3>
           <p>
             {hi
               ? 'ये केवल उपलब्ध जवाबों में छूटी हुई जानकारी दिखाते हैं; यह आपकी दृष्टि के बारे में निष्कर्ष नहीं है।'
