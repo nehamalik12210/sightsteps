@@ -391,3 +391,4 @@ export default function ClinicianBrief({ onClose }) {
       </main>
     </div>
   );
+}
