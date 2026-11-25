@@ -298,14 +298,6 @@ export default function Landing() {
         <div className="landing__illustration" aria-hidden="true">
           <OpticalIllustration className="landing__optical-svg" />
         </div>
-      </div>
-
-      <div className="landing__footer">
-        <span className="landing__footer-badge">
-          <span className="material-symbols-outlined" aria-hidden="true">verified</span>
-          ZEISS Beyond Code 2026
-        </span>
-      </div>
           {!kioskMode && savedSessions.length > 0 && (
         <section className="saved-session-history" aria-labelledby="saved-session-heading">
           <div className="saved-session-history__heading">
@@ -329,7 +321,7 @@ export default function Landing() {
                     <span>{dateLabel}</span>
                   </div>
                   <div className="saved-session-history__actions">
-                    <button type="button" className="btn btn--secondary" onClick={() => handleResumeSaved(record.sessionId)} disabled={historyBusyId !== null}>
+                    <button type="button" className="btn btn--secondary btn--sm" onClick={() => handleResumeSaved(record.sessionId)} disabled={historyBusyId !== null}>
                       {historyBusyId === record.sessionId ? (lang === 'hi' ? 'खोल रहे हैं…' : 'Opening…') : (lang === 'hi' ? 'फिर खोलें' : 'Resume')}
                     </button>
                     <button type="button" className="saved-session-history__delete" onClick={() => handleDeleteSaved(record.sessionId)} disabled={historyBusyId !== null}>
@@ -343,6 +335,15 @@ export default function Landing() {
           {historyError && <p className="saved-session-history__error" role="alert">{historyError}</p>}
         </section>
       )}
+      </div>
+
+      <div className="landing__footer">
+        <span className="landing__footer-badge">
+          <span className="material-symbols-outlined" aria-hidden="true">verified</span>
+          ZEISS Beyond Code 2026
+        </span>
+      </div>
+
 </main>
   );
 }

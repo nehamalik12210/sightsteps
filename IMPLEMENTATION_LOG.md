@@ -343,3 +343,11 @@ A passing build or automated test is not a substitute for the listed clinical, s
 - Consolidated them into one Ramesh demo card. The short report-first path remains the default; a checkbox inside the same card optionally enables the existing Direction Awareness and Amsler continuation.
 - The checkbox is separately labelled, keyboard operable and translated into English and Hindi. The card subtitle updates to reflect the selected path. No second demo entry card remains.
 - Updated the quality audit to require exactly one demo button and verify that the optional checkbox selects the correct scripted persona. The existing nine demo-policy tests continue to cover the two underlying walkthrough behaviours.
+
+
+## Landing saved-session layout correction — 26 November 2026
+
+- Reviewed the supplied landing screenshot. The history panel was styled with a 760px maximum width, while the landing actions and illustration were constrained to a 400–460px content column. The saved-history section was also rendered after the landing footer and outside the centered layout; the flex layout and auto illustration margin created a large vertical separation.
+- Moved Saved sessions into the centered landing layout, after the illustration and before the footer. Constrained it to 400px / the main action-column width, reduced card padding and row spacing, and changed Resume to the compact button size.
+- Changed the layout to content-driven height and replaced the illustration's auto vertical margin with explicit spacing. The footer can still sit at the bottom when the page is short, but saved history now participates in the normal page flow.
+- Added quality-audit checks for section placement, 400px maximum width and content-driven spacing.

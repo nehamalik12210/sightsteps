@@ -116,3 +116,6 @@ The current production alias is READY and returns HTTP 200. Browser-level visual
 
 
 | F-35 | Landing showed two separate Ramesh demo cards although both shared the same seven guided questions; only the post-intake destination differed. | Confirmed in Landing JSX: two adjacent demo buttons called the same handler with either the short or activity-inclusive persona. | Fixed by consolidating to one demo card with an optional, unchecked-by-default checkbox for Direction Awareness and Amsler. The subtitle reflects the selected mode. Quality audit now verifies one demo button and the optional selection wiring. |
+
+
+| F-36 | Saved-session history rendered after the Landing footer, outside the centered content layout, and used a 760px maximum width against 400–460px landing content. The flex layout and auto illustration margin created a visually detached panel and excessive vertical separation. | Confirmed from the supplied screenshot and Landing JSX/CSS. | Fixed by moving the history section into the landing layout before the footer, constraining it to 400px, compacting the row controls and replacing the auto vertical illustration margin with explicit spacing. Added regression assertions for placement and sizing. |
