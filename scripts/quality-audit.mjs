@@ -353,6 +353,7 @@ check(/savedDirectionResults/.test(vision) && /useState\(\(\) => \(savedDirectio
 check(/id="main-content"/.test(amslerGridSource), 'Amsler grid page has a skip-navigation main landmark');
 check(/canAdjustCalibration = canCalibrateAmsler\(viewportWidthPx, viewportHeightPx, MIN_CALIBRATION_SLIDER_PX\)/.test(amslerGridSource) && /disabled={!canAdjustCalibration}/.test(amslerGridSource) && /disabled={!canCalibrate}/.test(amslerGridSource), 'Amsler keeps calibration adjustment available while the current ruler size is invalid, but still blocks proceeding');
 check(/tabIndex={focusedCell\.row === r && focusedCell\.col === c \? 0 : -1}/.test(amslerGridSource), 'Amsler grid exposes a single roving keyboard tab stop instead of 400 cell tab stops');
+check(/handleCellClick[\s\S]*?setFocusedCell\(\{ row, col \}\)/.test(amslerGridSource), 'Amsler pointer selection keeps the roving keyboard stop aligned with the last selected cell');
 check(/handleGridCellKeyDown/.test(amslerGridSource) && /getNextGridCell/.test(amslerGridSource) && /onKeyDown=/.test(amslerGridSource), 'Amsler grid supports arrow-key and Home/End cell navigation');
 check(/role="group"/.test(amslerGridSource) && /20 by 20 selection grid/.test(amslerGridSource) && /gridCellRefs\.current/.test(amslerGridSource), 'Amsler grid labels the selection area and manages focus across both eye rounds');
 

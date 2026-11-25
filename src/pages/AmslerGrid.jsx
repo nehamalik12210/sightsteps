@@ -114,6 +114,9 @@ function AmslerGrid() {
 
   const handleCellClick = useCallback((row, col) => {
     if (!gridFitsCurrentViewport) return;
+    // Touch browsers do not always focus a button on tap. Keep the roving
+    // keyboard stop aligned with the participant's most recently chosen cell.
+    setFocusedCell({ row, col });
     setFlaggedCells((prev) => {
       const eyeCells = prev[currentEye];
       const existing = eyeCells.findIndex((c) => c.row === row && c.col === col);
