@@ -99,3 +99,28 @@
   line-height: var(--lh-relaxed);
   overflow-wrap: anywhere;
 }
+
+/* Isolate the modal from the full Report when its print action is used. */
+@media print {
+  body.has-clinician-brief .rpt > :not(.clinician-brief) {
+    display: none !important;
+  }
+
+  body.has-clinician-brief .rpt {
+    display: block !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body.has-clinician-brief .clinician-brief {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.has-clinician-brief .clinician-brief__page {
+    margin: 0 auto !important;
+  }
+}
