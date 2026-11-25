@@ -261,9 +261,10 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
   const informationGaps = gapTargets.flatMap(({ experience, isMain }) => {
     const { missing } = missingFieldsForExperience(experience, isMain, safeAnswers);
     if (!missing.length) return [];
-    const sourceIds = isMain
-      ? ['primary_concern', experience.id, 'experience_onset', 'experience_frequency', 'experience_context']
-      : ['additional_concerns', experience.id, `additional_experience_${experience.id}_onset`, `additional_experience_${experience.id}_frequency`, `additional_experience_${experience.id}_context`];
+    const detailIds = isMain
+      ? ['experience_onset', 'experience_change', 'experience_frequency', 'experience_context', ...(experience.id === 'headaches' ? [] : ['which_eye'])]
+      : [`additional_experience_${experience.id}_onset`, `additional_experience_${experience.id}_frequency`, `additional_experience_${experience.id}_context`, ...(experience.id === 'headaches' ? [] : [`additional_experience_${experience.id}_eye`])];
+    const sourceIds = [isMain ? 'primary_concern' : 'additional_concerns', experience.id, ...detailIds];
     const sourceAnswers = sourceIds
       .map((id) => sourceRecord(
         id,
@@ -272,14 +273,18 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
             : id === 'additional_concerns' ? 'Additional experience selected'
               : id === experience.id ? 'Reported experience response'
                 : id.includes('_onset') ? 'When first noticed'
-                  : id.includes('_frequency') ? 'How often noticed'
-                    : id.includes('_context') ? 'Situations selected' : 'Response',
+                  : id.includes('_change') ? 'Change over time'
+                    : id.includes('_frequency') ? 'How often noticed'
+                      : id.includes('_context') ? 'Situations selected'
+                        : id.endsWith('_eye') || id === 'which_eye' ? 'Eye or eyes noticed' : 'Response',
           hi: id === 'primary_concern' ? 'मुख्य अनुभव'
             : id === 'additional_concerns' ? 'चुना गया अतिरिक्त अनुभव'
               : id === experience.id ? 'बताए गए अनुभव का जवाब'
                 : id.includes('_onset') ? 'पहली बार कब महसूस हुआ'
-                  : id.includes('_frequency') ? 'कितनी बार महसूस होता है'
-                    : id.includes('_context') ? 'चुनी गई परिस्थितियाँ' : 'जवाब',
+                  : id.includes('_change') ? 'समय के साथ बदलाव'
+                    : id.includes('_frequency') ? 'कितनी बार महसूस होता है'
+                      : id.includes('_context') ? 'चुनी गई परिस्थितियाँ'
+                        : id.endsWith('_eye') || id === 'which_eye' ? 'किस आँख में महसूस हुआ' : 'जवाब',
         },
         safeAnswers,
         localized(experience.label).en,
