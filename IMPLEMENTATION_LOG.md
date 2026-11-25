@@ -235,3 +235,11 @@
 - Commit: `e6148c7101d27b9b28e3b0608fb3dbb95e026510`.
 - Vercel deployment `dpl_BYn8DmR9VaMXuMFbS1DU7CEyqfdh` reached READY, production alias `sightsteps.vercel.app`. Exact checks: quality **2,573 passed**; regression **1,056 passed**; clinical language **23 JSX / 2,774 fragments** passed; Vite **104 modules**. Live root **HTTP 200**, serving `index-5HL5_vzL.js`.
 - Direct browser/keyboard/screen-reader test remains outstanding because Vercel Sandbox Snapshot Storage is over the Hobby limit. The modal is source- and build-verified, not visually or assistive-technology validated after this change.
+
+
+### Phase 4 — F-28 custom activity relabeling
+- Fixed the Activity Profile edit path for participants who rename `Other` after already marking it as an affected activity. Previously the `affected_activities` values remained correct, but the saved answer label was regenerated from static option strings and could display “Other” instead of the participant's new name.
+- Added `getAffectedActivityLabels(activityIds, customActivityName)` as the single bilingual label helper. The profile calls it with the updated local custom name before persisting the revised answer label.
+- Added two regression assertions for bilingual combined labels and one static audit assertion for the profile integration.
+- Commit `bd3c16c6f7be7656e1a729afa934a0474485413e`; Vercel deployment `dpl_HfnXD5Tz6Jtj3G7iMUFxwxRKrh8c` READY and aliased to `sightsteps.vercel.app`.
+- Verification: quality **2,574 passed**; regression **1,058 passed**; clinical language **23 JSX / 2,774 fragments** passed; Vite **104 modules**; live root **HTTP 200** with `index-CFKY3dkv.js`.

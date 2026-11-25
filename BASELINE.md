@@ -183,3 +183,13 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Vercel deployment: `dpl_BYn8DmR9VaMXuMFbS1DU7CEyqfdh` — **READY**, production alias `https://sightsteps.vercel.app`.
 - Exact deployment checks: quality audit **2,573 passed, 0 failed**; regression suite **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**. Production root returned **HTTP 200** and serves `index-5HL5_vzL.js`.
 - Direct browser keyboard and screen-reader validation for the new global inert scope remains pending: the Vercel Sandbox Snapshot Storage quota prevented provisioning another browser sandbox. Build/audit success is not presented as manual modal interaction verification.
+
+
+## Phase 4 custom activity label consistency — 25 November 2026
+
+- Finding F-28: When a participant edited their custom `Other` activity name after it had already been selected as affected, `ActivityProfile.jsx` rebuilt the stored `affected_activities.label` with the static option labels. The selected value remained `other`, but the participant's new wording was replaced by generic “Other” in the answer label.
+- Added `getAffectedActivityLabels()` in `src/data/questions.js` to build a bilingual affected-activity label from the selected IDs and current participant-entered custom name. Activity Profile now uses it when a renamed custom activity affects an already recorded selection.
+- Added two engine regression assertions for English and Hindi labels with a regular activity plus renamed custom activity, and a quality-audit assertion that the profile handler uses the helper.
+- Commit: `bd3c16c6f7be7656e1a729afa934a0474485413e`.
+- Production deployment: `dpl_HfnXD5Tz6Jtj3G7iMUFxwxRKrh8c` — **READY**, production alias `https://sightsteps.vercel.app`.
+- Exact checks: quality audit **2,574 passed, 0 failed**; engine regression suite **1,058 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**. Live production root returned **HTTP 200** and serves `index-CFKY3dkv.js`.
