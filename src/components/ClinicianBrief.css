@@ -258,6 +258,10 @@
     gap: 2px;
   }
 
+  .clinician-brief__timeline li:nth-child(n + 2) {
+    display: none !important;
+  }
+
   .clinician-brief__timeline li {
     grid-template-columns: 70px minmax(0, 1fr);
     font-size: 6.8pt;
