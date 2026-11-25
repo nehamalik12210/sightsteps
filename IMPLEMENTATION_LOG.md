@@ -199,3 +199,12 @@
 - Commit: `06a7fa0ae3419c3a8565f83fae35f44632198855`.
 - Vercel verification: quality audit **2,563 passed**; regression suite **1,054 passed**; clinical-language scan **23 JSX files / 2,774 fragments** with no violations; production build **104 modules**; PWA **34 precache entries (1,014.73 KiB)**. Production deployment `dpl_HVN2rqsztHG8JoGCBeVE7ZhYLvTD` reached READY and `https://sightsteps.vercel.app` returned HTTP 200 with the new asset.
 - Limit: the sandbox snapshot quota prevented direct browser/assistive-technology verification of arrow-key navigation. This remains a device-level validation item; automated helper tests and production build passed.
+
+
+### Phase 4 — F-22 and F-23 verification
+- F-22: Keep the ruler slider enabled when the selected calibration width does not fit, provided the minimum supported slider width does fit. Continue remains gated by the selected width. Added a viewport regression assertion for 600 × 450 px (150 px fits, 300 px does not).
+- F-23: Reserve the accessibility control's 52 px header space for `.amsler__topbar-counter` as well as questionnaire and direction-activity counters. Added a quality-audit assertion for the selector.
+- Commit: `d05387b6e1bdc28599f16f4d4b8327bb964ed4ef`.
+- Production deployment: `dpl_9uZwVLLNcJHVu1xuhjHEcmzPeQoR` — READY, aliased to `sightsteps.vercel.app`.
+- Verification on that exact deployment: quality audit **2,565 passed**; regression tests **1,055 passed**; clinical-language scan **23 JSX files / 2,774 fragments** passed; Vite **104 modules transformed**; PWA **34 precache entries (1,014.77 KiB)**. Live root HTTP 200; production CSS asset confirmed to contain the new Amsler counter selector.
+- Remaining verification boundary: no direct browser/device check was possible for F-22/F-23 because the Vercel Sandbox Snapshot Storage quota was exceeded. The slider recovery and header spacing are source-checked and automated-build-checked, but not visually validated on physical mobile devices.

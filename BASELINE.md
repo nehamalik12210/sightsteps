@@ -137,3 +137,13 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Vercel production deployment `dpl_HVN2rqsztHG8JoGCBeVE7ZhYLvTD` reached READY and is aliased to `sightsteps.vercel.app`.
 - Deployment checks: quality audit **2,563 passed, 0 failed**; regression tests **1,054 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments, no violations**; Vite **104 modules transformed**; PWA **34 precache entries (1,014.73 KiB)**.
 - Live production root returned **HTTP 200** with the new JS asset. Automated and build validation passed. Direct browser interaction testing for arrow-key behavior remains pending because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox.
+
+
+## Phase 4 Amsler follow-up fixes — 25 November 2026
+
+- F-22: The calibration slider could disable itself when the current ruler width made the 10 cm grid too tall for the visible viewport, preventing the participant from reducing the ruler to a valid physical size. The slider now remains adjustable whenever the minimum supported slider size fits; the Continue action still requires the currently selected size to fit. A regression assertion covers a 600 × 450 viewport where the 150 px minimum fits but a 300 px selection does not.
+- F-23: The fixed accessibility control reserved 52 px in the questionnaire and direction-activity headers but not the Amsler round counter. Added `.amsler__topbar-counter` to the same reserved-space selector and a quality-audit assertion.
+- Combined production deployment: commit `d05387b6e1bdc28599f16f4d4b8327bb964ed4ef`, deployment `dpl_9uZwVLLNcJHVu1xuhjHEcmzPeQoR`, READY and aliased to `https://sightsteps.vercel.app`.
+- Verification for this exact deployment: quality audit **2,565 passed, 0 failed**; regression tests **1,055 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments, no violations**; Vite **104 modules transformed**; PWA **34 precache entries (1,014.77 KiB)**.
+- Live root returned **HTTP 200** and the production CSS asset was fetched and verified to contain `.amsler__topbar-counter`.
+- Browser/device verification of the calibration recovery and header overlap remains pending because the Vercel Sandbox Snapshot Storage limit prevented creating another browser sandbox. Do not treat the automated build as a visual or physical-device test.
