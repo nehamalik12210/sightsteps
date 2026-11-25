@@ -172,6 +172,8 @@ export function buildVisionEvidencePathways(answers = {}, timelineEntries = []) 
     );
 
     for (const context of contexts) {
+      // "Varies / no clear pattern" is not a specific situation to connect.
+      if (context.id === 'varies') continue;
       if (!contextMap.has(context.id)) contextMap.set(context.id, []);
       contextMap.get(context.id).push({ experience, sources, context });
       relationships.push({
