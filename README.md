@@ -33,6 +33,16 @@ A pattern engine (`src/engine/patternEngine.js`) evaluates predefined combinatio
 ### 🧭 Everyday Vision Experience Profile
 A bilingual synthesis layer (`src/engine/visionExperienceProfile.js`) connects the participant's main and additional reported experiences with onset, change over time, frequency, contexts, eye involvement, activity-specific impacts and participant-recorded timeline entries. Participants may choose additional experiences for separate, optional follow-up questions; each profile section retains source answer IDs and displays the source responses on demand. The same profile is reused in the detailed report, clinician brief and compact appointment preparation pack. It does not score severity, measure visual performance, infer a diagnosis or determine urgency.
 
+### 🔗 Vision Evidence Pathways
+A deterministic explainability layer (`src/engine/visionEvidencePathways.js`) shows the participant-reported relationships that SightSteps can trace to their original answer IDs and timeline entries:
+- **Experience → context:** where a separately reported experience was noticed.
+- **Context + activity impact:** keeps the participant's activity and impact answers visible beside the main experience context, but does not assign the activity impact to one experience when the questionnaire did not capture that link.
+- **Shared context across experiences:** the one new inference type — connects two separately reported experiences only when the participant selected the same specific context for each.
+- **Timeline + onset:** presents a participant-authored dated entry beside the questionnaire onset response, explicitly distinguishing the entry date from a medically determined onset.
+- **Information gaps:** identifies missing answers to follow-up fields the participant was actually asked.
+
+The pathways appear in the detailed report, compact Clinician Brief and Appointment Preparation Pack, and are included in the clinical-review export. The output is bilingual, source-traceable and non-diagnostic; it does not add confidence, severity or risk scores.
+
 ### 🧩 Personalized Everyday Activities
 Participants can describe an activity that is not covered by the preset categories (for example, jewellery making or repair work). Their own activity label is carried into impact questions, the experience profile and discussion prompts. Changing the custom label invalidates impact details tied to the old label so outdated wording is not reused.
 
@@ -107,7 +117,7 @@ Landing ──▶ Onboarding ──▶ Activity Profile ──▶ Intake Questio
 | Local storage | IndexedDB (including participant summary review and corrections) |
 | Rules engine | Deterministic JS rules engine (`src/engine/ruleEngine.js`) |
 | Pattern engine | Predefined response-pattern organiser (`src/engine/patternEngine.js`) |
-| Clinical language lint | Automated forbidden-phrase scanner (`scripts/clinical-language-audit.mjs`) |
+| Evidence pathways | Deterministic bilingual relationship builder with source-answer and timeline traceability (`src/engine/visionEvidencePathways.js`) |\n| Clinical language lint | Automated forbidden-phrase scanner (`scripts/clinical-language-audit.mjs`) |
 | PWA | vite-plugin-pwa, web app manifest & service worker |
 | Voice | Browser Web Speech APIs where available |
 
@@ -137,8 +147,8 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 
 | Command | What it does |
 |---|---|
-| `npm run audit` | 2,525 static project, data and feature checks |
-| `npm test` | 980 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
+| `npm run audit` | 2,555 static project, data and feature checks |
+| `npm test` | 1,044 regression tests for rules, patterns, evidence pathways, adaptive follow-ups, custom activities, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -153,7 +163,7 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 npm run export-review
 ```
 
-Generates `exports/clinical-review-export.txt` containing pattern definitions and sources, generated discussion prompts, bilingual adaptive follow-up questions and options, current Amsler instructions and safety wording, custom-activity examples, participant-review copy, and clinician-brief text. Send this export to an optometrist or ophthalmologist with the demo walkthrough.
+Generates `exports/clinical-review-export.txt` containing pattern definitions and sources, generated discussion prompts, bilingual adaptive follow-up questions and options, current Amsler instructions and safety wording, custom-activity examples, participant-review copy, five evidence-pathway relationship types with bilingual source answers, and clinician-brief text. Send this export to an optometrist or ophthalmologist with the demo walkthrough.
 
 See [`CLINICAL_REVIEW_PENDING.md`](CLINICAL_REVIEW_PENDING.md) for the full review kit procedure, reviewer questions and change log.
 
