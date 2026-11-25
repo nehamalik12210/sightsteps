@@ -211,7 +211,7 @@ sightsteps/
 │   ├── engine/
 │   │   ├── patternEngine.js           # Participant-response pattern organiser
 │   │   ├── ruleEngine.js              # Deterministic rules engine
-│   │   └── testEngine.mjs             # Engine and utility regression tests (961)
+│   │   └── testEngine.mjs             # Engine and utility regression tests (967)
 │   ├── pages/
 │   │   ├── ActivityProfile.jsx        # Everyday activity selection
 │   │   ├── AmslerGrid.jsx             # Amsler grid self-monitoring activity
@@ -251,7 +251,7 @@ sightsteps/
 
 ## Validation Status
 
-The latest exact-source verification completed on main commit c1936631a3eb93e4b025d50afe8659e7df11132f in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
+The latest exact-source verification completed on application-code commit 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681 in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
 
 | Check | Result |
 |---|---|
@@ -266,9 +266,9 @@ These checks cover source structure, data validation, routing, persistence, patt
 
 
 
-The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. It has not yet reached production: Vercel currently reports a build-rate-limit for this commit. The latest READY deployment is still the older 92a4d0da... revision; the live app should not be assumed to contain these changes.
+The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. This application code is deployed in production: deployment dpl_4hPiACBGmQzwxDpji7azb2fnQHa2 (READY, commit 4d09c8be..., which includes app code 8f44a9cc...). Live direct requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200 with the new entry bundle. This confirms the live SPA shell and route rewrite, not full browser interaction or visual validation.
 
-Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.87 kB (33.15 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
+Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.94 kB (33.18 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
 ---
 
