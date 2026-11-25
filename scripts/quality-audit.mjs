@@ -249,6 +249,9 @@ check(/onboarding\.historyConsent\.label/.test(read('src/pages/Onboarding.jsx'))
 check(/allowNewSession: true/.test(read('src/pages/Landing.jsx')) && /allowNewSession: true/.test(read('src/pages/KioskSetup.jsx')), 'normal and kiosk fresh-session transitions explicitly authorize their onboarding route');
 check(/handleExitLanguageStep/.test(onboarding) && /setLanguage\(null\)/.test(onboarding), 'abandoned onboarding clears the provisional language instead of leaking it to Landing');
 check(/demoStartPending/.test(read('src/pages/Landing.jsx')) && /navigate\('\/intake', \{ replace: true \}\)/.test(read('src/pages/Landing.jsx')), 'demo navigation waits for its context state and replaces the old Landing history entry');
+check(/rameshActivityDemoPersona[\s\S]*?skipVision: false/.test(read('src/data/demoPersona.js')), 'a second controlled Ramesh persona continues into the optional vision activities');
+check(/const handleDemo = async \(persona = rameshPersona\)/.test(landingSource) && /startDemo\(persona\)/.test(landingSource) && /handleDemo\(rameshActivityDemoPersona\)/.test(landingSource), 'Landing exposes separate short and activity-inclusive Ramesh demonstrations');
+check(/handleOpenAmsler/.test(vision) && /navigate\('\/amsler'\)/.test(vision), 'the activity-inclusive demo retains the E-to-Amsler continuation path');
 check(/pendingProfile/.test(activitySource) && /navigate\('\/intake', \{ replace: true \}\)/.test(activitySource), 'activity-profile navigation waits until selected activities and primary activity reach shared state');
 check(/disabled=\{Boolean\(pendingProfile\)/.test(activitySource), 'activity-profile controls lock while the profile transition is being committed');
 check(/reportPending/.test(vision) && /visionResults\?\.completed/.test(vision), 'vision completion and skip navigation wait until vision results are committed');

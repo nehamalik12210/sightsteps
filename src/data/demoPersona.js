@@ -93,4 +93,11 @@ const rameshPersona = {
   skipVision: true,
 };
 
+// Separate scripted variant for evaluators who want to continue beyond the
+// seven-question intake and explore the optional E Direction and Amsler flows.
+export const rameshActivityDemoPersona = {
+  ...rameshPersona,
+  skipVision: false,
+};
+
 export default rameshPersona;

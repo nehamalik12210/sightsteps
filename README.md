@@ -14,6 +14,10 @@ SightSteps helps people organise visual experiences they have noticed, understan
 ---
 
 
+### Demonstration modes
+
+Landing offers two scripted Ramesh walkthroughs. The short walkthrough covers the seven guided intake questions and proceeds directly to the report. A second walkthrough continues into the optional Direction Awareness activity and Amsler flow so those features can be explored separately. Both are scripted demo sessions, are excluded from participant history, and do not represent real participant measurements or clinical validation.
+
 ### Saved session history
 
 The active participant session is stored in the current browser's IndexedDB while it is in progress so it can be resumed. During onboarding, participants can separately and optionally opt in to retain up to **10 completed session records** on that device; the choice is off by default. Without that opt-in, the active session is removed when a new journey begins. The Landing page lists opted-in saved sessions so a participant can resume or delete an individual record. History is local to that browser/device; records are not encrypted and there are no accounts, cloud sync, identity matching, or cross-device profiles. Demo and kiosk sessions are excluded from participant history. Kiosk exit, inactivity cleanup, and kiosk setup clear the complete local session store rather than retaining another participant's data.

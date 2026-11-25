@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { t } from '../data/i18n.js';
-import rameshPersona from '../data/demoPersona.js';
+import rameshPersona, { rameshActivityDemoPersona } from '../data/demoPersona.js';
 import { getResumePath } from '../utils/sessionRouting.js';
 import { initVoices } from '../utils/tts.js';
 import { getSavedSessions } from '../utils/storage.js';
@@ -179,7 +179,7 @@ export default function Landing() {
     }
   };
 
-  const handleDemo = async () => {
+  const handleDemo = async (persona = rameshPersona) => {
     if (demoStartPending) return;
     setSessionActionError('');
     setDemoStartPending(true);
@@ -191,7 +191,7 @@ export default function Landing() {
         : 'The previous session could not be cleared. Please try again.');
       return;
     }
-    startDemo(rameshPersona);
+    startDemo(persona);
   };
 
   return (
@@ -248,12 +248,22 @@ export default function Landing() {
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </button>
 
-            <button className="landing__demo-btn" type="button" onClick={handleDemo} disabled={!isHydrated || demoStartPending}>
+            <button className="landing__demo-btn" type="button" onClick={() => handleDemo(rameshPersona)} disabled={!isHydrated || demoStartPending}>
               <span className="landing__demo-avatar" aria-hidden="true">र</span>
               <span className="landing__demo-text">
                 <span className="landing__demo-label">{t('landing.tryDemo', lang)}</span>
                 <span className="landing__demo-sub">
                   {lang === 'hi' ? 'रमेश, 42, दर्ज़ी · 7 सवाल · लगभग 1 मिनट' : 'Ramesh, 42, Tailor · 7 guided questions · ~1 min'}
+                </span>
+              </span>
+              <span className="material-symbols-outlined landing__demo-arrow" aria-hidden="true">arrow_forward</span>
+            </button>
+            <button className="landing__demo-btn landing__demo-btn--activities" type="button" onClick={() => handleDemo(rameshActivityDemoPersona)} disabled={!isHydrated || demoStartPending}>
+              <span className="landing__demo-avatar" aria-hidden="true">E</span>
+              <span className="landing__demo-text">
+                <span className="landing__demo-label">{lang === 'hi' ? 'वैकल्पिक दृष्टि गतिविधियाँ भी देखें' : 'Include optional vision activities'}</span>
+                <span className="landing__demo-sub">
+                  {lang === 'hi' ? 'रमेश · 7 सवाल · दिशा पहचान और एम्सलर ग्रिड' : 'Ramesh · 7 guided questions · Direction Awareness + Amsler'}
                 </span>
               </span>
               <span className="material-symbols-outlined landing__demo-arrow" aria-hidden="true">arrow_forward</span>
