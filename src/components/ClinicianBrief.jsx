@@ -335,7 +335,7 @@ export default function ClinicianBrief({ onClose }) {
           );
         })()}
 
-        {safeVisionResults && (
+        {safeVisionResults?.completed && safeVisionResults.data && (
           <section className="clinician-brief__section">
             <h2>
               <span className="material-symbols-outlined" aria-hidden="true">explore</span>
