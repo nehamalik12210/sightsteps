@@ -117,3 +117,13 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Confirmed source issue F-20: global accessibility settings could remain open over a destination page after route navigation.
 - Fixed with `useLocation` + location-key effect in `AccessibilityControls`; added a quality-audit assertion.
 - Source diff review and automated deployment verification pending.
+
+
+## Phase 4 initial navigation UX fix — verified deployment
+
+- Fix: accessibility settings panel closes on route navigation (F-20).
+- Commit: `d61758b944ff36c5fba3b7f3577f368449f7b1fa`.
+- Vercel deployment: `dpl_G5LazPYhmWy3kCPHMziLMSPdnJU6` — READY, production aliases include `sightsteps.vercel.app`.
+- Automated verification: quality audit **2,559 passed**; engine tests **1,044 passed**; clinical-language audit **23 JSX files / 2,771 fragments passed**; Vite **103 modules**; PWA **34 precache entries (1,013.43 KiB)**.
+- Production root HTTP check: **200 OK**.
+- Limit: direct browser interaction test for this new panel-close behavior remains pending because Vercel Sandbox Snapshot Storage is over the Hobby plan limit.

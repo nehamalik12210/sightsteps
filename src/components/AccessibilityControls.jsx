@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import './AccessibilityControls.css';
 
@@ -33,7 +32,6 @@ function getInitialPreferences() {
 
 export default function AccessibilityControls() {
   const { language } = useApp();
-  const location = useLocation();
   const hi = language === 'hi';
   const [preferences, setPreferences] = useState(getInitialPreferences);
   const detailsRef = useRef(null);
@@ -52,10 +50,6 @@ export default function AccessibilityControls() {
       // Display preferences remain active for this visit when browser storage is unavailable.
     }
   }, [preferences]);
-
-  useEffect(() => {
-    if (detailsRef.current?.open) detailsRef.current.open = false;
-  }, [location.key]);
 
   useEffect(() => {
     const handleEscape = (event) => {

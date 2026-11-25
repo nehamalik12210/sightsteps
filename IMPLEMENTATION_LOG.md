@@ -182,3 +182,10 @@
 - Source inspection confirmed the global accessibility `<details>` panel persisted across route changes because it is mounted outside the route tree and only closed on Escape or outside pointer input.
 - Added a React Router location-key effect that closes the panel after navigation, preventing it from covering a newly opened page.
 - Added a static quality-audit regression assertion. A direct browser interaction test for this specific change is pending because the Vercel sandbox quota prevented creating another sandbox; production build logs will be checked.
+
+
+### Phase 4 verification update — F-20
+- Vercel production build for `d61758b944ff36c5fba3b7f3577f368449f7b1fa` reached READY (deployment `dpl_G5LazPYhmWy3kCPHMziLMSPdnJU6`, aliased to `sightsteps.vercel.app`).
+- Build checks: quality audit **2,559 passed**; regression tests **1,044 passed**; clinical-language audit passed (**23 JSX files / 2,771 fragments**); Vite **103 modules transformed**; PWA **34 precache entries (1,013.43 KiB)**.
+- The live production URL returned HTTP 200 after deployment. This validates deployment and the SPA shell, not the route-panel interaction itself.
+- Direct browser test of F-20 remains pending due sandbox snapshot-storage limit; no claim of visual or interaction validation is made for that change.
