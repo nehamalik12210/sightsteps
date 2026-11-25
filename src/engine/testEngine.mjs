@@ -809,6 +809,22 @@ const overdueTwoExperiences = evaluatePatterns({
   headaches: { value: 'sometimes' },
 });
 assert(overdueTwoExperiences.some((pattern) => pattern.id === 'overdue-exam'), 'extended examination interval plus two reported experiences creates a discussion prompt');
+const overdueTwoPattern = overdueTwoExperiences.find((pattern) => pattern.id === 'overdue-exam');
+const overdueSourceIds = overdueTwoPattern.sources.map((source) => source.id);
+assert(overdueSourceIds.includes('eye_exam'), 'overdue-exam cites the examination-history answer');
+assert(overdueSourceIds.includes('blurred_vision') && overdueSourceIds.includes('headaches'), 'overdue-exam cites both reported experiences that meet its trigger');
+assert(!overdueSourceIds.includes('squinting') && !overdueSourceIds.includes('night_vision'), 'overdue-exam does not label negative symptom answers as supporting evidence');
+const overdueDifferentExperiences = evaluatePatterns({
+  eye_exam: { value: 'never', label: { en: 'Never', hi: 'कभी नहीं' } },
+  squinting: { value: 'yes', label: { en: 'Yes, often', hi: 'हाँ, अक्सर' } },
+  night_vision: { value: 'sometimes', label: { en: 'Sometimes', hi: 'कभी-कभी' } },
+  blurred_vision: { value: 'no', label: { en: 'No', hi: 'नहीं' } },
+  headaches: { value: 'rarely', label: { en: 'Rarely / Never', hi: 'बहुत कम / कभी नहीं' } },
+}).find((pattern) => pattern.id === 'overdue-exam');
+assert(Boolean(overdueDifferentExperiences), 'overdue-exam also matches a different pair of reported experiences');
+const overdueDifferentSourceIds = overdueDifferentExperiences.sources.map((source) => source.id);
+assert(overdueDifferentSourceIds.includes('squinting') && overdueDifferentSourceIds.includes('night_vision'), 'overdue-exam cites the actual second pair of reported experiences');
+assert(!overdueDifferentSourceIds.includes('blurred_vision') && !overdueDifferentSourceIds.includes('headaches'), 'overdue-exam omits negative blur/headache answers from its supporting sources');
 assert(!evaluatePatterns({
   eye_exam: { value: 'never' },
   blurred_vision: { value: 'sometimes' },
