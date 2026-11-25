@@ -351,3 +351,13 @@ A passing build or automated test is not a substitute for the listed clinical, s
 - Moved Saved sessions into the centered landing layout, after the illustration and before the footer. Constrained it to 400px / the main action-column width, reduced card padding and row spacing, and changed Resume to the compact button size.
 - Changed the layout to content-driven height and replaced the illustration's auto vertical margin with explicit spacing. The footer can still sit at the bottom when the page is short, but saved history now participates in the normal page flow.
 - Added quality-audit checks for section placement, 400px maximum width and content-driven spacing.
+
+
+## Follow-up: stale PWA page and final saved-session placement — 26 November 2026
+
+- The second supplied screenshot still showed the pre-correction layout: the panel was 760px wide and rendered after the ZEISS footer. Inspected the exact live production files: current root HTML loads index-CaSRaSBl.js and index-DLA_R6Do.css; the deployed CSS defines a 400px maximum for saved-session history, and the deployed JSX orders the history panel before the footer. The screenshot therefore came from an already-open stale PWA document rather than the current deployed bundle.
+- Moved Saved sessions to immediately after the primary landing content and before the optical illustration/footer, keeping it in the same centered layout.
+- Added explicit centered flex sizing and viewport-safe width to the saved-history panel.
+- Added a service-worker controllerchange listener in main.jsx so already-open tabs reload once when a future updated service worker takes control. This avoids indefinitely retaining an older DOM/CSS revision after deployment.
+- Updated the quality audit to verify the intended source order, centered 400px cap, and service-worker reload handling.
+- A tab already running the previous bundle cannot execute the new listener; a one-time hard refresh is still necessary to load this version.

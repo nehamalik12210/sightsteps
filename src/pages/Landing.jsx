@@ -295,9 +295,6 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="landing__illustration" aria-hidden="true">
-          <OpticalIllustration className="landing__optical-svg" />
-        </div>
           {!kioskMode && savedSessions.length > 0 && (
         <section className="saved-session-history" aria-labelledby="saved-session-heading">
           <div className="saved-session-history__heading">
@@ -335,6 +332,11 @@ export default function Landing() {
           {historyError && <p className="saved-session-history__error" role="alert">{historyError}</p>}
         </section>
       )}
+
+        <div className="landing__illustration" aria-hidden="true">
+          <OpticalIllustration className="landing__optical-svg" />
+        </div>
+
       </div>
 
       <div className="landing__footer">
