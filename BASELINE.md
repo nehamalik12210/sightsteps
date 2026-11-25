@@ -36,18 +36,18 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 
 ## Latest verified source checks — 25 November 2026
 
-**Exact source revision:** 7224c5c8b59a402a8e7fbc97893a55fc00914f0d on main. The repository was checked out at this SHA in an isolated Vercel sandbox; this is not a production deployment.
+**Exact source revision:** 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681 on main. The repository was checked out at this SHA in an isolated Vercel sandbox; this is not a production deployment.
 
 **Execution environment:** Node.js v22.23.5; npm 10.9.9. npm ci completed successfully (349 packages added; 350 audited). npm reported four moderate dependency advisories in the existing PWA build chain; they remain tracked above.
 
 - git diff --check: passed; checkout was clean after resetting to the exact main SHA.
-- npm test: **961 passed, 0 failed**.
+- npm test: **967 passed, 0 failed**.
 - npm run audit: **2,524 passed, 0 failed**.
 - npm run clinical-lint: passed; **22 JSX files / 2,629 copy fragments**, no violations.
-- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (106.00 kB gzip)**; Report chunk **151.87 kB (33.15 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.40 KiB)**. The build reruns the three checks above.
+- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (106.00 kB gzip)**; Report chunk **151.94 kB (33.18 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.47 KiB)**. The build reruns the three checks above.
 - npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
 
-**Deployment status:** the latest READY production deployment remains dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb, commit 92a4d0da..., which contains earlier application code through 5d964fc5.... The latest main source commit c1936631... has not been deployed. Its Vercel status check currently reports build-rate-limit; do not treat that provider status as a passing deployment. An earlier build attempt at af2f541... did execute tests and failed on stale Ramesh cluster assertions; those assertions were corrected and the current exact source passed the checks listed above in the isolated sandbox.
+**Deployment status:** the latest READY production deployment remains dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb, commit 92a4d0da..., which contains earlier application code through 5d964fc5.... The latest main source commit 8f44a9cc... has not been deployed. Its Vercel status check currently reports build-rate-limit; do not treat that provider status as a passing deployment. An earlier build attempt at af2f541... did execute tests and failed on stale Ramesh cluster assertions; those assertions were corrected and the current exact source passed the checks listed above in the isolated sandbox. The Phase 2 provenance regression additionally verifies that overdue-exam only cites the positive symptom answers that actually satisfied its trigger.
 
 ## Clinical review export verification
 
