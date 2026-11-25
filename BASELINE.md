@@ -44,7 +44,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - npm test: **980 passed, 0 failed**.
 - npm run audit: **2,525 passed, 0 failed**.
 - npm run clinical-lint: passed; **22 JSX files / 2,629 copy fragments**, no violations.
-- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (105.99 kB gzip)**; Report chunk **151.94 kB (33.18 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.47 KiB)**. The build reruns the three checks above.
+- npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (105.99 kB gzip)**; Report chunk **151.62 kB (33.11 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.63 KiB)**. The build reruns the three checks above.
 - npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
 
 **Deployment status:** the build-rate-limit cleared. The latest production deployment is READY as dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3 for application commit 088e3cd9...; the GitHub Vercel status is SUCCESS. The deployment includes the Amsler grid normalization, report-count consistency and regression tests described above. A READY state confirms deployment completion, not a browser-interaction or visual-validation pass. The Phase 2 provenance regression also verifies that overdue-exam only cites the positive symptom answers that actually satisfied its trigger.
