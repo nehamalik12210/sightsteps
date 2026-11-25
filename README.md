@@ -137,8 +137,8 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 
 | Command | What it does |
 |---|---|
-| `npm run audit` | 2,524 static project, data and feature checks |
-| `npm test` | 967 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
+| `npm run audit` | 2,525 static project, data and feature checks |
+| `npm test` | 980 regression tests for rules, patterns, adaptive experience follow-ups, custom activities, participant review, branching, persistence, routing and Amsler spatial analysis |
 | `npm run clinical-lint` | Clinical language audit — scans for forbidden diagnostic phrases |
 | `npm run check` | Runs audit + test + clinical-lint together |
 | `npm run build` | Runs check, then creates production build in `dist/` |
@@ -190,7 +190,7 @@ sightsteps/
 ├── scripts/
 │   ├── clinical-language-audit.mjs   # Forbidden-phrase scanner (CI gate)
 │   ├── export-prompts.mjs            # Clinical review export generator
-│   └── quality-audit.mjs             # Static quality and dynamic-import checks (2,524)
+│   └── quality-audit.mjs             # Static quality and dynamic-import checks (2,525)
 ├── src/
 │   ├── components/
 │   │   ├── AccessibilityControls.jsx  # Text size, contrast, motion, touch targets
@@ -211,7 +211,7 @@ sightsteps/
 │   ├── engine/
 │   │   ├── patternEngine.js           # Participant-response pattern organiser
 │   │   ├── ruleEngine.js              # Deterministic rules engine
-│   │   └── testEngine.mjs             # Engine and utility regression tests (967)
+│   │   └── testEngine.mjs             # Engine and utility regression tests (980)
 │   ├── pages/
 │   │   ├── ActivityProfile.jsx        # Everyday activity selection
 │   │   ├── AmslerGrid.jsx             # Amsler grid self-monitoring activity
@@ -251,24 +251,24 @@ sightsteps/
 
 ## Validation Status
 
-The latest exact-source verification completed on application-code commit 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681 in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
+The latest exact-source verification completed on application-code commit 088e3cd9bd610bc9fd1622bb22a00c97f13d4f16 in an isolated Node 22.23.5 / npm 10.9.9 sandbox with:
 
 | Check | Result |
 |---|---|
-| Static quality audit | **2,524 passed**, 0 failed |
-| Regression test suite | **967 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
+| Static quality audit | **2,525 passed**, 0 failed |
+| Regression test suite | **980 passed**, 0 failed (incl. source-key resolver, symptom-context attribution, cluster membership and questionnaire deduplication) |
 | Clinical language audit | **PASSED** — 0 violations; 22 JSX files / 2,629 copy fragments scanned, including a nested-new-component discovery fixture |
 | Vite production build | 100 modules transformed; initial JS entry 345.09 kB minified (105.99 kB gzip) |
-| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.94 kB (33.18 kB gzip) |
-| PWA service worker | 34 precache entries generated (980.47 KiB) |
+| Page chunks | All nine non-Landing pages lazy-loaded; largest route chunk is Report at 151.62 kB (33.11 kB gzip) |
+| PWA service worker | 34 precache entries generated (980.63 KiB) |
 
 These checks cover source structure, data validation, routing, persistence, pattern detection, clinical language safety, responsive-layout safeguards, appointment-pack output, save feedback and accessibility controls. They do **not** prove clinical suitability or complete accessibility. Real-device Amsler calibration, responsive visual/print testing, keyboard and screen-reader testing, participant usability sessions, and independent review by a qualified eye-care professional remain necessary before any clinical-context use.
 
 
 
-The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion now cites only symptom answers that contributed to its match; negative symptom answers are not presented as supporting evidence. This application code is deployed in production: deployment dpl_BULeMmr3mi7Byqr39j2aezTwaiUn (READY, commit f4aa4ef6..., which includes app code 8f44a9cc...). Live direct requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200 with the new entry bundle. This confirms the live SPA shell and route rewrite, not full browser interaction or visual validation.
+The exact source revision above has passed these checks and npm run export-review (965 lines reported by the exporter). The overdue-exam discussion cites only symptom answers that contributed to its match. Amsler report and print-pack counts now use a shared normalizer that removes duplicate, out-of-range or malformed cells before summarising saved grid data. This application code is deployed in production: deployment dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3 (READY, application commit 088e3cd9...). This does not replace browser interaction, visual, print-layout or real-device validation.
 
-Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.94 kB (33.18 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
+Route-level code splitting reduced the initial JavaScript entry from 581.00 kB to 345.09 kB minified (105.99 kB gzip); the largest route chunk is the Report page at 151.62 kB (33.11 kB gzip). The four moderate npm audit findings remain in the development-time PWA build chain (`vite-plugin-pwa` → `workbox-build` → `glob` / `minimatch`). See `BASELINE.md` for the advisory and upstream compatibility details; no dependency override or forced upgrade has been applied.
 
 ---
 
