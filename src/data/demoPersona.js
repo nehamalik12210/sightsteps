@@ -1,8 +1,8 @@
 /**
  * Scripted Ramesh persona for the guided demo.
  * Seven visible questions demonstrate symptom context and affected activities.
- * Additional seeded answers provide a consistent complete example report and are
- * explicitly identified as scripted demo context in the report.
+ * Additional seeded answers provide a controlled example report, including an
+ * explicit information gap, and are identified as scripted demo context.
  */
 
 
