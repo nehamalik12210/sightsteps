@@ -1,7 +1,7 @@
 # SightSteps — Review Findings and Priorities
 
 **Last reviewed:** 25 November 2026  
-**Scope:** Eight original reviewer concerns plus provenance and dependency-audit issues discovered during implementation.
+**Scope:** Eight original reviewer concerns plus provenance, dependency-audit and Evidence Pathways findings discovered during implementation.
 
 ## Findings
 
@@ -29,12 +29,14 @@
 
 | F-18 | Malformed or duplicate saved Amsler cells could crash spatial analysis or make the printed count disagree with the spatial summary. | Saved cell arrays are now normalized to unique integer row/column coordinates within the 20×20 grid. The detailed report and appointment pack use the same validated count; older count-only records remain supported where no cell array is present. | Fixed and regression-tested for null, non-array, duplicate, out-of-range, non-integer and stale count inputs. Latest verification: 980 engine tests pass, 2,525 quality checks pass, clinical-language audit and production build pass. |
 
+| F-19 | Vision Evidence Pathways could connect unrelated experiences, conceal source provenance, or imply unsupported activity/causal relationships. | Added Relationships A–E with exact source answer/timeline IDs. The only new inference (C) requires two distinct selected experiences with the same specific participant-selected context; `varies` is excluded. Activity impacts are displayed as separate participant evidence without mapping them to a particular experience. Temporal output distinguishes participant entry date from reported onset. Missing-field output is limited to follow-up questions actually asked. Ramesh demonstrates the shared-driving relationship and an information gap. Exact-source automated verification: 1,044 tests, 2,555 quality checks, 23 JSX / 2,767 fragments; 103-module build and 1,187-line clinical-review export passed. | Implemented and source-tested on `636ae406...`. Await READY deployment, browser/print review, accessibility testing and independent clinical review before claiming full phase acceptance. |
+
 ## Additional engineering observations
 
-- The latest exact-source audit scans 22 JSX files and 2,629 copy fragments; 2,525 quality checks and 980 regression tests pass.
+- Latest exact Phase 3 source audit: 23 JSX files / 2,767 copy fragments; 2,555 quality checks and 1,044 regression tests pass (commit 636ae406...).
 - Latest build emits a 344.80 kB minified initial JavaScript chunk (105.91 kB gzip), below Vite's 500 kB warning threshold. Page chunks are split; Report is the largest at 147.38 kB (32.22 kB gzip). The PWA precache now contains 34 entries / 975.74 KiB, including the split route assets.
 - npm audit report contains 4 moderate findings in the build-time PWA toolchain; see F-11 and `BASELINE.md` for advisory/version detail.
-- Clinical review export includes pattern clusters, source traceability and the synthetic Other-activity example. Latest inspected artifact: 954 lines / 68,713 bytes, 12 sections, 57 bilingual source pairs, explicit review-draft and demo-data notices.
+- Clinical review export includes pattern clusters, bilingual source provenance, synthetic Other-activity example and Vision Evidence Pathways A–E. Latest verified exporter reports 1,187 lines, 8 pattern definitions, 5 Ramesh matches, 10 discussion prompts and 2 follow-up notes.
 
 ## Outstanding release gates
 
@@ -43,3 +45,4 @@
 3. Browser print-preview and page-count/visual review of appointment packs in English and Hindi, including dense data and custom “Other” activity.
 4. Resolve the four moderate PWA build-tool advisories using compatible upstream versions or a fully tested override; do not force a major downgrade.
 5. Complete third-party keyboard, screen-reader and WCAG 2.1 AA review, plus participant usability sessions.
+6. Inspect Vision Evidence Pathways in browser and in English/Hindi print previews across the detailed Report, Clinician Brief and Appointment Preparation Pack.
