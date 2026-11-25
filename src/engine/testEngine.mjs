@@ -15,7 +15,7 @@ import rameshPersona from '../data/demoPersona.js';
 import { buildAppointmentPreparationPack } from '../utils/appointmentPack.js';
 import { normalizeDiscussionPriorities } from '../utils/reportPreferences.js';
 import { getLocalSaveStatusCopy } from '../utils/saveStatus.js';
-import { buildDirectionAwarenessResult } from '../utils/visionActivity.js';
+import { buildDirectionAwarenessResult, normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { evaluatePatterns, resolvePatternSourceKeys } from './patternEngine.js';
 import patternDefinitions from '../data/patterns.js';
 import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
@@ -980,6 +980,40 @@ assert(amslerPack.experienceProfile !== null, 'appointment pack includes a compa
 assert(typeof amslerPack.experienceProfile.summary === 'string', 'appointment pack stores one compact profile summary');
 assert(amslerPack.experienceProfile.summary.includes('Blurred or unclear vision'), 'appointment pack summary retains the main reported experience');
 assert(amslerPack.experienceProfile.summary.length <= 260, 'appointment pack profile summary is length-limited');
+
+const directionFixture = buildDirectionAwarenessResult({
+  left: [
+    { round: 1, expected: 'up', answered: 'up', correct: true },
+    { round: 2, expected: 'left', answered: 'down', correct: false },
+    { round: 3, expected: 'right', answered: 'right', correct: true },
+  ],
+  right: [
+    { round: 1, expected: 'down', answered: 'down', correct: true },
+    { round: 2, expected: 'up', answered: 'left', correct: false },
+  ],
+});
+const normalizedDirectionFixture = normalizeDirectionAwarenessResult(directionFixture);
+assert(normalizedDirectionFixture.data.left.correct === 2 && normalizedDirectionFixture.data.left.total === 3, 'direction result normalization retains first-round responses');
+assert(normalizedDirectionFixture.data.right.correct === 1 && normalizedDirectionFixture.data.right.total === 2, 'direction result normalization retains second-round responses');
+const directionPack = buildAppointmentPreparationPack({ language: 'en', visionResults: directionFixture });
+assert(directionPack.visionActivity?.completed === true, 'appointment pack includes completed direction-awareness results');
+assert(directionPack.visionActivity.round1.correct === 2 && directionPack.visionActivity.round1.total === 3, 'appointment pack preserves round 1 counts');
+assert(directionPack.visionActivity.round2.correct === 1 && directionPack.visionActivity.round2.total === 2, 'appointment pack preserves round 2 counts');
+assert(!Object.hasOwn(directionPack.visionActivity, 'left'), 'appointment pack exposes round labels rather than eye labels');
+const skippedDirectionPack = buildAppointmentPreparationPack({ language: 'en', visionResults: mockSkipResult });
+assert(skippedDirectionPack.visionActivity?.skipped === true, 'appointment pack records when direction-awareness activity was skipped');
+const malformedDirection = normalizeDirectionAwarenessResult({
+  completed: true,
+  data: {
+    activityType: 'direction-awareness',
+    left: { correct: 7, total: 2, trials: [{ expected: 'up', answered: 'down' }, { expected: 'diagonal', answered: 'up' }] },
+    right: { correct: -1, total: 8, trials: [] },
+  },
+});
+assert(malformedDirection.data.left.correct === 0 && malformedDirection.data.left.total === 1, 'direction normalizer drops unknown orientations and derives valid counts from retained trials');
+assert(malformedDirection.data.right.correct === 0 && malformedDirection.data.right.total === 0, 'direction normalizer safely handles empty and invalid count collections');
+assert(normalizeDirectionAwarenessResult({ completed: true, data: { activityType: 'other' } }) === null, 'unrelated activity result is not accepted as direction-awareness evidence');
+assert(normalizeDirectionAwarenessResult(mockSkipResult)?.skipped === true, 'skipped direction-awareness state is preserved');
 
 const noAmslerPack = buildAppointmentPreparationPack({ language: 'en', amslerResults: null });
 assert(noAmslerPack.amsler === null, 'appointment pack has null Amsler when not completed');
