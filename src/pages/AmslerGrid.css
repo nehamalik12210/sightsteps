@@ -90,3 +90,4 @@
     transition-duration: .01ms !important;
   }
 }
+.amsler__calibration-note { margin: 0 0 var(--space-4); padding: var(--space-3); border-left: 3px solid var(--color-primary); border-radius: var(--radius-sm); background: var(--color-primary-bg); color: var(--color-text-secondary); font-size: var(--fs-xs); line-height: var(--lh-relaxed); }

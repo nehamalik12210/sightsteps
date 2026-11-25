@@ -358,6 +358,9 @@ check(report.includes('ClinicianBrief') && report.includes('showClinicianBrief')
 check(report.includes('rpt__patterns-section') && report.includes('rpt__pattern-card'), 'report renders pattern cards with their own section');
 check(report.includes('amslerResults') && report.includes('rpt__amsler-section'), 'report renders Amsler screening results');
 const amslerGridSource = read('src/pages/AmslerGrid.jsx');
+check(amslerGridSource.includes('approximate setup aid') && amslerGridSource.includes('वास्तविक भौतिक आकार'), 'Amsler states in English and Hindi that screen sizing does not independently validate physical display scale');
+check(/Calibration limitation/.test(read('scripts/export-prompts.mjs')) && /does not independently verify/.test(read('scripts/export-prompts.mjs')), 'clinical review export includes the Amsler physical display-scale limitation');
+check(amslerGridSource.includes('approximate setup aid') && amslerGridSource.includes('वास्तविक भौतिक आकार'), 'Amsler states in English and Hindi that screen sizing does not independently validate physical display scale');
 check(/handleOpenAmsler/.test(vision) && /setVisionResults\(buildDirectionAwarenessResult\(results\)\)/.test(vision) && /onClick=\{handleOpenAmsler\}/.test(vision), 'opening Amsler first saves the completed E-orientation activity');
 check(/navigate\(getAmslerReturnPath\(visionResults\)/.test(amslerGridSource) && /getAmslerReturnPath/.test(amslerGridSource), 'Amsler completion returns to the report after E activity completion');
 check(/savedDirectionResults/.test(vision) && /useState\(\(\) => \(savedDirectionResults \? 'results' : 'intro'\)\)/.test(vision), 'reopening the E activity restores its saved results instead of its intro screen');

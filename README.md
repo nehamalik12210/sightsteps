@@ -284,7 +284,7 @@ Route-level code splitting reduced the initial JavaScript entry from 581.00 kB t
 
 ## Known Limitations
 
-- **Clinical review pending.** The review kit is prepared (`CLINICAL_REVIEW_PENDING.md`), but no formal feedback from a licensed optometrist or ophthalmologist has been received yet. All clinical content is grounded in published guidance (see [`CLINICAL_GROUNDING.md`](CLINICAL_GROUNDING.md)); independent expert review is planned as the next step.
+- **Clinical review pending.** The review kit is prepared (`CLINICAL_REVIEW_PENDING.md`), but First formal expert review pending; no formal feedback from a licensed optometrist or ophthalmologist has been received. All clinical content is grounded in published guidance (see [`CLINICAL_GROUNDING.md`](CLINICAL_GROUNDING.md)); independent expert review is planned as the next step.
 - **Amsler calibration is not device-validated.** The credit-card calibration calculation and viewport-fit guard are implemented in code. Actual display scaling, physical card matching, viewing distance and finger tap accuracy have not been validated across phones/tablets.
 - **Amsler grid keyboard navigation.** Grid cells are focusable buttons with `aria-label` and `aria-pressed` attributes, so Tab/Shift+Tab/Enter work for flagging cells. A keyboard fallback with row/column number inputs and an Add/Remove button is provided for users who cannot tap a grid. Arrow-key grid cursor navigation is not yet implemented.
 - **Clinician brief one-page fit.** The brief uses compact font sizes (10–12px) and `break-inside: avoid` print rules targeting A4. Actual one-page fit depends on the number of matched patterns and observation groups for a given session; dense sessions may overflow to two pages. Actual browser print-preview/page-count verification remains outstanding.
@@ -311,3 +311,22 @@ SightSteps is intended only to help people organise their own observations and p
 ## License
 
 This project is available under the [MIT License](LICENSE).
+
+## Current Pre-submission Verification — 25 November 2026
+
+Exact repository source reviewed: main at fbc57865af97fc606ed0a2d139d4662428e8e1bc. The previous application-code revision is READY in Vercel deployment dpl_B6cJn68sqAv3uGAvd9HuAjQSexe3; the latest Amsler limitation/audit change is a new source delta and must be redeployed before it can be called live.
+
+A clean npm ci completed on Node v24.22.3 / npm 11.19.1 (349 packages installed; four moderate advisories remain in the existing dependency tree).
+
+| Check | Result |
+|---|---|
+| Static quality audit | **2,588 passed, 0 failed** |
+| Regression suite | **1,064 passed, 0 failed** |
+| Clinical-language audit | **Passed** — 23 JSX files / 2,777 copy fragments |
+| Production build | **104 Vite modules transformed** |
+| PWA | **34 precache entries (1,016.82 KiB)** |
+| Clinical-review export | **1,192 lines** |
+
+Headless Chromium smoke testing reached the Report through all seven Ramesh demo questions, verified the shared-context explanation and source answer IDs, opened the Clinician Brief modal, checked a 390 px report viewport for horizontal overflow, and confirmed Appointment Pack print-mode invocation under interception. This does not establish physical-device accessibility, actual printer output or print page count.
+
+Still pending: first formal optometrist/ophthalmologist review; physical Amsler scale, zoom and viewing-distance validation on real devices; screen-reader/assistive-technology testing; actual print preview/page count; and a real five-minute kiosk idle/failure-injection test. Ramesh’s guided demo skips optional E Direction Awareness and Amsler activities; show those separately.

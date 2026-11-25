@@ -232,6 +232,10 @@ const amslerStrings = {
     en: 'Place a standard credit card (85.6 mm wide) against the screen and match the slider to its full width exactly. The complete 10 cm square must fit within both the visible screen width and height, with room for the controls. A phone may still be too small in landscape; use a tablet or larger display, or skip this activity. Do not estimate or shrink the grid.',
     hi: 'एक मानक क्रेडिट कार्ड (85.6 mm चौड़ा) स्क्रीन पर रखें और स्लाइडर को कार्ड की पूरी चौड़ाई से बिल्कुल मिलाएँ। फ़ोन लैंडस्केप में होने पर भी पूरा 10 cm वर्ग स्क्रीन की चौड़ाई और ऊँचाई दोनों में, नियंत्रणों के लिए जगह छोड़कर, फिट होना चाहिए। ऐसा न हो तो टैबलेट या बड़ी स्क्रीन का उपयोग करें या गतिविधि छोड़ दें। अनुमान न लगाएँ और ग्रिड को छोटा न करें।',
   },
+  'Calibration limitation': {
+    en: 'This matching step is an approximate setup aid. It does not independently verify the display’s physical size, browser zoom or screen viewing setup. Skip if the card match is uncertain or if screen size or zoom changes.',
+    hi: 'यह मिलान केवल अनुमानित सेटअप में मदद करता है। यह स्क्रीन के वास्तविक भौतिक आकार, ब्राउज़र ज़ूम या स्क्रीन देखने के सेटअप की स्वतंत्र पुष्टि नहीं करता। यदि कार्ड से मिलान स्पष्ट न हो या स्क्रीन का आकार/ज़ूम बदल जाए, तो गतिविधि छोड़ दें।',
+  },
   'Testing instructions and safety note': {
     en: 'This activity records only the areas you choose to flag. It does not test or interpret vision or rule out a problem. Discuss any concern with an eye-care professional even when no areas are flagged. Contact one promptly for new distortion, blurred or missing areas.',
     hi: 'यह गतिविधि केवल आपके द्वारा चिह्नित क्षेत्रों को दर्ज करती है। यह दृष्टि की जाँच, व्याख्या या किसी समस्या को खारिज नहीं करती। कोई क्षेत्र चिह्नित न होने पर भी चिंता हो तो नेत्र-देखभाल पेशेवर से चर्चा करें। नई टेढ़ी, धुंधली या गायब रेखाएँ/क्षेत्र दिखें तो शीघ्र संपर्क करें।',

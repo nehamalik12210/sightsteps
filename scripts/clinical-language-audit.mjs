@@ -43,6 +43,12 @@ const FORBIDDEN_PHRASES = [
   'consistent with',
   'appears to be progressing',
   'probability of',
+  'आपको ग्लूकोमा है',
+  'आपको मोतियाबिंद है',
+  'आपको नेत्र रोग है',
+  'आपको उपचार चाहिए',
+  'आपको इलाज चाहिए',
+  'निदान किया गया है',
 ];
 
 // Allow these phrases only when the forbidden match is inside the safe phrase.
@@ -384,6 +390,11 @@ console.log('Running fail-safe detector and JSX extraction tests...');
 const unsafeExample = 'You have astigmatism and need treatment immediately.';
 const mixedExample = 'SightSteps does not diagnose. You have glaucoma.';
 const safeExample = 'SightSteps does not diagnose or replace a professional eye examination.';
+const uppercaseUnsafeExample = 'YOU HAVE glaucoma!';
+const punctuatedMixedExample = 'SightSteps does not diagnose; You have glaucoma!';
+const uppercaseSafeExample = 'SIGHTSTEPS DOES NOT DIAGNOSE or replace a professional eye examination.';
+const hindiUnsafeExamples = ['आपको ग्लूकोमा है।', 'आपको मोतियाबिंद है।', 'आपको उपचार चाहिए।'];
+const hindiSafeExample = 'यह निदान नहीं है और यह आँखों की जाँच नहीं है।';
 const safeContextExamples = [
   'Outdoors or bright conditions',
   'This profile does not measure vision, diagnose a condition or determine clinical severity or urgency.',
@@ -399,6 +410,28 @@ if (!findClinicalViolations('mixed-example', mixedExample).some((item) => item.p
   console.error('  FAIL: A safe disclaimer elsewhere in the same text masked unsafe wording.');
   violations += 1;
 }
+if (!findClinicalViolations('uppercase-unsafe-example', uppercaseUnsafeExample).some((item) => item.phrase === 'you have')) {
+  console.error('  FAIL: Detector missed unsafe copy with uppercase wording and terminal punctuation.');
+  violations += 1;
+}
+if (!findClinicalViolations('punctuated-mixed-example', punctuatedMixedExample).some((item) => item.phrase === 'you have')) {
+  console.error('  FAIL: A disclaimer separated by punctuation masked an unsafe later sentence.');
+  violations += 1;
+}
+if (findClinicalViolations('uppercase-safe-example', uppercaseSafeExample).length !== 0) {
+  console.error('  FAIL: Detector rejected an uppercase safe disclaimer.');
+  violations += 1;
+}
+for (const [index, example] of hindiUnsafeExamples.entries()) {
+  if (!findClinicalViolations('hindi-unsafe-' + index, example).some((item) => ['आपको ग्लूकोमा है', 'आपको मोतियाबिंद है', 'आपको उपचार चाहिए'].includes(item.phrase))) {
+    console.error('  FAIL: Detector missed unsafe Hindi clinical wording: ' + example);
+    violations += 1;
+  }
+}
+if (findClinicalViolations('hindi-safe-example', hindiSafeExample).length !== 0) {
+  console.error('  FAIL: Detector rejected neutral Hindi disclaimer wording.');
+  violations += 1;
+}
 if (findClinicalViolations('safe-example', safeExample).length !== 0) {
   console.error('  FAIL: Detector rejected a safe disclaimer.');
   violations += 1;
@@ -410,10 +443,10 @@ for (const [index, example] of safeContextExamples.entries()) {
   }
 }
 
-const jsxFixture = 'const Example = () => (<section aria-label="You have glaucoma"><p>You have damage</p><p>{flag ? "You have lesion" : "Safe text"}</p></section>);';
+const jsxFixture = 'const Example = () => (<section aria-label="You have glaucoma"><p>You have damage</p><p>आपको ग्लूकोमा है</p><p>{flag ? "You have lesion" : "Safe text"}</p></section>);';
 const jsxFixtureAst = parse(jsxFixture, { sourceType: 'module', plugins: ['jsx'] });
 const jsxFixtureCopy = extractVisibleCopy(jsxFixtureAst, 'fixture');
-for (const expected of ['You have glaucoma', 'You have damage', 'You have lesion']) {
+for (const expected of ['You have glaucoma', 'You have damage', 'आपको ग्लूकोमा है', 'You have lesion']) {
   if (!jsxFixtureCopy.some((item) => item.text.includes(expected))) {
     console.error('  FAIL: JSX extractor missed fixture copy: ' + expected);
     violations += 1;
@@ -421,7 +454,8 @@ for (const expected of ['You have glaucoma', 'You have damage', 'You have lesion
 }
 const fixtureViolations = jsxFixtureCopy.flatMap((item) => findClinicalViolations(item.label, item.text));
 if (!fixtureViolations.some((item) => item.phrase === 'damage')
-  || !fixtureViolations.some((item) => item.phrase === 'lesion')) {
+  || !fixtureViolations.some((item) => item.phrase === 'lesion')
+  || !fixtureViolations.some((item) => item.phrase === 'आपको ग्लूकोमा है')) {
   console.error('  FAIL: JSX extractor did not pass text-node/expression copy to the clinical detector.');
   violations += 1;
 }

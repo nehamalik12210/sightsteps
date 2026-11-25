@@ -1,7 +1,7 @@
 # Clinical Review Record
 
 ## Review Status
-**Status:** Expert review is planned.
+**Status:** First formal expert review pending.
 
 In the absence of a completed review, every pattern and the Amsler activity is anchored to published clinical guidance — see [CLINICAL_GROUNDING.md](CLINICAL_GROUNDING.md). No pattern or activity introduces a novel clinical claim.
 
