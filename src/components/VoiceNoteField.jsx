@@ -31,7 +31,11 @@ export default function VoiceNoteField({
   }, [value]);
 
   useEffect(() => () => {
-    try { recognitionRef.current?.stop(); } catch { /* best-effort cleanup */ }
+    const activeRecognition = recognitionRef.current;
+    // Invalidate first so the browser's eventual onend event cannot update
+    // state after the field has unmounted during route navigation.
+    recognitionRef.current = null;
+    try { activeRecognition?.stop(); } catch { /* best-effort cleanup */ }
   }, []);
 
   const startListening = () => {
