@@ -11,7 +11,8 @@ import { useApp } from '../context/AppContext.jsx';
 import { evaluateAnswers } from '../engine/ruleEngine.js';
 import { evaluatePatterns } from '../engine/patternEngine.js';
 import { evaluateClusters } from '../data/patternClusters.js';
-import { analyzeSpatial, describeSpatial } from '../engine/amslerSpatial.js';
+import { analyzeSpatial, describeSpatial, getFlaggedCellCount } from '../engine/amslerSpatial.js';
+import { normalizeDirectionAwarenessResult } from '../utils/visionActivity.js';
 import { buildVisionExperienceProfile } from '../engine/visionExperienceProfile.js';
 import VisionExperienceProfile from './VisionExperienceProfile.jsx';
 import { formatVisionTimelineDate } from '../utils/visionTimeline.js';
@@ -35,6 +36,7 @@ export default function ClinicianBrief({ onClose }) {
     primaryActivity,
     participantNote,
     amslerResults,
+    visionResults,
     visionTimelineEntries,
     conversationReview,
     isDemo,
@@ -49,6 +51,8 @@ export default function ClinicianBrief({ onClose }) {
     participantNote,
     countableQuestionIds: isDemo ? demoPersona?.demoQuestionIds : undefined,
   }), [answers, activities, primaryActivity, participantNote, isDemo, demoPersona]);
+
+  const safeVisionResults = normalizeDirectionAwarenessResult(visionResults);
 
   const experienceProfile = useMemo(
     () => buildVisionExperienceProfile(answers, visionTimelineEntries || []),
@@ -219,11 +223,11 @@ export default function ClinicianBrief({ onClose }) {
               <div className="clinician-brief__amsler">
                 <div className="clinician-brief__amsler-eye">
                   <strong>{lang === 'hi' ? 'दाईं आँख' : 'Right Eye'}</strong>
-                  <span>{amslerResults.data.right?.cellCount || 0} {lang === 'hi' ? 'क्षेत्र चिह्नित' : 'regions flagged'}</span>
+                  <span>{getFlaggedCellCount(amslerResults.data.right)} {lang === 'hi' ? 'क्षेत्र चिह्नित' : 'regions flagged'}</span>
                 </div>
                 <div className="clinician-brief__amsler-eye">
                   <strong>{lang === 'hi' ? 'बाईं आँख' : 'Left Eye'}</strong>
-                  <span>{amslerResults.data.left?.cellCount || 0} {lang === 'hi' ? 'क्षेत्र चिह्नित' : 'regions flagged'}</span>
+                  <span>{getFlaggedCellCount(amslerResults.data.left)} {lang === 'hi' ? 'क्षेत्र चिह्नित' : 'regions flagged'}</span>
                 </div>
               </div>
               {(spatial.right.count > 0 || spatial.left.count > 0) && (
