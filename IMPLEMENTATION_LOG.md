@@ -144,3 +144,11 @@
 ### Change 20 — Final deployment and baseline metric reconciliation
 - Updated the baseline, README and review findings to use the exact final Vite gzip metrics (entry 345.09 kB / 105.99 kB gzip; Report 151.94 kB / 33.18 kB gzip) and the latest READY production deployment.
 - Latest READY production deployment is `dpl_BULeMmr3mi7Byqr39j2aezTwaiUn`, main commit `f4aa4ef6...`, a documentation-only commit that follows application-code commit `8f44a9cc...`. GitHub Vercel status is SUCCESS. This supersedes `dpl_4hPi...` as the latest deployment record; both contain the same verified app code.
+
+
+### Change 22 — Amsler saved-cell normalization
+- A review of the evidence pathways found that spatial analysis assumed every saved Amsler cell was a valid object with integer row/column coordinates. Malformed local-session data could throw during analysis; duplicate or out-of-range records could also make counts disagree between the report and appointment pack.
+- Added `normalizeFlaggedCells` to retain only unique integer coordinates inside the 20×20 grid. Added `getFlaggedCellCount` so the detailed report, spatial analysis and printable pack use the same validated cells. Count-only records from older saved sessions remain supported only when no `flaggedCells` field exists.
+- Added regression checks for null/non-array collections, duplicate cells, negative and out-of-range coordinates, fractional/NaN coordinates, stale counts, malformed left-eye data in the appointment pack, and spatial text/count consistency.
+- Verified exact main commit `088e3cd9bd610bc9fd1622bb22a00c97f13d4f16`: **980 regression tests, 2,525 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules; entry 345.09 kB / 105.99 kB gzip; Report 151.62 kB / 33.11 kB gzip; Amsler 21.91 kB / 5.69 kB gzip; 34 PWA precache entries / 980.63 KiB), and review export passed (965 lines reported; 8 pattern definitions; 4 Ramesh matches; 10 prompts; 2 follow-up notes).**
+- Application commit `088e3cd9...` reached READY in Vercel deployment `dpl_BxHTVeosVERn2wpv8s7BQfh5qAU3`; GitHub Vercel status SUCCESS. This is deployment evidence, not a browser/print/device validation pass.
