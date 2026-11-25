@@ -29,6 +29,7 @@ export function buildAppointmentPreparationPack({
   amslerResults = null,
   visionResults = null,
   experienceProfile = null,
+  evidencePathways = null,
   conversationReview = null,
   now = new Date(),
 } = {}) {
@@ -139,6 +140,7 @@ export function buildAppointmentPreparationPack({
     questionsToAsk: compactText(questionsToAsk, 480),
     timelineEntries: orderedTimeline,
     experienceProfile: safeExperienceProfile,
+    evidencePathways,
     conversationReview: safeConversationReview,
     amsler: safeAmsler,
     amslerSpatial: amslerSpatialText,
