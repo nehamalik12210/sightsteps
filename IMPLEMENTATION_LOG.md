@@ -226,3 +226,12 @@
 - Final application commit: `fc2408ad1cacb2959f12520c50dc2654738e3500`.
 - Vercel production deployment `dpl_4yACz5HTwWWnkE2qF5imqteVRM4K` reached READY and is aliased to `sightsteps.vercel.app`. Exact checks: quality **2,571 passed**; regression **1,056 passed**; clinical language **23 JSX / 2,774 fragments** passed; Vite **104 modules**; PWA **34 precache entries (1,015.19 KiB)**. Live root HTTP **200** and served `index-BhcLV8q3.js`.
 - Direct microphone permission/device testing remains pending due Vercel Sandbox Snapshot Storage quota. No browser-level voice test is claimed for F-26.
+
+
+### Phase 4 — F-27 Clinician Brief modal isolation
+- Source review found the Brief overlay at z-index 200 underneath the fixed skip link (2000) and Accessibility settings (1500). The old inert scope covered only local Report siblings, not app-level global controls.
+- Increased modal stacking to z-index 2200. On open, the effect now gathers local siblings plus `.app` children outside the branch containing the dialog, stores each element's original `inert` and `aria-hidden` state, and restores those values on close. Focus trap, Escape handling, previous-focus restoration and named print-page behavior remain unchanged.
+- Added two quality-audit assertions for the modal stacking order and the app-level inert background.
+- Commit: `e6148c7101d27b9b28e3b0608fb3dbb95e026510`.
+- Vercel deployment `dpl_BYn8DmR9VaMXuMFbS1DU7CEyqfdh` reached READY, production alias `sightsteps.vercel.app`. Exact checks: quality **2,573 passed**; regression **1,056 passed**; clinical language **23 JSX / 2,774 fragments** passed; Vite **104 modules**. Live root **HTTP 200**, serving `index-5HL5_vzL.js`.
+- Direct browser/keyboard/screen-reader test remains outstanding because Vercel Sandbox Snapshot Storage is over the Hobby limit. The modal is source- and build-verified, not visually or assistive-technology validated after this change.

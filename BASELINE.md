@@ -171,3 +171,15 @@ SightSteps is a participant-reported conversation aid. Automated tests and wordi
 - Production deployment: `dpl_4yACz5HTwWWnkE2qF5imqteVRM4K` — READY, aliased to `https://sightsteps.vercel.app`.
 - Verification for the exact final commit: quality audit **2,571 passed, 0 failed**; engine regression tests **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**; PWA **34 precache entries (1,015.19 KiB)**. Production root returned **HTTP 200** and serves `index-BhcLV8q3.js`.
 - No live microphone/permission/device browser test was possible because the Vercel Sandbox Snapshot Storage limit prevented provisioning another browser sandbox. Automated static checks and production build passed; real browser microphone behavior remains a device-level validation item.
+
+
+## Phase 4 Clinician Brief modal isolation — 25 November 2026
+
+- Finding F-27: the global Accessibility controls and skip link used z-index 1500/2000, above the Clinician Brief overlay's z-index 200. The Brief's inert logic only disabled siblings within its Report container; app-level global controls remained outside the modal's inert background.
+- Raised `.clinician-brief` to z-index **2200**, above the global accessibility elements.
+- Expanded modal background isolation to include siblings of the app root that do not contain the dialog, in addition to local Report siblings. Existing inert and `aria-hidden` values are saved and restored on close; previous focus restoration and Escape/Tab handling remain intact.
+- Added two quality-audit checks for stacking level and app-level inert background coverage.
+- Commit: `e6148c7101d27b9b28e3b0608fb3dbb95e026510`.
+- Vercel deployment: `dpl_BYn8DmR9VaMXuMFbS1DU7CEyqfdh` — **READY**, production alias `https://sightsteps.vercel.app`.
+- Exact deployment checks: quality audit **2,573 passed, 0 failed**; regression suite **1,056 passed, 0 failed**; clinical-language audit **23 JSX files / 2,774 fragments**, no violations; Vite **104 modules transformed**. Production root returned **HTTP 200** and serves `index-5HL5_vzL.js`.
+- Direct browser keyboard and screen-reader validation for the new global inert scope remains pending: the Vercel Sandbox Snapshot Storage quota prevented provisioning another browser sandbox. Build/audit success is not presented as manual modal interaction verification.
