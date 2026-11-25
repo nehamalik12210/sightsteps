@@ -19,6 +19,7 @@ import { buildDirectionAwarenessResult, normalizeDirectionAwarenessResult } from
 import { evaluatePatterns, resolvePatternSourceKeys } from './patternEngine.js';
 import patternDefinitions from '../data/patterns.js';
 import { buildVisionExperienceProfile, buildCompactExperienceSummary } from './visionExperienceProfile.js';
+import { buildVisionEvidencePathways } from './visionEvidencePathways.js';
 import {
   calculateGridSizePx,
   canCalibrateAmsler,
@@ -1314,6 +1315,56 @@ assert(compactProfileSummary.includes('Main reported experience: Blurred or uncl
 assert(compactProfileSummary.includes('Reported situations:'), 'compact summary preserves participant reported contexts');
 assert(compactProfileSummary.includes('Reported daily-activity impact:'), 'compact summary connects the selected daily-activity impact');
 assert(compactProfileSummary.length <= 360, 'compact summary respects its configured character limit');
+const rameshPathways = buildVisionEvidencePathways(rameshPersona.answers, profileTimelineFixtures);
+const sharedDrivingPathway = rameshPathways.relationships.find((item) => item.type === 'shared-context');
+assert(Boolean(sharedDrivingPathway), 'Ramesh demo contains one shared-context pathway across two selected experiences');
+assert(sharedDrivingPathway?.contextId === 'driving', 'shared-context pathway uses the driving context selected independently for both experiences');
+assert(sharedDrivingPathway?.experienceIds.includes('blurred_vision') && sharedDrivingPathway?.experienceIds.includes('night_vision'), 'shared-context pathway names the two separate reported experiences');
+assert(sharedDrivingPathway?.sourceAnswerIds.includes('experience_context') && sharedDrivingPathway?.sourceAnswerIds.includes('additional_experience_night_vision_context'), 'shared-context pathway traces both separate context answers');
+assert(sharedDrivingPathway?.sourceAnswerIds.includes('blurred_vision') && sharedDrivingPathway?.sourceAnswerIds.includes('night_vision'), 'shared-context pathway traces both original experience answers');
+assert(sharedDrivingPathway?.statement.en.includes('not a medical conclusion'), 'shared-context explanation explicitly avoids clinical conclusions');
+assert(sharedDrivingPathway?.statement.hi.includes('चिकित्सकीय निष्कर्ष'), 'shared-context explanation is available in Hindi');
+for (const relationship of rameshPathways.relationships) {
+  assert(relationship.sourceAnswerIds.every((id) => Boolean(rameshPersona.answers[id])), `evidence relationship ${relationship.id} cites only existing source answer IDs`);
+  assert(relationship.sourceAnswers.every((source) => relationship.sourceAnswerIds.includes(source.id)), `evidence relationship ${relationship.id} source records match its source IDs`);
+}
+assert(rameshPathways.relationships.some((item) => item.type === 'timeline-experience' && item.sourceTimelineIds.includes('profile-main-entry')), 'timeline pathway links the participant-authored entry to its reported experience');
+assert(rameshPathways.limitations.activityImpactsLinkedToSpecificExperiences === false, 'pathways do not invent an experience-to-activity-impact link absent from the questionnaire');
+const nightVisionGap = rameshPathways.informationGaps.find((item) => item.experienceId === 'night_vision');
+assert(Boolean(nightVisionGap), 'selected secondary experience with unanswered details produces an information-gap pathway');
+assert(nightVisionGap?.missingFields.some((item) => item.id === 'onset'), 'information gap identifies missing secondary onset');
+assert(nightVisionGap?.missingFields.some((item) => item.id === 'frequency'), 'information gap identifies missing secondary frequency when that question is asked');
+assert(nightVisionGap?.missingFields.some((item) => item.id === 'eye'), 'information gap identifies missing secondary eye-side when that question is asked');
+assert(!nightVisionGap?.missingFields.some((item) => item.id === 'context'), 'information gap does not flag a secondary context answer that exists');
+const unselectedPathways = buildVisionEvidencePathways({
+  ...rameshPersona.answers,
+  additional_concerns: { value: ['none'], label: { en: 'No other experience to add', hi: 'कोई अन्य अनुभव नहीं जोड़ना' } },
+}, []);
+assert(!unselectedPathways.relationships.some((item) => item.type === 'shared-context'), 'unselected additional experiences cannot create shared-context inference');
+const differentContextPathways = buildVisionEvidencePathways({
+  ...rameshPersona.answers,
+  additional_experience_night_vision_context: { value: ['outdoors'], label: { en: 'Outdoors or bright conditions', hi: 'बाहर या तेज़ रोशनी में' } },
+}, []);
+assert(!differentContextPathways.relationships.some((item) => item.type === 'shared-context'), 'different contexts do not create a shared-context inference');
+const completePathways = buildVisionEvidencePathways({
+  ...rameshPersona.answers,
+  additional_experience_night_vision_onset: { value: 'recent_weeks', label: { en: 'Within the last few weeks', hi: 'पिछले कुछ हफ़्तों में' } },
+  additional_experience_night_vision_frequency: { value: 'daily', label: { en: 'Every day', hi: 'रोज़' } },
+  additional_experience_night_vision_eye: { value: 'both', label: { en: 'Both eyes', hi: 'दोनों आँखें' } },
+}, []);
+assert(!completePathways.informationGaps.some((item) => item.experienceId === 'night_vision'), 'complete selected secondary answers produce no information gap for that experience');
+const mainHeadachePathways = buildVisionEvidencePathways({
+  headaches: { value: 'often', label: { en: 'Often', hi: 'अक्सर' } },
+  primary_concern: { value: 'headaches', label: { en: 'Headaches around visual activities', hi: 'दृष्टि से जुड़ी गतिविधियों के दौरान सिरदर्द' } },
+  experience_onset: { value: 'recent_months', label: { en: 'Within the last few months', hi: 'पिछले कुछ महीनों में' } },
+  experience_change: { value: 'unchanged', label: { en: 'It feels about the same', hi: 'यह लगभग पहले जैसा है' } },
+  experience_context: { value: ['screens'], label: { en: 'Using screens', hi: 'स्क्रीन का उपयोग' } },
+});
+assert(!mainHeadachePathways.informationGaps.some((item) => item.missingFields.some((field) => field.id === 'frequency' || field.id === 'eye')), 'headache pathways do not request a separate frequency or eye-side field that the questionnaire does not ask');
+assert(buildVisionEvidencePathways(null, null).relationships.length === 0, 'pathway engine safely handles malformed empty input');
+const pathwaysPack = buildAppointmentPreparationPack({ language: 'en', evidencePathways: rameshPathways });
+assert(pathwaysPack.evidencePathways === rameshPathways, 'appointment pack preserves the same computed evidence pathways');
+
 const compactHindiSummary = buildCompactExperienceSummary(experienceProfile, 'hi', 360, 3);
 assert(compactHindiSummary.includes('मुख्य बताया गया अनुभव'), 'compact summary has a Hindi version');
 assert(buildCompactExperienceSummary({}, 'en') === '', 'compact summary omits a profile with no reportable content');
