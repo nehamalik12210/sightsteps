@@ -25,9 +25,11 @@
 | F-15 | Generic overdue-exam matches could fill a member slot in unrelated clusters. | Removed overdue-exam from near-vision and low-light cluster membership. Each cluster now requires its two specific patterns; tests prove that a generic examination-history match cannot complete either cluster. | Fixed and regression-tested. |
 | F-16 | Clinical-review export crashed after pattern source keys became participant-context-dependent. | The exporter assumed sourceKeys was always an array. A shared resolvePatternSourceKeys helper now resolves static and function-based definitions for both runtime evaluation and the export. | Fixed; npm run export-review completes on verified source revision c1936631... |
 
+| F-17 | Overdue-exam discussion cited every symptom answer, including negative responses, as a source. | Trigger only required two or more positive reported experiences, but static source keys also displayed unrelated answers such as 'No' or 'Rarely' as if they supported the discussion. Source keys are now derived from the same positive experience values used by the trigger. | Fixed; regression tests cover two different positive symptom pairs and verify negative answers are omitted. Latest isolated verification: 967 engine tests pass. |
+
 ## Additional engineering observations
 
-- The latest exact-source audit scans 22 JSX files and 2,629 copy fragments; 2,524 quality checks and 961 regression tests pass.
+- The latest exact-source audit scans 22 JSX files and 2,629 copy fragments; 2,524 quality checks and 967 regression tests pass.
 - Latest build emits a 344.80 kB minified initial JavaScript chunk (105.91 kB gzip), below Vite's 500 kB warning threshold. Page chunks are split; Report is the largest at 147.38 kB (32.22 kB gzip). The PWA precache now contains 34 entries / 975.74 KiB, including the split route assets.
 - npm audit report contains 4 moderate findings in the build-time PWA toolchain; see F-11 and `BASELINE.md` for advisory/version detail.
 - Clinical review export includes pattern clusters, source traceability and the synthetic Other-activity example. Latest inspected artifact: 954 lines / 68,713 bytes, 12 sections, 57 bilingual source pairs, explicit review-draft and demo-data notices.
