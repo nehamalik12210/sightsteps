@@ -5,7 +5,7 @@
 
 In the absence of a completed review, every pattern and the Amsler activity is anchored to published clinical guidance — see [CLINICAL_GROUNDING.md](CLINICAL_GROUNDING.md). No pattern or activity introduces a novel clinical claim.
 
-**Last updated:** 2026-11-24
+**Last updated:** 2026-11-25
 
 ## Reviewer Information
 Formal clinical review should be conducted by a licensed optometrist or ophthalmologist before public deployment.
@@ -78,6 +78,25 @@ Every pattern and discussion point uses non-diagnostic language:
 
 **Review question:** Are any prompts or patterns misleading, redundant, or alarming? Would you reword any?
 
+### 6. Vision Evidence Pathways (`src/engine/visionEvidencePathways.js`)
+
+The report, Clinician Brief and Appointment Preparation Pack now include a structured explanation layer with five relationship types:
+- **A — Experience to context:** repeats the situations the participant selected for a separately reported experience.
+- **B — Context to activity impact:** displays experience/context answers beside separately captured everyday-activity impact answers. The questionnaire does not identify which specific experience/context an activity impact belongs to, so the application explicitly avoids a one-to-one assignment.
+- **C — Shared context across experiences:** the one new inference type. Two distinct participant-reported experiences are linked only when the participant selected the same specific context for both. The Ramesh demo shows blurred vision and difficulty in low light sharing a driving context.
+- **D — Timeline and onset:** presents a participant-entered timeline record beside the matching onset answer. The entry date is not represented as a medically determined onset date.
+- **E — Information gaps:** identifies missing follow-up answers only when that field was actually asked for the selected experience.
+
+Every pathway retains source answer IDs and/or participant timeline-entry IDs. The output is bilingual and non-diagnostic. No confidence, probability, severity or risk score is calculated. The Ramesh fixture is synthetic demo data; its unanswered secondary onset/frequency/eye fields deliberately demonstrate the information-gap output and do not represent a real participant.
+
+**Review questions:**
+- Is the shared-context relationship (two separately reported experiences selected in the same context) understandable and appropriately cautious, without suggesting shared cause?
+- Is it clear to the participant and clinician that a shared context is a connection between answers, not a clinical conclusion?
+- Is the activity-impact presentation sufficiently transparent about the absence of a one-to-one experience-to-activity mapping?
+- Does the timeline/onset presentation clearly distinguish participant entry date from reported onset?
+- Are the information-gap labels neutral and useful, and do they avoid implying that unanswered optional fields indicate a health problem?
+- Are the bilingual relationship explanations and source labels clear, proportionate and suitable for a clinical conversation?
+
 ## Review Kit
 
 To prepare a review package for the clinical expert:
@@ -89,6 +108,7 @@ node scripts/export-prompts.mjs
 This creates `exports/clinical-review-export.txt` containing:
 - All 8 pattern descriptions (EN + HI), including source keys
 - Pattern engine output for the scripted demo persona (Ramesh, 42, tailor)
+- Vision Evidence Pathways A–E, including shared-context inference, activity-impact caveat, temporal/onset link, missing fields and bilingual answer/timeline provenance
 - Rules-engine discussion prompts and follow-up notes (EN + HI), with paired source answers
 - A separate synthetic “Other” activity scenario showing participant-entered activity-name provenance
 - Dynamically generated secondary-experience questions and answer options (EN + HI)
@@ -140,6 +160,7 @@ Update the "Reviewer Feedback" section below with the reviewer's responses. Appl
 | 2026-11-25 | Export expanded with paired EN/HI source answers and scripted “Other” activity example | Let reviewers inspect traceability, free-text preservation and bilingual labels |
 | 2026-11-25 | Export marked as a review draft with explicit synthetic-demo notice | Prevent demo data being mistaken for participant data |
 | 2026-11-25 | GitHub Actions export and npm audit artifact workflow added | Reproduce the review pack and retain dependency-audit evidence |
+| 2026-11-25 | Vision Evidence Pathways A–E added to participant and clinician outputs and clinical-review export | Review traceability, shared-context inference and missing-information handling |
 
 ## Reviewer Feedback
 _To be completed after formal clinical review._
