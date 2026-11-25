@@ -139,3 +139,8 @@
 - GitHub Vercel status for `4d09c8be...` is SUCCESS. Deployment build logs show `npm run build` -> `npm run check`, quality audit 2,524 passed, clinical-language audit passed, 100 modules transformed, Vite build completed, and PWA generated 34 entries / 980.47 KiB. The exact-source isolated run at `8f44a9cc...` confirms 967 engine tests and review export success.
 - Live production requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200; the SPA HTML references `/assets/index-B73cZCMz.js`, confirming the new entry bundle is served. This is not a browser-interaction, screenshot, print-layout or clinical validation pass.
 - This supersedes the earlier entries noting that the new code had not yet deployed or that Vercel remained build-rate-limited.
+
+
+### Change 20 — Final deployment and baseline metric reconciliation
+- Updated the baseline, README and review findings to use the exact final Vite gzip metrics (entry 345.09 kB / 105.99 kB gzip; Report 151.94 kB / 33.18 kB gzip) and the latest READY production deployment.
+- Latest READY production deployment is `dpl_BULeMmr3mi7Byqr39j2aezTwaiUn`, main commit `f4aa4ef6...`, a documentation-only commit that follows application-code commit `8f44a9cc...`. GitHub Vercel status is SUCCESS. This supersedes `dpl_4hPi...` as the latest deployment record; both contain the same verified app code.
