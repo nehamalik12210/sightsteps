@@ -3,8 +3,8 @@
 **Baseline commit reviewed:** `2731d987bc3f5457b2124cdf67e9d758a5bbb049`  
 **Historical application-code verification commit:** `723c3c5a29abf31295fb77e8083564b48a53c156`  
 **Route-splitting application commit:** `38b7e7132593d72fa64be23a303a312a2a3697a2`  
-**Latest verified source commit (isolated checks):** `c1936631a3eb93e4b025d50afe8659e7df11132f`  
-**Latest verified production deployment:** `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (READY; `main`; commit `92a4d0da...`; production alias `https://sightsteps.vercel.app`; contains the verified app code from `5d964fc5...`)  
+**Latest verified application-code commit:** `8f44a9ccbfb8ff7d1b424b07153daf7878dbb681`  
+**Latest verified production deployment:** `dpl_4hPiACBGmQzwxDpji7azb2fnQHa2` (READY; `main`; commit `4d09c8be...`; production alias `https://sightsteps.vercel.app`; includes application-code commit `8f44a9cc...`)  
 **Branch:** `main`  
 **Date:** 25 November 2026
 
@@ -36,7 +36,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 
 ## Latest verified source checks — 25 November 2026
 
-**Exact source revision:** 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681 on main. The repository was checked out at this SHA in an isolated Vercel sandbox; this is not a production deployment.
+**Exact application-code revision:** 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681 on main. The repository was checked out at this SHA in an isolated Vercel sandbox; the built application is also included in the READY production deployment listed above.
 
 **Execution environment:** Node.js v22.23.5; npm 10.9.9. npm ci completed successfully (349 packages added; 350 audited). npm reported four moderate dependency advisories in the existing PWA build chain; they remain tracked above.
 
@@ -47,7 +47,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - npm run build: passed; 100 modules transformed. Initial JS entry **345.09 kB (106.00 kB gzip)**; Report chunk **151.94 kB (33.18 kB gzip)**; Amsler chunk **21.91 kB (5.69 kB gzip)**. PWA generated **34 precache entries (980.47 KiB)**. The build reruns the three checks above.
 - npm run export-review: passed; exporter reports **965 lines**, 8 pattern definitions, 4 matches for scripted Ramesh, 10 discussion prompts and 2 follow-up notes. The exporter now resolves function-based source keys using the same helper as runtime pattern evaluation.
 
-**Deployment status:** the latest READY production deployment remains dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb, commit 92a4d0da..., which contains earlier application code through 5d964fc5.... The latest main source commit 8f44a9cc... has not been deployed. Its Vercel status check currently reports build-rate-limit; do not treat that provider status as a passing deployment. An earlier build attempt at af2f541... did execute tests and failed on stale Ramesh cluster assertions; those assertions were corrected and the current exact source passed the checks listed above in the isolated sandbox. The Phase 2 provenance regression additionally verifies that overdue-exam only cites the positive symptom answers that actually satisfied its trigger.
+**Deployment status:** the build-rate-limit cleared. The latest production deployment is READY as dpl_4hPiACBGmQzwxDpji7azb2fnQHa2 (commit 4d09c8be..., documentation-only commit after application-code commit 8f44a9cc...). The deployment runs the application code verified above. The GitHub Vercel status for the latest docs commit is SUCCESS. Live requests to `/`, `/report`, `/activities` and `/amsler` return HTTP 200 and reference the new `index-B73cZCMz.js` entry asset. These responses confirm the live SPA shell/assets, not client-side interaction or visual behavior. The Phase 2 provenance regression verifies that overdue-exam only cites the positive symptom answers that actually satisfied its trigger.
 
 ## Clinical review export verification
 
@@ -64,7 +64,7 @@ Vercel deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` for commit `5d964fc5ab2311e
 - No local browser automation, printed-PDF page-count/visual inspection, responsive screenshot review, or physical Amsler device-calibration validation was completed in this work session. The available Vercel desktop sandbox did not include an installed browser, so it was not used to claim a visual pass.
 - Production HTTP checks for `/`, `/activities`, `/report`, `/amsler` and `/kiosk` returned HTTP 200 and the Vite SPA shell. This confirms the Vercel rewrite responds for direct route requests; it does not execute the client-side app or verify interactive route behavior.
 - The clinical review export and npm audit were generated and inspected as GitHub Actions artifacts, not as part of the Vercel app bundle.
-- The route-splitting deployment `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e713...`), the fully instrumented verification deployment `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5...`) and the latest production deployment `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (documentation commit `92a4d0da...`, same application code) all reached READY. The latest deployment logs reconfirmed 2,522 quality checks and 849 regression tests with zero failures; the 5d964 verification logs also confirm the 22-file / 2,625-fragment clinical-language scan.
+- Historical deployments: route-splitting `dpl_FJdRtfhg8nUfoJdymcfCDSag4cUo` (commit `38b7e713...`), instrumented verification `dpl_BxnNfeW8HBBhuXxQrg7UQTzoJDQf` (commit `5d964fc5...`) and prior documentation build `dpl_Avq3t47vhCwKjqnVEofiGRxvK9pb` (commit `92a4d0da...`) reached READY. The current deployment is recorded at the top of this baseline. The latest deployment logs reconfirmed 2,522 quality checks and 849 regression tests with zero failures; the 5d964 verification logs also confirm the 22-file / 2,625-fragment clinical-language scan.
 
 ## Dependency audit details
 
