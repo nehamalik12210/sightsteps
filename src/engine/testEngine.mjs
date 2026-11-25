@@ -455,6 +455,26 @@ const clearSecondaryAfterLaterStatic = getBackNavigationAnswerIds(
 );
 assert(!clearSecondaryAfterLaterStatic.includes('additional_experience_headaches_onset'), 'backtracking within later static questions preserves already completed secondary-experience follow-ups');
 
+const headachePrimaryAnswers = {
+  blurred_vision: { value: 'yes' },
+  headaches: { value: 'sometimes' },
+  primary_concern: { value: 'headaches' },
+  additional_concerns: { value: ['blurred_vision'] },
+  experience_onset: { value: 'recent_months' },
+  experience_change: { value: 'unchanged' },
+  experience_context: { value: ['screens'] },
+  additional_experience_blurred_vision_onset: { value: 'recent_weeks' },
+  additional_experience_blurred_vision_context: { value: ['screens'] },
+};
+const headachePrimaryQuestions = getVisibleQuestions(headachePrimaryAnswers, ['reading']);
+const clearHeadachePrimarySecondary = getBackNavigationAnswerIds(
+  headachePrimaryQuestions,
+  'additional_experience_blurred_vision_onset',
+  headachePrimaryAnswers,
+);
+assert(clearHeadachePrimarySecondary.includes('additional_experience_blurred_vision_onset'), 'headache-primary branch clears secondary follow-ups when backing up to main experience context');
+assert(clearHeadachePrimarySecondary.includes('additional_experience_blurred_vision_context'), 'headache-primary branch clears all later generated secondary follow-ups together');
+
 const multiActivityAnswers = {
   affected_activities: { value: ['reading', 'fine_detail'] },
   activity_impact_reading: { value: ['discomfort'] },
