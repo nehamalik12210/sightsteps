@@ -55,8 +55,9 @@ export function getPendingSessionQuestion(session = {}) {
 
 /**
  * Return the answers that must be revisited when moving one step backward.
- * Includes hidden conditional answers from the downstream static branch and
- * generated activity-impact answers, while retaining completed earlier work.
+ * Includes hidden conditional answers from the downstream static branch,
+ * generated secondary-experience and activity-impact answers, while retaining
+ * completed earlier work.
  */
 export function getBackNavigationAnswerIds(visibleQuestions = [], currentQuestionId, answers = {}) {
   if (!Array.isArray(visibleQuestions)) return [];
@@ -73,7 +74,21 @@ export function getBackNavigationAnswerIds(visibleQuestions = [], currentQuestio
     const downstreamActivityIds = previousStaticIndex < participantNoteIndex
       ? Object.keys(answers).filter((id) => id.startsWith('activity_impact_'))
       : [];
-    return [...new Set([...downstreamStaticIds, ...downstreamActivityIds])];
+    // Secondary-experience questions are generated after the main context/eye
+    // section. If navigation returns to that section or earlier, invalidate
+    // every saved secondary follow-up so a changed concern is asked again.
+    const secondaryExperienceAnchorId = answers.primary_concern?.value === 'headaches'
+      ? 'experience_context'
+      : 'which_eye';
+    const secondaryExperienceAnchorIndex = questionBank.findIndex((question) => question.id === secondaryExperienceAnchorId);
+    const downstreamSecondaryExperienceIds = previousStaticIndex <= secondaryExperienceAnchorIndex
+      ? Object.keys(answers).filter((id) => id.startsWith('additional_experience_'))
+      : [];
+    return [...new Set([
+      ...downstreamStaticIds,
+      ...downstreamActivityIds,
+      ...downstreamSecondaryExperienceIds,
+    ])];
   }
 
   // Dynamic activity-impact questions are ordered by the participant's

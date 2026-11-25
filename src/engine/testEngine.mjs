@@ -425,6 +425,36 @@ assert(clearAfterPrimary.includes('which_eye'), 'backtracking clears hidden answ
 assert(clearAfterPrimary.includes('activity_impact_reading'), 'backtracking before activity details clears downstream dynamic answers');
 assert(!clearAfterPrimary.includes('blurred_vision'), 'backtracking preserves answers before the edit point');
 
+const secondaryBackAnswers = {
+  blurred_vision: { value: 'yes' },
+  headaches: { value: 'sometimes' },
+  primary_concern: { value: 'blurred_vision' },
+  additional_concerns: { value: ['headaches'] },
+  experience_onset: { value: 'recent_months' },
+  experience_change: { value: 'unchanged' },
+  experience_context: { value: ['screens'] },
+  experience_frequency: { value: 'daily' },
+  which_eye: { value: 'both' },
+  additional_experience_headaches_onset: { value: 'recent_weeks' },
+  additional_experience_headaches_context: { value: ['screens'] },
+};
+const secondaryBackQuestions = getVisibleQuestions(secondaryBackAnswers, ['reading']);
+const clearSecondaryAfterEye = getBackNavigationAnswerIds(
+  secondaryBackQuestions,
+  'additional_experience_headaches_onset',
+  secondaryBackAnswers,
+);
+assert(clearSecondaryAfterEye.includes('additional_experience_headaches_onset'), 'backtracking from the first secondary follow-up to the main eye question clears its saved answer');
+assert(clearSecondaryAfterEye.includes('additional_experience_headaches_context'), 'backtracking to the main eye question clears later secondary-experience answers too');
+assert(!clearSecondaryAfterEye.includes('blurred_vision'), 'backtracking to the main eye question preserves the original reported experience');
+
+const clearSecondaryAfterLaterStatic = getBackNavigationAnswerIds(
+  secondaryBackQuestions,
+  'eye_exam',
+  secondaryBackAnswers,
+);
+assert(!clearSecondaryAfterLaterStatic.includes('additional_experience_headaches_onset'), 'backtracking within later static questions preserves already completed secondary-experience follow-ups');
+
 const multiActivityAnswers = {
   affected_activities: { value: ['reading', 'fine_detail'] },
   activity_impact_reading: { value: ['discomfort'] },
