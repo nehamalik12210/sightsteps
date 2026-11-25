@@ -94,9 +94,12 @@ function AmslerGrid() {
   const gridFitsCurrentViewport = doesCalibratedGridFit(viewportWidthPx, viewportHeightPx, gridSizePx);
 
   const handleGridCellKeyDown = useCallback((event, row, col) => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    // Consume supported grid keys even at an edge so the document does not
+    // scroll while the participant is still navigating the 20x20 grid.
+    event.preventDefault();
     const nextCell = getNextGridCell(row, col, event.key, GRID_SIZE);
     if (!nextCell) return;
-    event.preventDefault();
     setFocusedCell(nextCell);
     gridCellRefs.current[`${nextCell.row}-${nextCell.col}`]?.focus({ preventScroll: true });
   }, []);

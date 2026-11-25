@@ -364,6 +364,7 @@ check(/canAdjustCalibration = canCalibrateAmsler\(viewportWidthPx, viewportHeigh
 check(/tabIndex={focusedCell\.row === r && focusedCell\.col === c \? 0 : -1}/.test(amslerGridSource), 'Amsler grid exposes a single roving keyboard tab stop instead of 400 cell tab stops');
 check(/handleCellClick[\s\S]*?setFocusedCell\(\{ row, col \}\)/.test(amslerGridSource), 'Amsler pointer selection keeps the roving keyboard stop aligned with the last selected cell');
 check(/handleGridCellKeyDown/.test(amslerGridSource) && /getNextGridCell/.test(amslerGridSource) && /onKeyDown=/.test(amslerGridSource), 'Amsler grid supports arrow-key and Home/End cell navigation');
+check(/includes\(event\.key\)[\s\S]*?event\.preventDefault\(\)[\s\S]*?if \(!nextCell\) return/.test(amslerGridSource), 'Amsler grid consumes supported navigation keys at boundaries to prevent accidental document scrolling');
 check(/role="group"/.test(amslerGridSource) && /20 by 20 selection grid/.test(amslerGridSource) && /gridCellRefs\.current/.test(amslerGridSource), 'Amsler grid labels the selection area and manages focus across both eye rounds');
 
 check(accessibilityControlsSource.includes("addEventListener('pointerdown', handleOutsidePointer)") && accessibilityControlsSource.includes("detailsRef.current.contains(event.target)"), 'accessibility settings close when a user taps outside the panel');
