@@ -123,3 +123,11 @@
 - Reworded the low-light discussion prompt to ask participants to describe each experience and its own context separately, rather than implying squinting occurred in low light.
 - Regression, quality, clinical-language, production-build and review-export checks were rerun on c1936631a3eb93e4b025d50afe8659e7df11132f and all passed (961 tests, 2,524 checks, 22 JSX files / 2,629 fragments; 100 modules; 34 precache entries / 980.40 KiB; export 965 lines).
 - Vercel deployment remains blocked by its build-rate-limit status; current production remains the older READY 92a4d0da... deployment.
+
+
+### Change 18 — Overdue-exam source attribution
+- The overdue-exam trigger counted only positively reported experiences, but its static source list also cited every symptom answer, including negative replies. This made the provenance list broader than the evidence used by the trigger.
+- Replaced the static list with a resolver that includes the examination-history answer and only symptom answers whose values contributed to the positive experience count.
+- Added two regression scenarios using different positive symptom pairs; each asserts that both supporting answers are cited and that negative answers are excluded.
+- Verified on exact main commit 8f44a9ccbfb8ff7d1b424b07153daf7878dbb681: **967 regression tests, 2,524 quality checks, clinical-language audit passed (22 JSX / 2,629 fragments), production build passed (100 modules; initial JS 345.09 kB / 105.99 kB gzip; Report 151.94 kB / 33.18 kB gzip; Amsler 21.91 kB / 5.69 kB gzip; PWA 34 entries / 980.47 KiB), and review export passed (965 lines reported, 8 pattern definitions, 4 Ramesh matches, 10 discussion prompts, 2 follow-up notes).**
+- This exact source revision is verified in an isolated sandbox. Vercel production deployment remains subject to its build-rate-limit status; do not claim this revision is live until a READY deployment exists.
