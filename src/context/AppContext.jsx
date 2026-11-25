@@ -98,7 +98,7 @@ function appReducer(state, action) {
         isHydrated: true,
         language: action.payload?.language || state.language || 'en',
         consentGiven: true,
-        historyConsentGiven: true,
+        historyConsentGiven: Boolean(action.payload?.historyConsentGiven),
         kioskMode: Boolean(state.kioskMode),
         assistedCompletion: Boolean(state.assistedCompletion),
         sessionId: createSessionId(),
@@ -286,7 +286,10 @@ export function AppProvider({ children }) {
 
   const setLanguage = useCallback((language) => dispatch({ type: 'SET_LANGUAGE', payload: language }), []);
   const giveConsent = useCallback(() => dispatch({ type: 'GIVE_CONSENT' }), []);
-  const startSession = useCallback((language) => dispatch({ type: 'START_SESSION', payload: { language } }), []);
+  const startSession = useCallback((language, historyConsentGiven = false) => dispatch({
+    type: 'START_SESSION',
+    payload: { language, historyConsentGiven: Boolean(historyConsentGiven) },
+  }), []);
   const startDemo = useCallback((persona) => dispatch({ type: 'START_DEMO', payload: persona }), []);
   const demoNextStep = useCallback(() => dispatch({ type: 'DEMO_NEXT_STEP' }), []);
   const setAnswer = useCallback((questionId, value, label) => {

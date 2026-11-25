@@ -243,6 +243,9 @@ check(
 check(/NewSessionGuard/.test(appSource) && /getNewSessionRedirect/.test(appSource) && /allowNewSession/.test(appSource), 'onboarding distinguishes an intentional fresh journey from direct visits with an existing session');
 check(/Navigate to=\{redirect\} replace/.test(appSource), 'route guard redirects replace invalid history entries instead of creating navigation loops');
 check(/startPending/.test(onboarding) && /startSession\(selectedLang/.test(onboarding), 'consent navigation waits until the newly-created English or Hindi session is committed');
+check(/historyConsentSelected, setHistoryConsentSelected\] = useState\(false\)/.test(onboarding) && /!kioskMode && historyConsentSelected/.test(onboarding), 'completed-session history requires a separate optional participant opt-in and is disabled in kiosk mode');
+check(/historyConsentGiven: Boolean\(action\.payload\?\.historyConsentGiven\)/.test(contextSource) && /historyConsentGiven = false/.test(contextSource), 'new participant sessions do not retain completed-session history unless the participant explicitly opts in');
+check(/onboarding\.historyConsent\.label/.test(read('src/pages/Onboarding.jsx')) && /onboarding\.historyConsent\.note/.test(consentSource), 'history opt-in is disclosed in the participant language before consent');
 check(/allowNewSession: true/.test(read('src/pages/Landing.jsx')) && /allowNewSession: true/.test(read('src/pages/KioskSetup.jsx')), 'normal and kiosk fresh-session transitions explicitly authorize their onboarding route');
 check(/handleExitLanguageStep/.test(onboarding) && /setLanguage\(null\)/.test(onboarding), 'abandoned onboarding clears the provisional language instead of leaking it to Landing');
 check(/demoStartPending/.test(read('src/pages/Landing.jsx')) && /navigate\('\/intake', \{ replace: true \}\)/.test(read('src/pages/Landing.jsx')), 'demo navigation waits for its context state and replaces the old Landing history entry');

@@ -61,13 +61,13 @@ check(await loadSessionById('participant-5') === null, 'deleted session cannot b
 check(await loadLatestSession() === null, 'deleting the selected session clears its resume pointer');
 
 // Verify write-queue ordering: a pending save must never recreate data after a full wipe.
-const legacySave = await saveSession({ sessionId: 'legacy-single-consent', consentGiven: true, historyConsentGiven: false, startedAt: '2026-11-20T09:00:00.000Z' });
-check(legacySave === true, 'legacy single-session record can still be written while active');
-check((await loadSessionById('legacy-single-consent'))?.sessionId === 'legacy-single-consent', 'legacy active session remains resumable until the participant ends it');
-check((await getSavedSessions()).every((record) => record.sessionId !== 'legacy-single-consent'), 'legacy single-session consent is not promoted into saved history');
-check(await setLatestSessionId('legacy-single-consent') === false, 'legacy consent cannot select a saved-history record');
-check(await archiveLatestSession() === true, 'archiving a legacy session succeeds');
-check(await loadSessionById('legacy-single-consent') === null, 'archiving removes a legacy record that lacks the new history consent');
+const legacySave = await saveSession({ sessionId: 'participant-history-opt-out', consentGiven: true, historyConsentGiven: false, startedAt: '2026-11-20T09:00:00.000Z' });
+check(legacySave === true, 'history opt-out record remains available for the active session');
+check((await loadSessionById('participant-history-opt-out'))?.sessionId === 'participant-history-opt-out', 'history opt-out session can be resumed while it is active');
+check((await getSavedSessions()).every((record) => record.sessionId !== 'participant-history-opt-out'), 'history opt-out session is not exposed in saved history');
+check(await setLatestSessionId('participant-history-opt-out') === false, 'history opt-out session cannot be selected from saved history');
+check(await archiveLatestSession() === true, 'archiving an opted-out session succeeds');
+check(await loadSessionById('participant-history-opt-out') === null, 'ending an opted-out session removes it rather than retaining it in history');
 const pendingSave = saveSession({ sessionId: 'queued-before-wipe', consentGiven: true });
 const pendingWipe = clearAllSessions();
 check(await pendingSave === true, 'queued save completes before the following wipe');

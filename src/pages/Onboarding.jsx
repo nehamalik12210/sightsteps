@@ -10,6 +10,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(language ? 'consent' : 'language');
   const [selectedLang, setSelectedLang] = useState(language || null);
   const [startPending, setStartPending] = useState(false);
+  const [historyConsentSelected, setHistoryConsentSelected] = useState(false);
   const lang = selectedLang || 'en';
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function Onboarding() {
   const handleConsent = () => {
     if (startPending) return;
     setStartPending(true);
-    startSession(selectedLang || language || 'en');
+    startSession(selectedLang || language || 'en', !kioskMode && historyConsentSelected);
   };
 
   if (step === 'language') {
@@ -119,6 +120,20 @@ export default function Onboarding() {
           <input type="checkbox" checked={assistedCompletion} onChange={(event) => setAssistedCompletion(event.target.checked)} />
           <span>{lang === 'hi' ? 'मैं किसी दूसरे प्रतिभागी की जवाब देने में मदद कर रहा/रही हूँ।' : 'I am helping another participant complete these answers.'}</span>
         </label>
+        {!kioskMode && (
+          <fieldset className="onboarding__history-consent">
+            <legend>{lang === 'hi' ? 'सेशन इतिहास (वैकल्पिक)' : 'Saved session history (optional)'}</legend>
+            <label className="onboarding__history-consent-option">
+              <input
+                type="checkbox"
+                checked={historyConsentSelected}
+                onChange={(event) => setHistoryConsentSelected(event.target.checked)}
+              />
+              <span>{t('onboarding.historyConsent.label', lang)}</span>
+            </label>
+            <p>{t('onboarding.historyConsent.note', lang)}</p>
+          </fieldset>
+        )}
         {kioskMode && <p className="onboarding__kiosk-note">{lang === 'hi' ? 'साझा-डिवाइस मोड सक्रिय है: पाँच मिनट की निष्क्रियता के बाद डेटा साफ़ होगा।' : 'Shared-device mode is active: session data clears after five minutes of inactivity.'}</p>}
 
         <button className="btn btn--primary btn--full btn--lg onboarding__continue-btn" type="button" onClick={handleConsent} disabled={startPending}>
