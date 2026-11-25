@@ -191,6 +191,8 @@ The root `vercel.json` rewrites application routes to `index.html` so the client
 
 ~~~text
 sightsteps/
+├── .github/
+│   └── workflows/          # Automated checks and clinical-review export
 ├── public/                 # Logo, app icon and favicon
 ├── scripts/                # Quality, clinical-language, storage and demo checks
 ├── src/
