@@ -107,3 +107,9 @@ External release gate: First formal expert review by a licensed optometrist or o
 | F-33 | Completed-session retention was enabled implicitly by the single onboarding consent action rather than a separate, explicit history choice. | Confirmed in Onboarding.jsx and the START_SESSION reducer: every new participant session previously set historyConsentGiven: true. | Fixed: separate English/Hindi checkbox is optional and unchecked by default; new sessions default to false; kiosk mode suppresses the option; opt-out active sessions can be resumed but are not exposed in history and are deleted on archive. CI run 45686841938 SUCCESS (2,631 quality checks, 1,068 engine tests, 10 history-policy tests, 42 IndexedDB checks). |
 
 The current production alias is READY and returns HTTP 200. Browser-level visual verification of F-33 remains pending because Vercel Sandbox creation was blocked by the Hobby snapshot-storage quota. Do not claim the new checkbox has been manually tested in a browser.
+
+## Phase 6 demonstration coverage update — 26 November 2026
+
+| ID | Finding | Verification | Status |
+|---|---|---|---|
+| F-34 | The short Ramesh demonstration intentionally skipped vision activities, so evaluators needed a separate route to demonstrate Direction Awareness and Amsler. | Confirmed by the Ramesh persona skipVision=true and the Intake end-of-flow route to Report. | Added a second controlled Ramesh variant with the same seven guided answers and skipVision=false. Landing exposes both demos; VisionActivity retains the E-to-Amsler continuation. Dedicated 9-check demo-flow test and quality-audit assertions pass in CI run 45688025235. Manual browser walkthrough remains pending. |
